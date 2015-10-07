@@ -36,13 +36,13 @@ opts_chunk$set(fig.width = 7.5, fig.height = 8)
 opts_chunk$set(comment = NA)
 
 
-config <- read.table("config.txt", header = FALSE, skip = 0, sep="\t",stringsAsFactors = FALSE, fill=TRUE)
+config <- read.table("config_tissue.txt", header = FALSE, skip = 0, sep="\t",stringsAsFactors = FALSE, fill=TRUE)
 colnames(config) <- c("Parameter", "Value")
 #setwd("~/Dropbox (Bjorklund Lab)/Shared/NGS data")
-script.dir <- "~/Dropbox (Bjorklund Lab)/Shared/NGS data/R analysis/Functions/"
-source(file.path(script.dir, "buildFragLengthTable.R"))
-source(file.path(script.dir, "makePEfastq.R"))
-source(file.path(script.dir, "retrieveFASTAQID.R"))
+script.dir <- normalizePath("../SharedFunctions/")
+# source(file.path(script.dir, "buildFragLengthTable.R"))
+# source(file.path(script.dir, "makePEfastq.R"))
+# source(file.path(script.dir, "retrieveFASTAQID.R"))
 source(file.path(script.dir, "buildFragTableSC3.R"))
 
 output.table <- data.frame(meanCount=numeric(),
