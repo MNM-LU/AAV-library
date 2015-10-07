@@ -1,0 +1,12 @@
+dataDir	../../Shared/NGS\\ data/Original\\ sequencing\\ files/150730_NextSeq_AAVlib_1missmatch
+in.name.P5	3em-lib_S3_L1-4andUndet_R1_001.fastq.gz
+in.name.P7	3em-lib_S3_L1-4andUndet_R2_001.fastq.gz
+name.out	2015-09-30_AAVlibrary
+paired.alignment	TRUE
+bb.dir	../Templates/adapters/pscAAV_firstLib
+fragmentTemplate	../../Shared/NGS\\ data/bowtieIndices/libIndex
+sc.param	2
+run.subset	FALSE
+align.P7	FALSE
+max.cores	4
+subset.count	100000

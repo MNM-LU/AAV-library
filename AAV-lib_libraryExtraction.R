@@ -41,11 +41,11 @@ opts_chunk$set(comment = NA)
 config <- read.table("config.txt", header = FALSE, skip = 0, sep="\t",stringsAsFactors = FALSE, fill=TRUE)
 colnames(config) <- c("Parameter", "Value")
 #setwd("~/Dropbox (Bjorklund Lab)/Shared/NGS data")
-script.dir <- "~/Dropbox (Bjorklund Lab)/Shared/NGS data/R analysis/Functions/"
-source(file.path(script.dir, "buildFragLengthTable.R"))
-source(file.path(script.dir, "makePEfastq.R"))
-source(file.path(script.dir, "retrieveFASTAQID.R"))
-source(file.path(script.dir, "buildFragTableSC3.R"))
+script.dir <- normalizePath("../SharedFunctions/")
+# source(file.path(script.dir, "buildFragLengthTable.R"))
+# source(file.path(script.dir, "makePEfastq.R"))
+# source(file.path(script.dir, "retrieveFASTAQID.R"))
+# source(file.path(script.dir, "buildFragTableSC3.R"))
 
 output.table <- data.frame(meanCount=numeric(),
                            sdCount=numeric(), 
@@ -138,18 +138,19 @@ in.name.P7 <- out.name.P7
 #' ============================
 #+ Extracting subset.......
 
-# if (run.subset){
-#   suppressWarnings(sampler <- FastqSampler(gsub("([\\])", "", in.name.P5), subset.count, readerBlockSize=1e9, ordered = TRUE)) 
-#   set.seed(123); tmp.P5 <- yield(sampler)
-#   in.name.P5 <- tempfile(pattern = "P5_", tmpdir = tempdir(), fileext = ".fastq.gz")
-#   writeFastq(tmp.P5,in.name.P5, compress=TRUE)
-#   rm(tmp.P5)
-#   suppressWarnings(sampler <- FastqSampler(gsub("([\\])", "", in.name.P7), subset.count, readerBlockSize=1e9, ordered = TRUE)) 
-#   set.seed(123); tmp.P7 <- yield(sampler)
-#   in.name.P7 <- tempfile(pattern = "P7_", tmpdir = tempdir(), fileext = ".fastq.gz")
-#   writeFastq(tmp.P7,in.name.P7, compress=TRUE)
-#   rm(tmp.P7)
-# }
+if (run.subset){
+  suppressWarnings(sampler <- FastqSampler(gsub("([\\])", "", in.name.P5), subset.count, readerBlockSize=1e9, ordered = TRUE)) 
+  set.seed(123); tmp.P5 <- yield(sampler)
+  in.name.P5 <- tempfile(pattern = "P5_", tmpdir = tempdir(), fileext = ".fastq.gz")
+  writeFastq(tmp.P5,in.name.P5, compress=TRUE)
+  rm(tmp.P5)
+  suppressWarnings(sampler <- FastqSampler(gsub("([\\])", "", in.name.P7), subset.count, readerBlockSize=1e9, ordered = TRUE)) 
+  set.seed(123); tmp.P7 <- yield(sampler)
+  in.name.P7 <- tempfile(pattern = "P7_", tmpdir = tempdir(), fileext = ".fastq.gz")
+  writeFastq(tmp.P7,in.name.P7, compress=TRUE)
+  rm(tmp.P7)
+}
+
 output.table$Reads <- as.integer(system(paste("gunzip -c ",shQuote(gsub("([\\])", "", in.name.P5)),
                                               " | echo $((`wc -l`/4)) 2>&1", sep = ""), intern = TRUE, 
                                         ignore.stdout = FALSE)) #Stores the read count utilized
@@ -265,42 +266,6 @@ invisible(barcodeTable[,oldBC:=NULL])
 #+ Extracting fragments.......
 
 
-# reads.untrim <- readFastq(in.name.P5)
-# reads.untrim <- reads.untrim[width(sread(reads.untrim))>= 90]
-# 
-# pattern.pre <- "GTATGTTGTTCTGG"
-# found.match <- vcountPattern(pattern.pre, sread(reads.untrim),
-#                              max.mismatch=0, min.mismatch=0,
-#                              with.indels=FALSE, fixed=TRUE,
-#                              algorithm="auto")
-# reads.with3p <- reads.untrim[as.logical(found.match)]
-# rev(sort(table(sread(reads.with3p))))[1:10]
-# sum(found.match)
-# 
-# 
-# 
-# 
-# pattern.pre <- "CATGGACGAGCTGTACAAGT"
-# found.match <- vcountPattern(pattern.pre, sread(reads.untrim),
-#                              max.mismatch=0, min.mismatch=0,
-#                              with.indels=FALSE, fixed=TRUE,
-#                              algorithm="auto")
-# reads.with3p <- reads.untrim[as.logical(found.match)]
-# sum(found.match)
-# rev(sort(table(sread(reads.with3p))))[1:10]
-# 
-# 
-# unique(sread(reads.with3p))
-# 
-# pattern.post <- "CAGACAAGCAGCTACCGCA"
-# found.match <- vcountPattern(pattern.post, sread(reads.untrim),
-#               max.mismatch=1, min.mismatch=0,
-#               with.indels=TRUE, fixed=TRUE,
-#               algorithm="auto")
-# 
-# sum(found.match)
-
-
 out.name.P5 <- tempfile(pattern = "P5_", tmpdir = tempdir(), fileext = ".fastq.gz")
 out.name.P7 <- tempfile(pattern = "P7_", tmpdir = tempdir(), fileext = ".fastq.gz")
 command.args <- paste("-Xmx12g overwrite=true k=10 mink=18 rcomp=f qhdist=0 maskmiddle=t hammingdistance=1 findbestmatch=t minlength=40 maxlength=78 ordered=t threads=",detectCores(),
@@ -327,31 +292,14 @@ table.frag <- as.data.frame((rev(sort(table(sread(reads.trim)))))[1:100 ])
 colnames(table.frag) <- c("Fragment and readcount")
 knitr::kable(table.frag, format = "markdown")
 
-
-
-
-
 #' Align fragments to reference
 #' ============================
 #+ Align to reference...
 
-
-
-
-seqs.original <- readFasta("DNA Libraries for Retrograde Transport.fasta")
-
-seqs.AA <- Biostrings::translate(sread(seqs.original), genetic.code=GENETIC_CODE, if.fuzzy.codon="error")
-
-source("AAtoDNA.R")
-seqs.optimized = ShortRead(DNAStringSet(sapply(seqs.AA, function(x) AAtoDNA(x, species="hsa"))), BStringSet(gsub("([ ])", "_", ShortRead::id(seqs.original))))
-
-writeFasta(seqs.optimized,"libraryIndex.fa")
-
-
 name.bowtie <- tempfile(pattern = "bowtie_", tmpdir = tempdir(), fileext = "")
 
 sys.out <-  system(paste("bowtie2 --threads ",detectCores()," --local -D 20 -R 3 -N 1 -L 10 ",
-                         "-i S,1,0.10 --ma 3 --no-unal --phred33 -x ","libIndex"," -U ",out.name.P7, " -S ", 
+                         "-i S,1,0.10 --ma 3 --no-unal --phred33 -x ",fragmentTemplate," -U ",out.name.P7, " -S ", 
                          name.bowtie, ".sam 2>&1",  sep = ""), intern = TRUE, ignore.stdout = FALSE)
 
 #   system(paste("samtools view -@ ",detectCores()," -Sh ", name.bowtie, ".sam | grep -v \"XS:i:\" > ",
@@ -372,11 +320,6 @@ knitr::kable(sys.out[1:lengthOut,], format = "markdown")
 
 frag.ranges.ok <- frag.ranges[width(frag.ranges) > 38 & width(frag.ranges) < 75]
 unique(granges(frag.ranges))
-# frag.ranges <- granges(frag.ranges)
-# frag.ranges <- frag.ranges[seqnames(frag.ranges) != "backbone"]
-
-
-sedit(inAA,humanCodon$AA, humanCodon$DNA, wild.literal=FALSE)
 
 frag.ranges.subset <- frag.ranges[names(frag.ranges) %in% barcodeTable$ID]
 names(frag.ranges.subset) <- barcodeTable$BC[match(names(frag.ranges.subset),barcodeTable$ID)]
