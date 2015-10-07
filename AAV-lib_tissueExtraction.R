@@ -112,7 +112,7 @@ command.args <- paste("-Xmx12g overwrite=true k=10 rcomp=f skipr1=t qhdist=0 mas
                       " in2=", in.name.P7,
                       " outm=", out.name.P5,
                       " outm2=", out.name.P7,
-                      " fliteral=", "ACAAGCAGCTACCGCAGATGTCAACACA", sep = "") #Length 48-72 bp k=18 mink=10 qhdist=0 hammingdistance=3 findbestmatch=t ,
+                      " fliteral=", "CGCCACAACATCGAGGACGGCAGCGTG", sep = "") #Length 48-72 bp k=18 mink=10 qhdist=0 hammingdistance=3 findbestmatch=t , ATATCATGGCCGACAAGCAGA
 
 sys.out <- system2(path.expand("~/bbmap/bbduk2.sh"), args=command.args, stdout=TRUE, stderr=TRUE) #
 
@@ -179,11 +179,24 @@ in.name.P7 <- out.name.P7
 
 
 out.name.BC <- tempfile(pattern = "BC_", tmpdir = tempdir(), fileext = ".fastq.gz")
+# out.name.P7 <- tempfile(pattern = "P7_", tmpdir = tempdir(), fileext = ".fastq.gz")
+# 
+# sys.out <- system(paste("~/bbmap/bbduk2.sh overwrite=true k=12 hammingdistance=1 findbestmatch=t ",
+#                         "trd=t rcomp=f skipr2=t findbestmatch=f qhdist=0 minavgquality=0 ordered=t maxns=0 minlength=18 ",
+#                         "maxlength=22 threads=", detectCores()," in=", shQuote(in.name.P5),
+#                         " in2=", in.name.P7,
+#                         " out=", out.name.BC,
+#                         " out2=", out.name.P7,
+#                         " lliteral=", "GGCCTAGCGGCCGCTTTACTT",
+#                         " rliteral=", "ATAACTTCGTATAATGTATGC",
+#                         " 2>&1", sep = ""), intern = TRUE, ignore.stdout = FALSE) #" fliteral=",id.uncut,
+# sys.out <- as.data.frame(sys.out)
 
 sys.out <- system(paste("~/bbmap/bbduk2.sh overwrite=true k=12 hammingdistance=1 findbestmatch=t ",
-                        "trd=t rcomp=f findbestmatch=f qhdist=0 minavgquality=0 ordered=t maxns=0 minlength=18 ",
-                        "maxlength=22 threads=", detectCores()," in=", shQuote(in.name.P5), 
-                        " out=", out.name.BC," lliteral=", "GGCCTAGCGGCCGCTTTACTT",
+                        "trd=t rcomp=f skipr2=t findbestmatch=f qhdist=0 minavgquality=0 ordered=t maxns=0 minlength=18 ",
+                        "maxlength=22 threads=", detectCores()," in=", shQuote(in.name.P5),
+                        " out=", out.name.BC,
+                        " lliteral=", "GGCCTAGCGGCCGCTTTACTT",
                         " rliteral=", "ATAACTTCGTATAATGTATGC",
                         " 2>&1", sep = ""), intern = TRUE, ignore.stdout = FALSE) #" fliteral=",id.uncut,
 sys.out <- as.data.frame(sys.out)
@@ -248,7 +261,7 @@ table.frag <- data.table(as.data.frame((rev(sort(table(barcodeTable$oldBC))))[1:
 setnames(table.frag, colnames(table.frag), c("Original BC", "Count"))
 knitr::kable(table.frag, format = "markdown")
 
-table.frag <- data.table(as.data.frame((rev(sort(table(barcodeTable$BC))))[1:10]), keep.rownames=TRUE)
+table.frag <- data.table(as.data.frame((rev(sort(table(barcodeTable$BC))))[1:15]), keep.rownames=TRUE)
 setnames(table.frag, colnames(table.frag), c("SC reduced BC", "Count"))
 knitr::kable(table.frag, format = "markdown")
 
