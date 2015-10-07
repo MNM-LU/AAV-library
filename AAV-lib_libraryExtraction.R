@@ -112,7 +112,7 @@ command.args <- paste("-Xmx12g overwrite=true k=10 rcomp=f skipr1=t qhdist=0 mas
                       " in2=", in.name.P7,
                       " outm=", out.name.P5,
                       " outm2=", out.name.P7,
-                      " fliteral=", "AGACAAGCAGCTACCGCAGATGTCAACACA", sep = "") #Length 48-72 bp k=18 mink=10 qhdist=0 hammingdistance=3 findbestmatch=t ,
+                      " fliteral=", "ACAAGCAGCTACCGCAGATGTCAACACA", sep = "") #Length 48-72 bp k=18 mink=10 qhdist=0 hammingdistance=3 findbestmatch=t ,
 
 sys.out <- system2(path.expand("~/bbmap/bbduk2.sh"), args=command.args, stdout=TRUE, stderr=TRUE) #
 
@@ -133,18 +133,18 @@ in.name.P7 <- out.name.P7
 #' ============================
 #+ Extracting subset.......
 
-if (run.subset){
-  suppressWarnings(sampler <- FastqSampler(gsub("([\\])", "", in.name.P5), subset.count, readerBlockSize=1e9, ordered = TRUE)) 
-  set.seed(123); tmp.P5 <- yield(sampler)
-  in.name.P5 <- tempfile(pattern = "P5_", tmpdir = tempdir(), fileext = ".fastq.gz")
-  writeFastq(tmp.P5,in.name.P5, compress=TRUE)
-  rm(tmp.P5)
-  suppressWarnings(sampler <- FastqSampler(gsub("([\\])", "", in.name.P7), subset.count, readerBlockSize=1e9, ordered = TRUE)) 
-  set.seed(123); tmp.P7 <- yield(sampler)
-  in.name.P7 <- tempfile(pattern = "P7_", tmpdir = tempdir(), fileext = ".fastq.gz")
-  writeFastq(tmp.P7,in.name.P7, compress=TRUE)
-  rm(tmp.P7)
-}
+# if (run.subset){
+#   suppressWarnings(sampler <- FastqSampler(gsub("([\\])", "", in.name.P5), subset.count, readerBlockSize=1e9, ordered = TRUE)) 
+#   set.seed(123); tmp.P5 <- yield(sampler)
+#   in.name.P5 <- tempfile(pattern = "P5_", tmpdir = tempdir(), fileext = ".fastq.gz")
+#   writeFastq(tmp.P5,in.name.P5, compress=TRUE)
+#   rm(tmp.P5)
+#   suppressWarnings(sampler <- FastqSampler(gsub("([\\])", "", in.name.P7), subset.count, readerBlockSize=1e9, ordered = TRUE)) 
+#   set.seed(123); tmp.P7 <- yield(sampler)
+#   in.name.P7 <- tempfile(pattern = "P7_", tmpdir = tempdir(), fileext = ".fastq.gz")
+#   writeFastq(tmp.P7,in.name.P7, compress=TRUE)
+#   rm(tmp.P7)
+# }
 output.table$Reads <- as.integer(system(paste("gunzip -c ",shQuote(gsub("([\\])", "", in.name.P5)),
                                               " | echo $((`wc -l`/4)) 2>&1", sep = ""), intern = TRUE, 
                                         ignore.stdout = FALSE)) #Stores the read count utilized
@@ -154,15 +154,38 @@ print(paste("Utilized sequences:", output.table$Reads[1]))
 #' Extraction of barcodes
 #' ============================
 #+ Extracting barcodes.......
+
+out.name.P5 <- tempfile(pattern = "P5_", tmpdir = tempdir(), fileext = ".fastq.gz")
+out.name.P7 <- tempfile(pattern = "P7_", tmpdir = tempdir(), fileext = ".fastq.gz")
+command.args <- paste("-Xmx12g overwrite=true k=10 rcomp=f skipr2=t qhdist=0 maskmiddle=t hammingdistance=1 findbestmatch=t ordered=t threads=",detectCores(),
+                      " in=", in.name.P5,
+                      " in2=", in.name.P7,
+                      " outm=", out.name.P5,
+                      " outm2=", out.name.P7,
+                      " fliteral=", "ATAACTTCGTATAATGTATGC", sep = "") #Length 48-72 bp k=18 mink=10 qhdist=0 hammingdistance=3 findbestmatch=t ,
+
+sys.out <- system2(path.expand("~/bbmap/bbduk2.sh"), args=command.args, stdout=TRUE, stderr=TRUE) #
+
+sys.out <- as.data.frame(sys.out)
+
+
+colnames(sys.out) <- c("bbduk2 Identification of real barcodes")
+invisible(sys.out[" "] <- " ")
+lengthOut <- (nrow(sys.out))
+knitr::kable(sys.out[3:lengthOut,], format = "markdown")
+
+in.name.P5 <- out.name.P5
+in.name.P7 <- out.name.P7
+
+
 out.name.BC <- tempfile(pattern = "BC_", tmpdir = tempdir(), fileext = ".fastq.gz")
 
 sys.out <- system(paste("~/bbmap/bbduk2.sh overwrite=true k=12 hammingdistance=1 findbestmatch=t ",
-                        "trd=t rcomp=f findbestmatch=f qhdist=0 minavgquality=30 maxns=0 minlength=18 ",
+                        "trd=t rcomp=f findbestmatch=f qhdist=0 minavgquality=0 ordered=t maxns=0 minlength=18 ",
                         "maxlength=22 threads=", detectCores()," in=", shQuote(in.name.P5), 
-                        " out=", out.name.BC," lref=", id.BC.L,
-                        " rref=", id.BC.R," fliteral=",id.uncut,
-                        " 2>&1", sep = ""), intern = TRUE, ignore.stdout = FALSE)
-
+                        " out=", out.name.BC," lliteral=", "GGCCTAGCGGCCGCTTTACTT",
+                        " rliteral=", "ATAACTTCGTATAATGTATGC",
+                        " 2>&1", sep = ""), intern = TRUE, ignore.stdout = FALSE) #" fliteral=",id.uncut,
 sys.out <- as.data.frame(sys.out)
 
 colnames(sys.out) <- c("bbduk2 Extraction of barcodes")
@@ -275,15 +298,13 @@ invisible(barcodeTable[,oldBC:=NULL])
 
 out.name.P5 <- tempfile(pattern = "P5_", tmpdir = tempdir(), fileext = ".fastq.gz")
 out.name.P7 <- tempfile(pattern = "P7_", tmpdir = tempdir(), fileext = ".fastq.gz")
-command.args <- paste("-Xmx12g overwrite=true k=10 rcomp=f skipr1=t qhdist=0 maskmiddle=t hammingdistance=1 findbestmatch=t minlength=40 ordered=t threads=",detectCores(),
-                      " in=", in.name.P5,
-                      " in2=", in.name.P7,
-                      " out=", out.name.P5,
-                      " out2=", out.name.P7,
-                      " lliteral=", "AACCTCCAGAGAGGCAAC",
-                      " rliteral=", "AGACAAGCAGCTACCGCAGATGTCAACACA", sep = "") #Length 48-72 bp k=18 mink=10 qhdist=0 hammingdistance=3 findbestmatch=t ,
+command.args <- paste("-Xmx12g overwrite=true k=10 rcomp=f qhdist=0 maskmiddle=t hammingdistance=1 findbestmatch=t minlength=40 maxlength=78 ordered=t threads=",detectCores(),
+                      " in=", in.name.P7,
+                      " out=", out.name.P7,
+                      " lliteral=", "AGCAACCTCCAGAGAGGCAAC",
+                      " rliteral=", "ATAACTTCGTATAATGTATGC", sep = "") #Length 48-72 bp k=18 mink=10 qhdist=0 hammingdistance=3 findbestmatch=t ,
 
-sys.out <- system2(path.expand("~/bbmap/bbduk2.sh"), args=command.args, stdout=TRUE, stderr=TRUE) #
+sys.out <- system2(path.expand("~/bbmap/bbduk2.sh"), args=command.args, stdout=TRUE, stderr=TRUE) # 
 
 sys.out <- as.data.frame(sys.out)
 
