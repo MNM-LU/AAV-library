@@ -117,7 +117,7 @@ if (run.subset){
   writeFastq(tmp.P7,in.name.P7, compress=TRUE)
   rm(tmp.P7)
 }
-output.table$Reads <- as.integer(system(paste("zcat ",shQuote(gsub("([\\])", "", in.name.P5)),
+output.table$Reads <- as.integer(system(paste("gunzip -c ",shQuote(gsub("([\\])", "", in.name.P5)),
                                               " | echo $((`wc -l`/4)) 2>&1", sep = ""), intern = TRUE, 
                                         ignore.stdout = FALSE)) #Stores the read count utilized
 print(paste("Utilized sequences:", output.table$Reads[1]))
@@ -247,14 +247,17 @@ invisible(barcodeTable[,oldBC:=NULL])
 
 out.name.P5 <- tempfile(pattern = "P5_", tmpdir = tempdir(), fileext = ".fastq.gz")
 out.name.P7 <- tempfile(pattern = "P7_", tmpdir = tempdir(), fileext = ".fastq.gz")
-sys.out <- system(paste("~/bbmap/bbduk2.sh overwrite=true k=18 mink=10 qhdist=0 minlength=44 maxlength=75 hammingdistance=1 findbestmatch=t threads=",detectCores(),
-                        " in=", in.name.P7, 
-                        " out=", out.name.P7,
-                        " lref=", id.backbone.L,
-                        " rref=", id.backbone.R, 
-                        " fliteral=",id.uncut,
-                        " 2>&1", sep = ""), intern = TRUE, ignore.stdout = FALSE) #Length 48-72 bp k=18 mink=10 qhdist=0 hammingdistance=3 findbestmatch=t 
+command.args <- paste("overwrite=true k=18 mink=10 qhdist=0 minlength=44 maxlength=75 hammingdistance=1 findbestmatch=t threads=",detectCores(),
+                      " in=", gsub(" ", "\ ", in.name.P7, fixed=FALSE), 
+                      " out=", out.name.P7,
+                      " lref=", id.backbone.L,
+                      " rref=", id.backbone.R, 
+                      " fliteral=",id.uncut, sep = "") #Length 48-72 bp k=18 mink=10 qhdist=0 hammingdistance=3 findbestmatch=t ,
+" 2>&1"
+sys.out <- system2(path.expand("~/bbmap/bbduk2.sh"), args=command.args)
+
 sys.out <- as.data.frame(sys.out)
+
 
 colnames(sys.out) <- c("bbduk2 Extraction of barcodes")
 invisible(sys.out[" "] <- " ")
