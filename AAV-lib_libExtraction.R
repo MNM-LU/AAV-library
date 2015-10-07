@@ -112,7 +112,7 @@ command.args <- paste("-Xmx12g overwrite=true k=10 rcomp=f skipr1=t qhdist=0 mas
                       " in2=", in.name.P7,
                       " outm=", out.name.P5,
                       " outm2=", out.name.P7,
-                      " fliteral=", "ACAAGCAGCTACCGCAGATGTCAACACA", sep = "") #Length 48-72 bp k=18 mink=10 qhdist=0 hammingdistance=3 findbestmatch=t ,
+                      " fliteral=", "CGCCACAACATCGAGGACGGCAGCGTG", sep = "") #Length 48-72 bp k=18 mink=10 qhdist=0 hammingdistance=3 findbestmatch=t , ATATCATGGCCGACAAGCAGA
 
 sys.out <- system2(path.expand("~/bbmap/bbduk2.sh"), args=command.args, stdout=TRUE, stderr=TRUE) #
 
