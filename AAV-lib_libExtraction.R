@@ -248,7 +248,7 @@ table.frag <- data.table(as.data.frame((rev(sort(table(barcodeTable$oldBC))))[1:
 setnames(table.frag, colnames(table.frag), c("Original BC", "Count"))
 knitr::kable(table.frag, format = "markdown")
 
-table.frag <- data.table(as.data.frame((rev(sort(table(barcodeTable$BC))))[1:10]), keep.rownames=TRUE)
+table.frag <- data.table(as.data.frame((rev(sort(table(barcodeTable$BC))))[1:15]), keep.rownames=TRUE)
 setnames(table.frag, colnames(table.frag), c("SC reduced BC", "Count"))
 knitr::kable(table.frag, format = "markdown")
 
