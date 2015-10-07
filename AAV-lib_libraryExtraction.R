@@ -208,54 +208,22 @@ invisible(barcodeTable[,oldBC:=NULL])
 #' ============================
 #+ Extracting fragments.......
 
-if (paired.alignment | !align.p7){
-  intr.name.P5 <- tempfile(pattern = "P5intr_", tmpdir = tempdir(), fileext = ".fastq.gz")
-  intr.name.P7 <- tempfile(pattern = "P7intr_", tmpdir = tempdir(), fileext = ".fastq.gz")
-  sys.out <- system(paste("~/bbmap/bbduk2.sh overwrite=true hammingdistance=1 findbestmatch=t ",
-                          "rcomp=f qhdist=0 minlength=10 k=18 threads=",detectCores(),
-                          " in=", shQuote(in.name.P5), " in2=", shQuote(in.name.P7), 
-                          " out=", intr.name.P5, " out2=", intr.name.P7,
-                          " lref=", id.backbone.L, " fref=",id.uncut, 
-                          " 2>&1", sep = ""), intern = TRUE, ignore.stdout = FALSE)
-  sys.out <- as.data.frame(sys.out)
-  
-  colnames(sys.out) <- c("bbduk2 Extraction of barcodes")
-  invisible(sys.out[" "] <- " ")
-  lengthOut <- (nrow(sys.out))
-  knitr::kable(sys.out[3:lengthOut,], format = "markdown")
-  
-} else {
-  intr.name.P5 <- in.name.P5
-  intr.name.P7 <- in.name.P7
-}
+out.name.P5 <- tempfile(pattern = "P5_", tmpdir = tempdir(), fileext = ".fastq.gz")
+out.name.P7 <- tempfile(pattern = "P7_", tmpdir = tempdir(), fileext = ".fastq.gz")
+sys.out <- system(paste("~/bbmap/bbduk2.sh overwrite=true hammingdistance=1 findbestmatch=t ",
+                        "qhdist=0 minlength=44 maxlength=75 k=18 mink=10 threads=",detectCores(),
+                        " in=", in.name.P5, " in2=", in.name.P7, 
+                        " out=", out.name.P5, " out2=", out.name.P7,
+                        " lref=", id.backbone.L, " rref=", id.backbone.R, 
+                        " 2>&1", sep = ""), intern = TRUE, ignore.stdout = FALSE) #Length 48-72 bp
+sys.out <- as.data.frame(sys.out)
 
+colnames(sys.out) <- c("bbduk2 Extraction of barcodes")
+invisible(sys.out[" "] <- " ")
+lengthOut <- (nrow(sys.out))
+knitr::kable(sys.out[3:lengthOut,], format = "markdown")
 
-if (paired.alignment | align.p7){
-  out.name.P5 <- tempfile(pattern = "P5_", tmpdir = tempdir(), fileext = ".fastq.gz")
-  out.name.P7 <- tempfile(pattern = "P7_", tmpdir = tempdir(), fileext = ".fastq.gz")
-  sys.out <- system(paste("~/bbmap/bbduk2.sh overwrite=true hammingdistance=1 findbestmatch=t ",
-                          "qhdist=0 minlength=10 k=18 mink=10 threads=",detectCores(),
-                          " in=", intr.name.P5, " in2=", intr.name.P7, 
-                          " out=", out.name.P5, " out2=", out.name.P7,
-                          " rref=", id.backbone.R, " fref=",id.uncut, 
-                          " 2>&1", sep = ""), intern = TRUE, ignore.stdout = FALSE)
-  sys.out <- as.data.frame(sys.out)
-  
-  colnames(sys.out) <- c("bbduk2 Extraction of barcodes")
-  invisible(sys.out[" "] <- " ")
-  lengthOut <- (nrow(sys.out))
-  knitr::kable(sys.out[3:lengthOut,], format = "markdown")
-  
-} else {
-  out.name.P5 <- intr.name.P5
-  out.name.P7 <- intr.name.P7
-}
-
-if (paired.alignment | align.p7){
-  reads.trim <- readFastq(out.name.P7)
-} else {
-  reads.trim <- readFastq(out.name.P5) 
-}
+reads.trim <- readFastq(out.name.P7)
 
 table.frag <- as.data.frame((rev(sort(table(sread(reads.trim)))))[1:10])
 colnames(table.frag) <- c("Fragment and readcount")
