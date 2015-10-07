@@ -29,6 +29,8 @@ suppressPackageStartupMessages(library(biovizBase))
 suppressPackageStartupMessages(library(Gviz))
 suppressPackageStartupMessages(library(plyr))
 suppressPackageStartupMessages(library(devtools))
+suppressPackageStartupMessages(library(Hmisc))
+
 
 
 #+ setup, include=FALSE
@@ -341,54 +343,44 @@ seqs.original <- readFasta("DNA Libraries for Retrograde Transport.fasta")
 seqs.AA <- Biostrings::translate(sread(seqs.original), genetic.code=GENETIC_CODE, if.fuzzy.codon="error")
 
 source("AAtoDNA.R")
-sread(seqs.original) <- sapply(seqs.AA, function(x) AAtoDNA(x, species="hsa"))
+seqs.optimized = ShortRead(DNAStringSet(sapply(seqs.AA, function(x) AAtoDNA(x, species="hsa"))), BStringSet(gsub("([ ])", "_", ShortRead::id(seqs.original))))
 
-AAtoDNA(seqs.AA[1], species="hsa")
+writeFasta(seqs.optimized,"libraryIndex.fa")
+
 
 name.bowtie <- tempfile(pattern = "bowtie_", tmpdir = tempdir(), fileext = "")
-if (paired.alignment){
-  sys.out <-  system(paste("bowtie2 --no-discordant --no-mixed --fr --threads ",detectCores()
-                           ,"  --local --very-sensitive-local --no-unal --gbar 10 --rdg 10,20 ",
-                           "--minins 20 --maxins 2500 --phred33 -x ",
-                           fragmentTemplate," -1 ",out.name.P5, " -2 ", out.name.P7, " -S ", 
-                           name.bowtie, ".sam 2>&1",  sep = ""), intern = TRUE, ignore.stdout = FALSE)
-  
-  system(paste("samtools view -@ ",detectCores()," -Shf 0x2 ", name.bowtie, ".sam | grep -v \"XS:i:\" > ",
-               name.bowtie, "_filtered.sam",  sep = ""))
-  system(paste("samtools view -@ ",detectCores()," -bS ", name.bowtie, "_filtered.sam > ",name.bowtie, 
-               ".bam",  sep = ""))
-  system(paste("samtools sort -@ ",detectCores()," ", name.bowtie, ".bam ",name.bowtie, "_sort",  sep = ""))
-  
-  frag.ranges <- readGAlignmentPairs(paste(name.bowtie, "_sort.bam", sep = ""), use.names=TRUE)
-  
-} else {
-  if (align.p7) {
-    sys.out <-  system(paste("bowtie2 --threads ",detectCores()," --local -D 20 -R 3 -N 1 -L 10 ",
-                             "-i S,1,0.10 --ma 3 --no-unal --phred33 -x ",fragmentTemplate," -U ",out.name.P7, " -S ", 
-                             name.bowtie, ".sam 2>&1",  sep = ""), intern = TRUE, ignore.stdout = FALSE)
-  } else{
-    sys.out <-  system(paste("bowtie2 --threads ",detectCores()," --local -D 20 -R 3 -N 1 -L 10 ",
-                             "-i S,1,0.10 --ma 3 --no-unal --phred33 -x ",fragmentTemplate," -U ",out.name.P5, " -S ", 
-                             name.bowtie, ".sam 2>&1",  sep = ""), intern = TRUE, ignore.stdout = FALSE)
-  }
-  
-  system(paste("samtools view -@ ",detectCores()," -bS ", name.bowtie, ".sam > ",
-               name.bowtie, ".bam",  sep = ""))
-  system(paste("samtools sort -@ ",detectCores()," ", name.bowtie, ".bam ",
-               name.bowtie, "_sort",  sep = ""))
-  
-  frag.ranges <- readGAlignments(paste(name.bowtie, "_sort.bam", sep = ""), use.names=TRUE)
-}
+
+sys.out <-  system(paste("bowtie2 --threads ",detectCores()," --local -D 20 -R 3 -N 1 -L 10 ",
+                         "-i S,1,0.10 --ma 3 --no-unal --phred33 -x ","libIndex"," -U ",out.name.P7, " -S ", 
+                         name.bowtie, ".sam 2>&1",  sep = ""), intern = TRUE, ignore.stdout = FALSE)
+
+#   system(paste("samtools view -@ ",detectCores()," -Sh ", name.bowtie, ".sam | grep -v \"XS:i:\" > ",
+#                  name.bowtie, "_filtered.sam",  sep = ""))
+system(paste("samtools view -@ ",detectCores()," -bS ", name.bowtie, ".sam > ",
+             name.bowtie, ".bam",  sep = "")) 
+system(paste("samtools sort -@ ",detectCores()," ", name.bowtie, ".bam ",
+             name.bowtie, "_sort",  sep = ""))
+
+frag.ranges <- readGAlignments(paste(name.bowtie, "_sort.bam", sep = ""), use.names=TRUE)
+
 sys.out <- as.data.frame(sys.out)
 
-colnames(sys.out) <- c("bbduk2 Extraction of barcodes")
+colnames(sys.out) <- c("Bowtie 2 alignment to library")
 invisible(sys.out[" "] <- " ")
 lengthOut <- (nrow(sys.out))
 knitr::kable(sys.out[1:lengthOut,], format = "markdown")
 
-frag.ranges <- granges(frag.ranges)
-frag.ranges <- frag.ranges[seqnames(frag.ranges) != "backbone"]
+frag.ranges.ok <- frag.ranges[width(frag.ranges) > 38 & width(frag.ranges) < 75]
+unique(granges(frag.ranges))
+# frag.ranges <- granges(frag.ranges)
+# frag.ranges <- frag.ranges[seqnames(frag.ranges) != "backbone"]
 
+
+sedit(inAA,humanCodon$AA, humanCodon$DNA, wild.literal=FALSE)
+
+frag.ranges.subset <- frag.ranges[names(frag.ranges) %in% barcodeTable$ID]
+names(frag.ranges.subset) <- barcodeTable$BC[match(names(frag.ranges.subset),barcodeTable$ID)]
+frag.ranges.subset[names(frag.ranges.subset) %in% "GAGCATGGAAGCATGGCTGT"]
 
 #' Generation of summary table
 #' ============================
