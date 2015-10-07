@@ -107,12 +107,15 @@ id.uncut <- file.path(bb.dir, "uncut.fa")
 
 out.name.P5 <- tempfile(pattern = "P5_", tmpdir = tempdir(), fileext = ".fastq.gz")
 out.name.P7 <- tempfile(pattern = "P7_", tmpdir = tempdir(), fileext = ".fastq.gz")
-command.args <- paste("-Xmx12g overwrite=true k=10 rcomp=f skipr1=t qhdist=0 maskmiddle=t hammingdistance=0 findbestmatch=t ordered=t threads=",detectCores(),
+command.args <- paste("-Xmx12g overwrite=true k=15 rcomp=f skipr2=t qhdist=0 maskmiddle=f hammingdistance=2 findbestmatch=f ordered=t threads=",detectCores(),
                       " in=", in.name.P5,
                       " in2=", in.name.P7,
                       " outm=", out.name.P5,
                       " outm2=", out.name.P7,
-                      " fliteral=", "ACAAGCAGCTACCGCAGATGTCAACACA", sep = "") #Length 48-72 bp k=18 mink=10 qhdist=0 hammingdistance=3 findbestmatch=t ,
+                      " fliteral=", "GTATGTTGTTCTGGAGCGGGAGGGTGCTATTTTGCCTAGCGATAA", sep = "") #Length 48-72 bp k=18 mink=10 qhdist=0 hammingdistance=3 findbestmatch=t , ACAAGCAGCTACCGCAGATGTCAACACA           
+# postLoxP on P5: GTATGTTGTTCTGGAGCGGGAGGGTGCTATTTTGCCTAGCGATAAGCTGATGTAGCC
+# GFP from P7: CCTGCTGGAGTTCGTGACCGCCGCCGGGATCACTCTCGGCATGGACGAGCTGTACAAGTAA
+# Cap from P7: AGACAAGCAGCTACCGCAGATGTCAACACACAAGGCGTTCTTCCAGGCATGGTCTGG
 
 sys.out <- system2(path.expand("~/bbmap/bbduk2.sh"), args=command.args, stdout=TRUE, stderr=TRUE) #
 
@@ -180,7 +183,7 @@ in.name.P7 <- out.name.P7
 
 out.name.BC <- tempfile(pattern = "BC_", tmpdir = tempdir(), fileext = ".fastq.gz")
 
-sys.out <- system(paste("~/bbmap/bbduk2.sh overwrite=true k=12 hammingdistance=1 findbestmatch=t ",
+sys.out <- system(paste("~/bbmap/bbduk2.sh overwrite=true k=15 mink=15 hammingdistance=1 findbestmatch=t ",
                         "trd=t rcomp=f findbestmatch=f qhdist=0 minavgquality=0 ordered=t maxns=0 minlength=18 ",
                         "maxlength=22 threads=", detectCores()," in=", shQuote(in.name.P5), 
                         " out=", out.name.BC," lliteral=", "GGCCTAGCGGCCGCTTTACTT",
@@ -298,11 +301,11 @@ invisible(barcodeTable[,oldBC:=NULL])
 
 out.name.P5 <- tempfile(pattern = "P5_", tmpdir = tempdir(), fileext = ".fastq.gz")
 out.name.P7 <- tempfile(pattern = "P7_", tmpdir = tempdir(), fileext = ".fastq.gz")
-command.args <- paste("-Xmx12g overwrite=true k=10 rcomp=f qhdist=0 maskmiddle=t hammingdistance=1 findbestmatch=t minlength=40 maxlength=78 ordered=t threads=",detectCores(),
+command.args <- paste("-Xmx12g overwrite=true k=10 mink=18 rcomp=f qhdist=0 maskmiddle=t hammingdistance=1 findbestmatch=t minlength=40 maxlength=78 ordered=t threads=",detectCores(),
                       " in=", in.name.P7,
                       " out=", out.name.P7,
                       " lliteral=", "AGCAACCTCCAGAGAGGCAAC",
-                      " rliteral=", "ATAACTTCGTATAATGTATGC", sep = "") #Length 48-72 bp k=18 mink=10 qhdist=0 hammingdistance=3 findbestmatch=t ,
+                      " rliteral=", "AGACAAGCAGCTACCGCAGATGTCAACACACAAGGCGTTCTTCCAGGCATGGTCTGG", sep = "") #Length 48-72 bp k=18 mink=10 qhdist=0 hammingdistance=3 findbestmatch=t ,
 
 sys.out <- system2(path.expand("~/bbmap/bbduk2.sh"), args=command.args, stdout=TRUE, stderr=TRUE) # 
 
@@ -318,14 +321,29 @@ knitr::kable(sys.out[3:lengthOut,], format = "markdown")
 
 reads.trim <- readFastq(out.name.P7)
 
-table.frag <- as.data.frame((rev(sort(table(sread(reads.trim)))))[1:100])
+table.frag <- as.data.frame((rev(sort(table(sread(reads.trim)))))[1:100 ])
 colnames(table.frag) <- c("Fragment and readcount")
 knitr::kable(table.frag, format = "markdown")
+
+
+
 
 
 #' Align fragments to reference
 #' ============================
 #+ Align to reference...
+
+
+
+
+seqs.original <- readFasta("DNA Libraries for Retrograde Transport.fasta")
+
+seqs.AA <- Biostrings::translate(sread(seqs.original), genetic.code=GENETIC_CODE, if.fuzzy.codon="error")
+
+source("AAtoDNA.R")
+sread(seqs.original) <- sapply(seqs.AA, function(x) AAtoDNA(x, species="hsa"))
+
+AAtoDNA(seqs.AA[1], species="hsa")
 
 name.bowtie <- tempfile(pattern = "bowtie_", tmpdir = tempdir(), fileext = "")
 if (paired.alignment){
