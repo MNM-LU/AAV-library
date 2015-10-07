@@ -101,6 +101,34 @@ id.BC.R <- file.path(bb.dir, "BC-R.fa")
 id.uncut <- file.path(bb.dir, "uncut.fa")
 
 
+#' Selection of real amplicons
+#' ============================
+#+ Selecting real amplicons.......
+
+out.name.P5 <- tempfile(pattern = "P5_", tmpdir = tempdir(), fileext = ".fastq.gz")
+out.name.P7 <- tempfile(pattern = "P7_", tmpdir = tempdir(), fileext = ".fastq.gz")
+command.args <- paste("-Xmx12g overwrite=true k=10 rcomp=f skipr1=t qhdist=0 maskmiddle=t hammingdistance=0 findbestmatch=t ordered=t threads=",detectCores(),
+                      " in=", in.name.P5,
+                      " in2=", in.name.P7,
+                      " outm=", out.name.P5,
+                      " outm2=", out.name.P7,
+                      " fliteral=", "AGACAAGCAGCTACCGCAGATGTCAACACA", sep = "") #Length 48-72 bp k=18 mink=10 qhdist=0 hammingdistance=3 findbestmatch=t ,
+
+sys.out <- system2(path.expand("~/bbmap/bbduk2.sh"), args=command.args, stdout=TRUE, stderr=TRUE) #
+
+sys.out <- as.data.frame(sys.out)
+
+
+colnames(sys.out) <- c("bbduk2 Identification of real amplicons")
+invisible(sys.out[" "] <- " ")
+lengthOut <- (nrow(sys.out))
+knitr::kable(sys.out[3:lengthOut,], format = "markdown")
+
+in.name.P5 <- out.name.P5
+in.name.P7 <- out.name.P7
+
+
+
 #' Extraction of a subset
 #' ============================
 #+ Extracting subset.......
@@ -247,22 +275,25 @@ invisible(barcodeTable[,oldBC:=NULL])
 
 out.name.P5 <- tempfile(pattern = "P5_", tmpdir = tempdir(), fileext = ".fastq.gz")
 out.name.P7 <- tempfile(pattern = "P7_", tmpdir = tempdir(), fileext = ".fastq.gz")
-command.args <- paste("overwrite=true k=18 mink=10 qhdist=0 minlength=44 maxlength=75 hammingdistance=1 findbestmatch=t threads=",detectCores(),
-                      " in=", gsub(" ", "\ ", in.name.P7, fixed=FALSE), 
-                      " out=", out.name.P7,
-                      " lref=", id.backbone.L,
-                      " rref=", id.backbone.R, 
-                      " fliteral=",id.uncut, sep = "") #Length 48-72 bp k=18 mink=10 qhdist=0 hammingdistance=3 findbestmatch=t ,
-" 2>&1"
-sys.out <- system2(path.expand("~/bbmap/bbduk2.sh"), args=command.args)
+command.args <- paste("-Xmx12g overwrite=true k=10 rcomp=f skipr1=t qhdist=0 maskmiddle=t hammingdistance=1 findbestmatch=t minlength=40 ordered=t threads=",detectCores(),
+                      " in=", in.name.P5,
+                      " in2=", in.name.P7,
+                      " out=", out.name.P5,
+                      " out2=", out.name.P7,
+                      " lliteral=", "AACCTCCAGAGAGGCAAC",
+                      " rliteral=", "AGACAAGCAGCTACCGCAGATGTCAACACA", sep = "") #Length 48-72 bp k=18 mink=10 qhdist=0 hammingdistance=3 findbestmatch=t ,
+
+sys.out <- system2(path.expand("~/bbmap/bbduk2.sh"), args=command.args, stdout=TRUE, stderr=TRUE) #
 
 sys.out <- as.data.frame(sys.out)
 
 
-colnames(sys.out) <- c("bbduk2 Extraction of barcodes")
+colnames(sys.out) <- c("bbduk2 Identification of real amplicons")
 invisible(sys.out[" "] <- " ")
 lengthOut <- (nrow(sys.out))
 knitr::kable(sys.out[3:lengthOut,], format = "markdown")
+
+
 
 reads.trim <- readFastq(out.name.P7)
 
