@@ -1,12 +1,12 @@
 dataDir	../../Shared/NGS\\ data/Original\\ sequencing\\ files/TB20151026-26037026
 in.name.P5	psc-lib-2_S1-2_L001_R1_001.fastq.gz
 in.name.P7	psc-lib-2_S1-2_L001_R2_001.fastq.gz
-name.out	2015-09-30_AAVlibrary
+name.out	2015-11-04_AAVlibrary
 paired.alignment	TRUE
 bb.dir	../Templates/adapters/pscAAV_firstLib
 fragmentTemplate	../../Shared/NGS\\ data/bowtieIndices/libIndex
-sc.param	2
+sc.param	0
 run.subset	FALSE
 align.P7	FALSE
-max.cores	4
-subset.count	100000
+max.cores	32
+subset.count	500000
