@@ -1,5 +1,3 @@
-library(compiler)
-enableJIT(3)
 suppressPackageStartupMessages(library(knitr))
 suppressPackageStartupMessages(library(ShortRead))
 suppressPackageStartupMessages(library(ggplot2))
@@ -21,6 +19,7 @@ suppressPackageStartupMessages(library(Gviz))
 suppressPackageStartupMessages(library(plyr))
 suppressPackageStartupMessages(library(devtools))
 suppressPackageStartupMessages(library(Hmisc))
+suppressPackageStartupMessages(library(matrixStats))
 
 
 LUT.dna <- read.table("Complete fragment list for Custom array 2015-02-10.txt", header = TRUE, skip = 0, sep="\t",stringsAsFactors = FALSE, fill=TRUE)
@@ -91,7 +90,7 @@ reads.BC <- readFastq("data/barcodes_2015-11-04_AAVlibrary.fastq.gz")
 # 
 # invisible(barcodeTable[,oldBC:=NULL])
 
-reads.BC <- reads.BC[width(sread(reads.trim)) < 80L & width(sread(reads.trim)) > 35L]
+reads.BC <- reads.BC[width(sread(reads.trim)) < 75L & width(sread(reads.trim)) > 38L]
 reads.trim <- reads.trim[width(sread(reads.trim)) < 80L & width(sread(reads.trim)) > 35L]
 
 source("retrieveFASTAQID.R")
@@ -105,13 +104,48 @@ reads.trim <- reads.trim[match(hits,FastQ2ID)]
 reads.table <- sread(reads.trim)
 names(reads.table) <- sread(reads.BC)
 reads.table.list <- split(reads.table, names(reads.table))
+rm(reads.BC,reads.trim,FastQ1ID,FastQ2ID,hits,reads.table)
 reads.table.list <- reads.table.list[1:1000]
+
+reads.table.list <- reads.table.list[mcmapply(length,reads.table.list,mc.preschedule = TRUE, mc.cores = detectCores()) > 3]
+
 reads.table.list <- reads.table.list[sapply(reads.table.list,length) > 3]
 
-reads <- reads.table.list[[1]]
+reads <- reads.table.list[[99]]
 
 
-lapply(reads,function(x) adist(x,LUT.dna$Sequence))
+uniques <- rev(sort(table(reads)))
+read.match <- adist(names(uniques),LUT.dna$Sequence)
+names(uniques) <- unlist(lapply(1:nrow(read.match), function(i) which.min(read.match[i,])))
+uniques <- split(uniques, names(uniques))
+uniques <- unlist(lapply(uniques,sum))
+uniques <- uniques[which.max(uniques)]
+rowMins(read.match)
+read.match <- sweep(read.match,MARGIN=1,uniques,`/`)
+
+
+pmin(read.match)
+read.match <- colMedians(read.match)
+which.min(read.match)
+lv.score <- min(read.match)/length(uniques)
+matched.ref <- LUT.dna$Sequence[which.min(read.match)]
+return(cbind(matched.ref,lv.score))
+
+reads <- reads.table.list[[99]]
+reads <- reads[4]
+uniques <- rev(sort(table(reads)))
+read.match <- adist(names(uniques),LUT.dna$Sequence)
+LUT.dna$Sequence[which.min(read.match)]
+which.min(read.match)
+
+
+
+
+tmp %/% t(as.matrix(uniques))
+read.match <- lapply(uniques,function(x) adist(names(x),LUT.dna$Sequence))
+
+tmp <- read.match[[1]]
+min(tmp/10)
 match.pair <- function(x){
   matches <- adist(x,LUT.dna$Sequence)
   lv.score <- min(matches)
