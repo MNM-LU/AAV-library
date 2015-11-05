@@ -1,6 +1,6 @@
 dataDir	../../Shared/NGS\\ data/Original\\ sequencing\\ files/TB20151026-26037026
-in.name.P5	psc-lib-2_S1-2_L001_R1_001.fastq.gz
-in.name.P7	psc-lib-2_S1-2_L001_R2_001.fastq.gz
+in.name.P5	psc-lib-1-2UndetOld_S1_L001_R1_001.fastq.gz
+in.name.P7	psc-lib-1-2UndetOld_S1_L001_R2_001.fastq.gz
 name.out	2015-11-04_AAVlibrary
 paired.alignment	TRUE
 bb.dir	../Templates/adapters/pscAAV_firstLib
