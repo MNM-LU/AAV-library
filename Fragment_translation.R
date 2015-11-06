@@ -25,7 +25,7 @@ suppressPackageStartupMessages(library(matrixStats))
 LUT.dna <- read.table("Complete fragment list for Custom array 2015-02-10.txt", header = TRUE, skip = 0, sep="\t",stringsAsFactors = FALSE, fill=TRUE)
 LUT.dna <- data.table(LUT.dna)
 invisible(LUT.dna[,Sequence:=gsub("aacctccagagaggcaac","",Sequence)])
-invisible(LUT.dna[,Sequence:=gsub("cagacaagcagctaccgca","",Sequence)])
+invisible(LUT.dna[,Sequence:=gsub("agacaagcagctaccgca","",Sequence)])
 invisible(LUT.dna[,Sequence:=toupper(Sequence)])
 
 

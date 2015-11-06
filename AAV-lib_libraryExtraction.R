@@ -216,11 +216,11 @@ barcodeTable <- data.table(ID=as.character(ShortRead::id(reads.BC)), BC=as.chara
 
 
 out.name.P7 <- tempfile(pattern = "P7_", tmpdir = tempdir(), fileext = ".fastq.gz")
-command.args <- paste("-Xmx12g overwrite=true k=10 mink=18 rcomp=f qhdist=0 maskmiddle=t hammingdistance=1 findbestmatch=t ordered=t minlength=35 maxlength=75 threads=", detectCores(),
+command.args <- paste("-Xmx12g overwrite=true k=18 mink=18 rcomp=f qhdist=1 maskmiddle=t hammingdistance=2 findbestmatch=t ordered=t threads=", detectCores(),
                       " in=", in.name.P7,
                       " out=", out.name.P7,
                       " lliteral=", "AGCAACCTCCAGAGAGGCAAC",
-                      " rliteral=", "CAGACAAGCAGCTACCGCAGATGTCAACACACAAGGCGTTCTTCCAGGCATGGTCTGG", sep = "") #Length 48-72 bp k=18 mink=10 qhdist=0 hammingdistance=3 findbestmatch=t ,
+                      " rliteral=", "AGACAAGCAGCTACCGCAGAT", sep = "") #Length 48-72 bp k=18 mink=10 qhdist=0 hammingdistance=3 findbestmatch=t ,
 
 sys.out <- system2(path.expand("~/bbmap/bbduk2.sh"), args=command.args, stdout=TRUE, stderr=TRUE) # 
 
