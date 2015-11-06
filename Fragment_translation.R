@@ -116,7 +116,7 @@ reads.table.multiple <- reads.table[!(names(reads.table) %in%  names(BCs.single)
 reads.table.list <- split(reads.table.multiple, names(reads.table.multiple))
 rm(reads.BC,reads.trim,FastQ1ID,FastQ2ID,hits,reads.table)
 
-#reads.table.list <- reads.table.list[1:1000]
+#reads.table.list <- reads.table.list[1:100]
 
 #reads.table.list <- reads.table.list[mcmapply(length,reads.table.list,mc.preschedule = TRUE, mc.cores = detectCores()/2L) > 3]
 
@@ -144,7 +144,7 @@ output.Table = data.frame(matrix(vector(), length(reads.table.list), 5,
                           stringsAsFactors=F)
 
 
-calculateMultiple <- function(startPos) {
+for (startPos in seq(1,length(reads.table.list),1000)) {
 reads.sub <- reads.table.list[startPos:min((startPos+999),length(reads.table.list))]
 strt4<-Sys.time()
 match.out <- mclapply(reads.sub, match.pair, mc.preschedule = TRUE, mc.cores = detectCores()-1L )
@@ -157,7 +157,7 @@ print("Total fragment translation time:")
 print(Sys.time()-strt4)
 }
 
-lapply(seq(1,length(reads.table.list),1000), calculateMultiple)
+
 
 match.pair.single <- function(read){
   read.match <- adist(read,LUT.dna$Sequence)
