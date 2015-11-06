@@ -29,8 +29,8 @@ invisible(LUT.dna[,Sequence:=gsub("cagacaagcagctaccgca","",Sequence)])
 invisible(LUT.dna[,Sequence:=toupper(Sequence)])
 
 
-reads.trim <- readFastq("data/fragments_2015-11-04_AAVlibrary.fastq.gz")
-reads.BC <- readFastq("data/barcodes_2015-11-04_AAVlibrary.fastq.gz")
+reads.trim <- readFastq("data/fragments_2015-11-05_AAVlibrary_complete.fastq.gz")
+reads.BC <- readFastq("data/barcodes_2015-11-05_AAVlibrary_complete.fastq.gz")
 
 
 # reads.BC.file <- "data/barcodes_2015-11-04_AAVlibrary.fastq.gz"
@@ -145,19 +145,19 @@ output.Table = data.frame(matrix(vector(), length(reads.table.list), 5,
 
 
 calculateMultiple <- function(startPos) {
-reads.sub <- reads.table.list[startPos:min((startPos+10),length(reads.table.list))]
+reads.sub <- reads.table.list[startPos:min((startPos+999),length(reads.table.list))]
 strt4<-Sys.time()
 match.out <- mclapply(reads.sub, match.pair, mc.preschedule = TRUE, mc.cores = detectCores()-1L )
 table.sub <- data.table(do.call(rbind,match.out))
 table.sub$BC <- names(reads.sub)
-firstRow <- count(!is.na(output.Table[,1]))+1
+firstRow <- sum(!is.na(output.Table[,1]))+1
 output.Table[firstRow:(firstRow+nrow(table.sub)-1),] <- table.sub
 save(output.Table, file="multipleContfragments.rda")
 print("Total fragment translation time:")
 print(Sys.time()-strt4)
 }
 
-lapply(seq(1,length(reads.table.list),10), calculateMultiple)
+lapply(seq(1,length(reads.table.list),1000), calculateMultiple)
 
 match.pair.single <- function(read){
   read.match <- adist(read,LUT.dna$Sequence)
