@@ -32,13 +32,13 @@ outDNA <- DNAString(outDNA)
 outDNA <- GeneCodon(as.character(outDNA) , organism = species)
 #wSet <- read.table("~/Dropbox (Bjorklund Lab)/mnm group files/AAV WGA project/R analysis/OrganismTable.txt", row.names = 1, header = TRUE, skip = 0, sep="\t")
 
-if (fullOPT == TRUE){
-   GeneGAoutput <- GeneGA(sequence = outDNA, popSize = 50, iters =optIt, crossoverRate = 0.2,
-                   mutationChance = 0.05, region = NULL, organism = species, 
-                   showGeneration = TRUE, frontSeq = NULL, ramp=FALSE, numcode=1)
-   outDNA <- GeneGAoutput
-}
-
-
-  outDNA
+# if (fullOPT == TRUE){
+#    GeneGAoutput <- GeneGA(sequence = outDNA, popSize = 50, iters =optIt, crossoverRate = 0.2,
+#                    mutationChance = 0.05, region = NULL, organism = species, 
+#                    showGeneration = TRUE, frontSeq = NULL, ramp=FALSE, numcode=1)
+#    outDNA <- GeneGAoutput
+# }
+# 
+# 
+#   outDNA
 }

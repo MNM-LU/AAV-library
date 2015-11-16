@@ -27,6 +27,7 @@ LUT.dna <- data.table(LUT.dna)
 invisible(LUT.dna[,Sequence:=gsub("aacctccagagaggcaac","",Sequence)])
 invisible(LUT.dna[,Sequence:=gsub("agacaagcagctaccgca","",Sequence)])
 invisible(LUT.dna[,Sequence:=toupper(Sequence)])
+save(LUT.dna, file="LUTdna.rda")
 
 
 reads.trim <- readFastq("data/fragments_2015-11-05_AAVlibrary_complete.fastq.gz")
