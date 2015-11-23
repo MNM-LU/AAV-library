@@ -121,19 +121,21 @@ rm(reads.BC,reads.trim,FastQ1ID,FastQ2ID,hits,reads.table)
 #reads.table.list <- reads.table.list[mcmapply(length,reads.table.list,mc.preschedule = TRUE, mc.cores = detectCores()/2L) > 3]
 
 #reads.table.list <- reads.table.list[sapply(reads.table.list,length) > 3]
-
 #reads <- reads.table.list[[99]]
 
+
+
+
 match.pair <- function(reads){
-  uniques <- rev(sort(table(reads)))
-  read.match <- adist(names(uniques),LUT.dna$Sequence)
-  read.match <- do.call(rbind,lapply(1:nrow(read.match), function(i) c(which.min(read.match[i,]), min(read.match[i,]))))
-  uniques <- data.table(cbind(read.match, uniques))
-  uniques <- split(uniques, uniques$V1)
-  uniques <- data.table(do.call(rbind, lapply(uniques,function(x) c((sum(x$V2*x$uniques)/sum(x$uniques)), sum(x$uniques)))), keep.rownames=TRUE)
-  uniques <- uniques[which.max(uniques$V2),]
-  uniques$V3 <- length(reads)
-  return(uniques)
+uniques <- rev(sort(table(reads)))
+read.match <- adist(names(uniques),LUT.dna$Sequence)
+read.match <- do.call(rbind,lapply(1:nrow(read.match), function(i) c(which.min(read.match[i,]), min(read.match[i,]))))
+uniques <- data.table(cbind(read.match, uniques))
+uniques <- split(uniques, uniques$V1)
+uniques <- data.table(do.call(rbind, lapply(uniques,function(x) c((sum(x$V2*x$uniques)/sum(x$uniques)), sum(x$uniques)))), keep.rownames=TRUE)
+uniques <- uniques[which.max(uniques$V2),]
+uniques$V3 <- length(reads)
+return(uniques)
 }
 
 
@@ -143,18 +145,18 @@ output.Table = data.frame(matrix(vector(), length(reads.table.list), 5,
                                  dimnames=list(c(), c("LUTnr","LV","mCount","tCount", "BC"))),
                           stringsAsFactors=F)
 
-
-for (startPos in seq(1,length(reads.table.list),10000)) {
-  reads.sub <- reads.table.list[startPos:min((startPos+9999),length(reads.table.list))]
-  strt4<-Sys.time()
-  match.out <- mclapply(reads.sub, match.pair, mc.preschedule = TRUE, mc.cores = detectCores()-1L )
-  table.sub <- data.table(do.call(rbind,match.out))
-  table.sub$BC <- names(reads.sub)
-  firstRow <- sum(!is.na(output.Table[,1]))+1
-  output.Table[firstRow:(firstRow+nrow(table.sub)-1),] <- table.sub
-  save(output.Table, file="multipleContfragments.rda")
-  print("Total fragment translation time:")
-  print(Sys.time()-strt4)
+binSize <- 10000
+for (startPos in seq(1,length(reads.table.list),binSize)) {
+reads.sub <- reads.table.list[startPos:min((startPos+binSize-1),length(reads.table.list))]
+strt4<-Sys.time()
+match.out <- mclapply(reads.sub, match.pair, mc.preschedule = TRUE, mc.cores = detectCores()-1L )
+table.sub <- data.table(do.call(rbind,match.out))
+table.sub$BC <- names(reads.sub)
+firstRow <- sum(!is.na(output.Table[,1]))+1
+output.Table[firstRow:(firstRow+nrow(table.sub)-1),] <- table.sub
+save(output.Table, file="multipleContfragments.rda")
+print("Total fragment translation time:")
+print(Sys.time()-strt4)
 }
 
 
@@ -170,15 +172,15 @@ match.pair.single <- function(read){
 output.Table = data.frame(matrix(vector(), length(reads.table.single), 5,
                                  dimnames=list(c(), c("LUTnr","LV","mCount","tCount", "BC"))),
                           stringsAsFactors=F)
-
-for (startPos in seq(1,length(reads.table.single),10000)) {
-  reads.single.sub <- reads.table.single[startPos:min((startPos+9999),length(reads.table.single))]
+binSize <- 50000
+for (startPos in seq(1,length(reads.table.single),binSize)) {
+  reads.single.sub <- reads.table.single[startPos:min((startPos+binSize-1),length(reads.table.single))]
   strt4<-Sys.time()
-  match.out.single <- mclapply(reads.single.sub, match.pair.single, mc.preschedule = TRUE, mc.cores = detectCores()/2L )
+  match.out.single <- mclapply(reads.single.sub, match.pair.single, mc.preschedule = TRUE, mc.cores = detectCores()-1 )
   table.sub.single <- data.table(do.call(rbind,match.out.single))
   table.sub.single$BC <- names(reads.single.sub)
   firstRow <- sum(!is.na(output.Table[,1]))+1
-  output.Table[firstRow:(firstRow+nrow(table.sub)-1),] <- table.sub.single
+  output.Table[firstRow:(firstRow+nrow(table.sub.single)-1),] <- table.sub.single
   save(output.Table, file="singleContfragments.rda")
   print("Total fragment translation time:")
   print(Sys.time()-strt4)
