@@ -31,21 +31,14 @@ suppressPackageStartupMessages(library(plyr))
 suppressPackageStartupMessages(library(devtools))
 suppressPackageStartupMessages(library(Hmisc))
 
-
-
 #+ setup, include=FALSE
 opts_chunk$set(fig.width = 7.5, fig.height = 8)
 opts_chunk$set(comment = NA)
 
-
 config <- read.table("config.txt", header = FALSE, skip = 0, sep="\t",stringsAsFactors = FALSE, fill=TRUE)
 colnames(config) <- c("Parameter", "Value")
-#setwd("~/Dropbox (Bjorklund Lab)/Shared/NGS data")
+
 script.dir <- normalizePath("../SharedFunctions/")
-# source(file.path(script.dir, "buildFragLengthTable.R"))
-# source(file.path(script.dir, "makePEfastq.R"))
-# source(file.path(script.dir, "retrieveFASTAQID.R"))
-# source(file.path(script.dir, "buildFragTableSC3.R"))
 
 output.table <- data.frame(meanCount=numeric(),
                            sdCount=numeric(), 
@@ -106,7 +99,7 @@ id.uncut <- file.path(bb.dir, "uncut.fa")
 #' Selection of real amplicons
 #' ============================
 #+ Selecting real amplicons.......
-
+#' This section searches the sequencing file and only select the files with valid amplicons
 out.name.P5 <- tempfile(pattern = "P5_", tmpdir = tempdir(), fileext = ".fastq.gz")
 out.name.P7 <- tempfile(pattern = "P7_", tmpdir = tempdir(), fileext = ".fastq.gz")
 command.args <- paste("-Xmx12g overwrite=true k=15 rcomp=f skipr2=t qhdist=0 maskmiddle=f hammingdistance=2 findbestmatch=f ordered=t threads=",detectCores(),
@@ -114,15 +107,11 @@ command.args <- paste("-Xmx12g overwrite=true k=15 rcomp=f skipr2=t qhdist=0 mas
                       " in2=", in.name.P7,
                       " outm=", out.name.P5,
                       " outm2=", out.name.P7,
-                      " fliteral=", "GTATGTTGTTCTGGAGCGGGAGGGTGCTATTTTGCCTAGCGATAA", sep = "") #Length 48-72 bp k=18 mink=10 qhdist=0 hammingdistance=3 findbestmatch=t , ACAAGCAGCTACCGCAGATGTCAACACA           
-# postLoxP on P5: GTATGTTGTTCTGGAGCGGGAGGGTGCTATTTTGCCTAGCGATAAGCTGATGTAGCC
-# GFP from P7: CCTGCTGGAGTTCGTGACCGCCGCCGGGATCACTCTCGGCATGGACGAGCTGTACAAGTAA
-# Cap from P7: AGACAAGCAGCTACCGCAGATGTCAACACACAAGGCGTTCTTCCAGGCATGGTCTGG
+                      " fliteral=", "GTATGTTGTTCTGGAGCGGGAGGGTGCTATTTTGCCTAGCGATAA", sep = "") #Identifies postLoxP on P5         
 
 sys.out <- system2(path.expand("~/bbmap/bbduk2.sh"), args=command.args, stdout=TRUE, stderr=TRUE) #
 
 sys.out <- as.data.frame(sys.out)
-
 
 colnames(sys.out) <- c("bbduk2 Identification of real amplicons")
 invisible(sys.out[" "] <- " ")
@@ -131,7 +120,6 @@ knitr::kable(sys.out[3:lengthOut,], format = "markdown")
 
 in.name.P5 <- out.name.P5
 in.name.P7 <- out.name.P7
-
 
 
 #' Extraction of a subset
@@ -209,7 +197,6 @@ output.table$OrigBC <- length(unique(sread(reads.BC)))
 unique(sread(reads.BC))
 barcodeTable <- data.table(ID=as.character(ShortRead::id(reads.BC)), BC=as.character(sread(reads.BC)))
 
-##"CATTACGCGCTCGCGTAAGC" %in% names(frag.ranges.matched)
 #' Extraction of fragments
 #' ============================
 #+ Extracting fragments.......
@@ -220,24 +207,20 @@ command.args <- paste("-Xmx12g overwrite=true k=18 mink=18 rcomp=f qhdist=1 mask
                       " in=", in.name.P7,
                       " out=", out.name.P7,
                       " lliteral=", "AGCAACCTCCAGAGAGGCAAC",
-                      " rliteral=", "AGACAAGCAGCTACCGCAGAT", sep = "") #Length 48-72 bp k=18 mink=10 qhdist=0 hammingdistance=3 findbestmatch=t ,
+                      " rliteral=", "AGACAAGCAGCTACCGCAGAT", sep = "")
 
 sys.out <- system2(path.expand("~/bbmap/bbduk2.sh"), args=command.args, stdout=TRUE, stderr=TRUE) # 
 
 sys.out <- as.data.frame(sys.out)
 
-colnames(sys.out) <- c("bbduk2 Identification of real amplicons")
+colnames(sys.out) <- c("bbduk2 extraction of fragments")
 invisible(sys.out[" "] <- " ")
 lengthOut <- (nrow(sys.out))
 knitr::kable(sys.out[3:lengthOut,], format = "markdown")
 
-
-
 in.name.P7 <- out.name.P7
 
-
 source("retrieveFASTAQID.R")
-
 FastQ1 <- readFastq(out.name.P5)
 FastQ2 <- readFastq(out.name.P7)
 FastQ1ID <- retrieveFASTAQID(FastQ1, PE=TRUE)
