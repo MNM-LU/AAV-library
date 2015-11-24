@@ -2,7 +2,7 @@
 #' ---
 #' title: "Library analysis output"
 #' author: "Tomas Bjorklund"
-#' output: 
+#' output:
 #'  pdf_document:
 #'    highlight: tango
 #' geometry: margin=0.7in
@@ -73,17 +73,17 @@ id.BC.L <- file.path(bb.dir, "BC-L.fa")
 id.BC.R <- file.path(bb.dir, "BC-R.fa")
 id.uncut <- file.path(bb.dir, "uncut.fa")
 
-
+load("singleContfragments.rda")
+output.Table.single <- output.Table
 load("multipleContfragments.rda")
+output.Table <- rbind(output.Table, output.Table.single)
 load("alignedLibraries.rda")
 load("LUTdna.rda")
 
 output.Table <- na.omit(output.Table)
 nrow(output.Table)
-# output.Table <-output.Table[(output.Table$mCount/output.Table$tCount > 0.5) & (output.Table$LV < 4),]
-# nrow(output.Table)
-
-
+output.Table <-output.Table[(output.Table$LV < 4),] #(output.Table$mCount/output.Table$tCount > 0.5) & 
+nrow(output.Table)
 
 
 
@@ -253,7 +253,8 @@ o = order(-mcols(found.all)$RNAcount)
 found.all <- found.all[o]
 found.all[1:10]
 
-
+assign(paste("found.",name.out, sep=""), found.all)
+save(list = paste("found.",name.out, sep=""), file=paste("output/","found.",name.out, sep=""))
 unlink(paste(tempdir(), "/*", sep = ""), recursive = FALSE, force = FALSE) #Cleanup of temp files
 
 print("Total execution time:")
