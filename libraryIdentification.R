@@ -6,9 +6,11 @@ LUT.dna <- data.table(LUT.dna)
 invisible(LUT.dna[,Sequence:=gsub("aacctccagagaggcaac","",Sequence)])
 invisible(LUT.dna[,Sequence:=gsub("agacaagcagctaccgca","",Sequence)])
 invisible(LUT.dna[,Sequence:=toupper(Sequence)])
+setkey(LUT.dna, "Sequence")
+LUT.dna <- unique(LUT.dna)
 LUT.dna$Names <- LUT.dna$Sequence
 
-output.Table$LUTseq <- LUT.dna$Sequence[as.numeric(output.Table$LUTnr)]
+#output.Table$LUTseq <- LUT.dna$Sequence[as.numeric(output.Table$LUTnr)]
 LUT.14aaG4S <- LUT.dna[substr(LUT.dna$Sequence,1,15) == "GGAGGCGGAGGAAGT"]
 LUT.remaining <- LUT.dna[!(substr(LUT.dna$Sequence,1,15) == "GGAGGCGGAGGAAGT")]
 LUT.14aaA5 <- LUT.remaining[substr(LUT.remaining$Sequence,1,15) == "GCTGCTGCAGCAGCC"]
@@ -141,5 +143,12 @@ frag22aa.ranges <- readGAlignments(paste(name.bowtie, "_sort.bam", sep = ""), us
 length(names(frag22aa.ranges))
 length(unique(names(frag22aa.ranges)))
 length(unique(LUT.22aa$Sequence))
+mcols(frag14aa.ranges)$structure <- "14aa"
+mcols(frag22aa.ranges)$structure <- "22aa"
+mcols(frag14aaA5.ranges)$structure <- "14aaA5"
+mcols(frag14aaG4S.ranges)$structure <- "14aaG4S"
+allFragments.ranges <- append(frag14aa.ranges,frag22aa.ranges)
+allFragments.ranges <- append(allFragments.ranges,frag14aaA5.ranges)
+allFragments.ranges <- append(allFragments.ranges,frag14aaG4S.ranges)
 
-save(frag22aa.ranges,frag14aaA5.ranges, frag14aaG4S.ranges, frag14aa.ranges, file="alignedLibraries.rda")
+save(allFragments.ranges, file="alignedLibraries.rda")

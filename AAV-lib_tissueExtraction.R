@@ -82,7 +82,7 @@ load("LUTdna.rda")
 
 output.Table <- na.omit(output.Table)
 nrow(output.Table)
-output.Table <-output.Table[(output.Table$LV < 4),] #(output.Table$mCount/output.Table$tCount > 0.5) & 
+#output.Table <-output.Table[(output.Table$LV < 4),] #(output.Table$mCount/output.Table$tCount > 0.5) & 
 nrow(output.Table)
 
 
@@ -227,34 +227,28 @@ invisible(barcodeTable[,oldBC:=NULL])
 
 
 BCcount <- rev(sort(table(barcodeTable$BC)))
+
 foundFrags <- output.Table[match(names(BCcount), output.Table$BC),]
 foundFrags$RNAcount <- as.integer(BCcount)
 foundFrags <- na.omit(foundFrags)
-
-
 foundFrags$fragment <- LUT.dna$Sequence[as.integer(foundFrags$LUTnr)]
-found.14aa <- frag14aa.ranges[na.omit(match(foundFrags$fragment,names(frag14aa.ranges)))]
-mcols(found.14aa) <- foundFrags[foundFrags$fragment %in% names(frag14aa.ranges),2:6]
 
-found.14aaG4s <- frag14aaG4S.ranges[na.omit(match(foundFrags$fragment,names(frag14aaG4S.ranges)))]
-mcols(found.14aaG4s) <- foundFrags[foundFrags$fragment %in% names(frag14aaG4S.ranges),2:6]
+matchRange <- function(idxFrag) {
+  #idxFrag <- 23
+  machRanges <- which(names(allFragments.ranges) == foundFrags$fragment[idxFrag])
+  return(cbind(machRanges,idxFrag))
+}
+match.ranges.list <- mclapply(1:nrow(foundFrags), matchRange, mc.preschedule = TRUE, mc.cores = detectCores())
+match.ranges <- do.call(rbind, match.ranges.list)
+foundFragments.ranges <- allFragments.ranges[match.ranges[,1]]
+mcols(foundFragments.ranges) <- c(mcols(foundFragments.ranges), foundFrags[match.ranges[,2],2:6])
 
-found.14aaA5 <- frag14aaA5.ranges[na.omit(match(foundFrags$fragment,names(frag14aaA5.ranges)))]
-mcols(found.14aaA5) <- foundFrags[foundFrags$fragment %in% names(frag14aaA5.ranges),2:6]
+o = order(-mcols(foundFragments.ranges)$RNAcount)
+foundFragments.ranges <- foundFragments.ranges[o]
+foundFragments.ranges[1:10]
 
-found.22aa <- frag22aa.ranges[na.omit(match(foundFrags$fragment,names(frag22aa.ranges)))]
-mcols(found.22aa) <- foundFrags[foundFrags$fragment %in% names(frag22aa.ranges),2:6]
-
-found.all <- append(found.14aa, found.14aaG4s)
-found.all <- append(found.all, found.14aaA5)
-found.all <- append(found.all, found.22aa)
-
-o = order(-mcols(found.all)$RNAcount)
-found.all <- found.all[o]
-found.all[1:10]
-
-assign(paste("found.",name.out, sep=""), found.all)
-save(list = paste("found.",name.out, sep=""), file=paste("output/","found.",name.out, sep=""))
+assign(paste("found.",name.out, sep=""), foundFragments.ranges)
+save(list = paste("found.",name.out, sep=""), file=paste("output/","found.",name.out,".rda", sep=""))
 unlink(paste(tempdir(), "/*", sep = ""), recursive = FALSE, force = FALSE) #Cleanup of temp files
 
 print("Total execution time:")
