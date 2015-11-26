@@ -1,0 +1,6 @@
+suppressPackageStartupMessages(library(ShortRead))
+suppressPackageStartupMessages(library(muscle))
+in.fasta <-  readFasta("DNA Libraries for Retrograde Transport.fasta")
+aaSeqs <- Biostrings::translate(sread(in.fasta), genetic.code=GENETIC_CODE, if.fuzzy.codon="solve")
+names(aaSeqs) <- ShortRead::id(in.fasta)
+writeXStringSet(aaSeqs,"DNAlibrariesAA.fasta", format= "fasta")
