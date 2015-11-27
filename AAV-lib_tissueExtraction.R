@@ -37,6 +37,7 @@ opts_chunk$set(comment = NA)
 
 
 config <- read.table("config_tissue.txt", header = FALSE, skip = 0, sep="\t",stringsAsFactors = FALSE, fill=TRUE)
+
 colnames(config) <- c("Parameter", "Value")
 #setwd("~/Dropbox (Bjorklund Lab)/Shared/NGS data")
 script.dir <- normalizePath("../SharedFunctions/")
@@ -49,9 +50,6 @@ source(file.path(script.dir, "buildFragTableSC3.R"))
 #'===================
 knitr::kable(config, format = "markdown")
 dataDir <- config$Value[1]
-in.name.P5 <- file.path(dataDir, config$Value[2])
-in.name.P7 <- file.path(dataDir, config$Value[3])
-name.out <- config$Value[4]
 paired.alignment <- as.logical(config$Value[5])
 
 #'Analysis parameters
@@ -86,8 +84,14 @@ nrow(output.Table)
 nrow(output.Table)
 
 
+load.list <- read.table("loadlist.txt", header = FALSE, skip = 0, sep="\t",stringsAsFactors = FALSE, fill=TRUE)
+colnames(load.list) <- c("Name", "P5", "P7")
 
+analyzeTissue <- function(indexNr) {
 
+in.name.P5 <- file.path(dataDir, load.list$P5[indexNr])
+in.name.P7 <- file.path(dataDir, load.list$P7[indexNr])
+name.out <- load.list$Name[indexNr]
 
 
 #' Selection of real amplicons
@@ -249,6 +253,10 @@ foundFragments.ranges[1:10]
 
 #assign(paste("found.",name.out, sep=""), foundFragments.ranges)
 saveRDS(foundFragments.ranges, file=paste("output/","found.",name.out,".rds", sep=""), compress = TRUE)
+}
+
+lapply(1:nrow(load.list), analyzeTissue)
+
 unlink(paste(tempdir(), "/*", sep = ""), recursive = FALSE, force = FALSE) #Cleanup of temp files
 
 print("Total execution time:")

@@ -17,7 +17,10 @@ tree.file <- tempfile(pattern = "results_", tmpdir = tempdir(), fileext = ".tree
 sys.out <- system(paste("~/usearch -cluster_agg ",aaLib.file," -treeout  tree.phy -distmxout distance.txt -clusterout clusters.txt -id 0.10 -linkage max "," 2>&1", sep = ""), intern = TRUE, ignore.stdout = FALSE)
 tree <- read_newick_phylo("tree.phy", simplify = FALSE, missing_edge_length = NA)
 tmp.list <- tree$edge.length
-tmp.list <- as.integer(tmp.list*10000)
+#tmp.list <- as.integer(tmp.list)
 tree$edge.length <- tmp.list
-dendrogram <- chronos(tree)
+
+tree.calib <- makeChronosCalib(tree, age.min = 0, age.max = max(tmp.list))
+dendrogram <- chronos(tree, calibration = tree.calib )
+
 plot(dendrogram)
