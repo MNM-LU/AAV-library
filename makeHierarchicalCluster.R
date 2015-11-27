@@ -13,7 +13,7 @@ writeXStringSet(aaSeqs,aaLib.file, format= "fasta")
 
 tree.file <- tempfile(pattern = "results_", tmpdir = tempdir(), fileext = ".tree")
 
-sys.out <- system(paste("~/usearch -cluster_agg ",aaLib.file," -treeout  tree.phy -distmxout distance.txt -clusterout clusters.txt -id 0.30 -linkage max "," 2>&1", sep = ""), intern = TRUE, ignore.stdout = FALSE)
+sys.out <- system(paste("~/usearch -cluster_agg ",aaLib.file," -treeout  tree.phy -distmxout distance.txt -clusterout clusters.txt -id 0.10 -linkage max "," 2>&1", sep = ""), intern = TRUE, ignore.stdout = FALSE)
 
 tree <- read.tree("tree.phy")
 
