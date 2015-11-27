@@ -247,8 +247,8 @@ o = order(-mcols(foundFragments.ranges)$RNAcount)
 foundFragments.ranges <- foundFragments.ranges[o]
 foundFragments.ranges[1:10]
 
-assign(paste("found.",name.out, sep=""), foundFragments.ranges)
-save(list = paste("found.",name.out, sep=""), file=paste("output/","found.",name.out,".rda", sep=""))
+#assign(paste("found.",name.out, sep=""), foundFragments.ranges)
+saveRDS(foundFragments.ranges, file=paste("output/","found.",name.out,".rds", sep=""), compress = TRUE)
 unlink(paste(tempdir(), "/*", sep = ""), recursive = FALSE, force = FALSE) #Cleanup of temp files
 
 print("Total execution time:")
