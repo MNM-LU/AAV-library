@@ -32,4 +32,14 @@ Nr08_100x_Str.table <- makeTable(found.Nr08_100x_Str)
 load("output/found.Nr08_100x_Thal.rda")
 Nr08_100x_Thal.table <- makeTable(found.Nr08_100x_Thal)
 
+load("output/found.Cells_293T_1000x.rda")
+Cells_293T_1000x.table <- makeTable(found.Cells_293T_1000x)
+
 save(library.table, Nr08_100x_SN.table, Nr08_100x_Ctx.table, Nr08_100x_Str.table, Nr08_100x_Thal.table, file="output/RNAtables.rda")
+
+
+
+se <- summarizeOverlaps(features=granges(allFragments.ranges), reads=complete.ranges,
+                        mode="Union",
+                        singleEnd=TRUE,
+                        ignore.strand=TRUE)
