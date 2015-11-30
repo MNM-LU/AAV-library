@@ -88,7 +88,7 @@ load.list <- read.table("loadlist.txt", header = FALSE, skip = 0, sep="\t",strin
 colnames(load.list) <- c("Name", "BaseName")
 
 analyzeTissue <- function(indexNr) {
-#indexNr <- 1
+#indexNr <- 13
   in.files <- list.files(gsub("([\\])", "", dataDir), pattern=paste(load.list$BaseName[indexNr],"*", sep=""), full.names=TRUE)
   in.files.P5 <-in.files[grep("R1",in.files)]
   in.files.P7 <- in.files[grep("R2",in.files)]
