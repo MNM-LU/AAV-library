@@ -85,12 +85,20 @@ nrow(output.Table)
 
 
 load.list <- read.table("loadlist.txt", header = FALSE, skip = 0, sep="\t",stringsAsFactors = FALSE, fill=TRUE)
-colnames(load.list) <- c("Name", "P5", "P7")
+colnames(load.list) <- c("Name", "BaseName")
 
 analyzeTissue <- function(indexNr) {
+#indexNr <- 1
+  in.files <- list.files(gsub("([\\])", "", dataDir), pattern=paste(load.list$BaseName[indexNr],"*", sep=""), full.names=TRUE)
+  in.files.P5 <-in.files[grep("R1",in.files)]
+  in.files.P7 <- in.files[grep("R2",in.files)]
 
-in.name.P5 <- file.path(dataDir, load.list$P5[indexNr])
-in.name.P7 <- file.path(dataDir, load.list$P7[indexNr])
+in.name.P5 <- tempfile(pattern = "P5_", tmpdir = tempdir(), fileext = ".fastq.gz")
+in.name.P7 <- tempfile(pattern = "P7_", tmpdir = tempdir(), fileext = ".fastq.gz")
+system(paste("cat '", paste(as.character(in.files.P5), collapse="' '"), "' > ", in.name.P5, " 2>&1", sep = ""), intern = TRUE, ignore.stdout = FALSE)
+system(paste("cat '", paste(as.character(in.files.P7), collapse="' '"), "' > ", in.name.P7, " 2>&1", sep = ""), intern = TRUE, ignore.stdout = FALSE)
+
+
 name.out <- load.list$Name[indexNr]
 
 

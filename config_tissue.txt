@@ -1,4 +1,4 @@
-dataDir	../../Shared/NGS\\ data/Original\\ sequencing\\ files/2015-09-24_NS500551_102_H3MNJAFXX
+dataDir	../../Shared/NGS\\ data/Original\\ sequencing\\ files/2015-09-24_NS500551_102_H3MNJAFXX/Originals
 in.name.P5	29_S29_L001-4_R1_001.fastq.gz
 in.name.P7	29_S29_L001-4_R2_001.fastq.gz
 name.out	primaryNeurons_100x
