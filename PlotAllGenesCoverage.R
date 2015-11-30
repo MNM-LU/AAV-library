@@ -10,13 +10,14 @@ min(library.table$AApos)
 
 
 attach("data/RNAtables.rda")
-total.library <- get('RatNr1_100x_Ctx_6')
+total.library <- get('RatNr1_100x_Ctx_6_RatNr7_100x_Ctx_2_RatNr8_100x_Ctx_10')
 
 detach("file:data/RNAtables.rda")
 setnames(total.library, c("V1", "V2"), c("GeneName", "AApos"))
 
 #library.table$BCcount <- (library.table$BCcount/max(library.table$BCcount))*100
 library.table$Library <- "Plasmid"
+total.library <- total.library[total.library$ReadCount > 1,]
 max(total.library$BCcount)
 total.library$BCcount <- (total.library$BCcount/max(total.library$BCcount))*max(library.table$BCcount)
 total.library$Library <- "AAV"
