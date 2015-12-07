@@ -1,0 +1,106 @@
+ctx
+
+                                                       GeneName AApos ReadCount BCcount   ReadNorm  ReadNormZ
+ 1: Herpes_simplex_virus_type_1,HSV-1-pUL44,No,,#56,HSV-1-pUL44    56 12.264058       3 611181.353 280.423964
+ 2: Herpes_simplex_virus_type_1,HSV-1-pUL37,No,,#48,HSV-1-pUL37   591  7.911720       3   4426.041   2.030769
+ 3:              Adeno-associated_virus,VP1,AAV1,,#125,AAV1-VP1   181  7.812111       2  70615.864  32.400171
+ 4:              Adeno-associated_virus,VP1,AAV6,,#126,AAV6-VP1   181  7.812111       2  70615.864  32.400171
+ 5:              Adeno-associated_virus,VP1,AAV8,,#127,AAV8-VP1   182  7.812111       2  70615.864  32.400171
+ 6:              Adeno-associated_virus,VP1,AAV9,,#127,AAV9-VP1   181  7.812111       2  70615.864  32.400171
+ 7:   Herpes_simplex_virus_type_1,HSV-1-pUS5,No,,#60,HSV-1-pUS5    35  7.724897       2 373055.731 171.166490
+ 8:                            Poliovirus,VP1,PV3,,#122,PV3-VP1   230  7.667980       2  85829.658  39.380607
+ 9:                            Poliovirus,VP2,PV3,,#123,PV3-VP2   161  7.667980       2  85829.658  39.380607
+10:                      Influenza_A_virus,HA,H1N1,,#87,H1N1-HA   349  7.541322       2 142687.815  65.468429
+
+
+                                                       GeneName AApos ReadCount BCcount  ReadNorm ReadNormZ
+ 1: Herpes_simplex_virus_type_2,HSV-2-pUL22,No,,#67,HSV-2-pUL22   750 18.972328       7  26111.92  39.27223
+ 2:   Herpes_simplex_virus_type_2,HSV-2-pUS7,No,,#74,HSV-2-pUS7   201 12.803735       5  57750.62  86.85670
+ 3: Herpes_simplex_virus_type_2,HSV-2-pUL19,No,,#76,HSV-2-pUL19   426 11.426071       4 325665.12 489.79907
+ 4:                  Measles_virus,MV-F,CAM-70,,#82,MV-F-CAM-70   134 10.773816       4  41448.27  62.33803
+ 5:            Measles_virus,MV-F,Edmonston,,#78,MV-F-Edmonston   134 10.773816       4  41448.27  62.33803
+ 6:                    Measles_virus,MV-F,Halle,,#80,MV-F-Halle   134 10.773816       4  41448.27  62.33803
+ 7:                                 Neurotrophin,NT3,No,,#2,NT3    59  9.984932       4  14655.34  22.04157
+ 8: Herpes_simplex_virus_type_1,HSV-1-pUL36,No,,#47,HSV-1-pUL36  2046  9.962074       4  11008.09  16.55612
+ 9: Herpes_simplex_virus_type_2,HSV-2-pUL10,No,,#66,HSV-2-pUL10   395  9.838492       4  25185.96  37.87959
+10:                 Herpes_B_virus,Glycoprotein_D,No,,#114,BV-G   325  9.478528       4  28915.64  43.48902
+
+SN
+
+                                                                 GeneName AApos ReadCount BCcount     ReadNorm    ReadNormZ
+ 1:           Herpes_simplex_virus_type_1,HSV-1-pUL37,No,,#48,HSV-1-pUL37   591 13.732613       2 7.714731e+05 2.700696e+02
+ 2:                                Neuron_related_prorein,Tau,No,,#12,Tau   275 13.265466       2 3.316969e+05 1.161172e+02
+ 3:             Herpes_simplex_virus_type_2,HSV-2-pUS8,No,,#75,HSV-2-pUS8    89  6.242939       1 3.212202e+05 1.124496e+02
+ 4:                                Neurotoxin,BoNT/E_Hc,No,,#22,BoNT/E_Hc   191  3.025896       2 9.492628e+00 3.323085e-03
+ 5:           Herpes_simplex_virus_type_1,HSV-1-pUL44,No,,#56,HSV-1-pUL44    56  2.822412       2 5.258090e+01 1.840700e-02
+ 6:                           Herpes_B_virus,Glycoprotein_D,No,,#114,BV-G   309  1.758929       2 1.341350e+00 4.695663e-04
+ 7:                             Canine_adenovirus_2,Fiber,/,,#110,CAV-2-F   466  1.637375       1 1.609619e+01 5.634796e-03
+ 8:                     Canine_adenovirus_2,Fiber,SH01,,#108,CAV-2-F-SH01   466  1.637375       1 1.609619e+01 5.634796e-03
+ 9: Canine_adenovirus_2,Fiber,Toronto_A26/61,,#109,CAV-2-F-Toronto_A26/61   466  1.637375       1 1.609619e+01 5.634796e-03
+10:                             Canine_adenovirus_2,Fiber,/,,#110,CAV-2-F   108  1.400569       2 3.659477e+00 1.281073e-03
+
+                                                       GeneName AApos ReadCount BCcount  ReadNorm ReadNormZ
+ 1:   Herpes_simplex_virus_type_1,HSV-1-pUS4,No,,#58,HSV-1-pUS4    95 13.814645       6 50298.270 55.287217
+ 2: Herpes_simplex_virus_type_1,HSV-1-pUL21,No,,#51,HSV-1-pUL21   309 13.506788       7 11864.281 13.041066
+ 3: Herpes_simplex_virus_type_1,HSV-1-pUL36,No,,#47,HSV-1-pUL36  2613  9.936214       5 52578.977 57.794141
+ 4:   Herpes_simplex_virus_type_2,HSV-2-pUS4,No,,#71,HSV-2-pUS4    62  7.808488       4  4112.241  4.520123
+ 5:     Chikungunya_virus,CHIKV-Sp,Wuerzburg_1,,#129,CHIKV-Sp-1   438  7.795663       4  8099.000  8.902317
+ 6:                            Poliovirus,VP1,PV3,,#122,PV3-VP1   269  7.724575       4  3722.486  4.091709
+ 7:                            Poliovirus,VP2,PV2,,#119,PV2-VP2   200  7.724575       4  3722.486  4.091709
+ 8:                            Poliovirus,VP2,PV3,,#123,PV3-VP2   200  7.724575       4  3722.486  4.091709
+ 9: Herpes_simplex_virus_type_2,HSV-2-pUL10,No,,#66,HSV-2-pUL10   429  7.652812       4 41029.717 45.099341
+10:   Herpes_simplex_virus_type_1,HSV-1-pUS8,No,,#62,HSV-1-pUS8   401  7.525377       4 17646.960 19.397313
+
+
+Thal
+
+                                                                       GeneName AApos ReadCount BCcount  ReadNorm
+ 1:                                  Herpes_B_virus,Glycoprotein_D,No,,#114,BV-G   309  8.229501       8  5701.147
+ 2:                                       Neuron_related_prorein,Tau,No,,#12,Tau   603  5.205950       6 21838.409
+ 3:                                    Canine_adenovirus_2,Fiber,/,,#110,CAV-2-F   108  4.928517       6  4124.808
+ 4:                            Canine_adenovirus_2,Fiber,SH01,,#108,CAV-2-F-SH01   108  4.928517       6  4124.808
+ 5:        Canine_adenovirus_2,Fiber,Toronto_A26/61,,#109,CAV-2-F-Toronto_A26/61   108  4.928517       6  4124.808
+ 6: Theiler’s_murine_encephalomyelitis_virus,VP1,U33047.1,,#96,TMEV-VP1-U33047.1   214  4.822648       6  2151.026
+ 7:                               Adeno-associated_virus,VP1,AAV8,,#127,AAV8-VP1   522  4.767826       6  2893.197
+ 8:                 Enterovirus_71,VP1,1095/Japan_97,,#90,EV71-VP1-1095/Japan_97    27  4.728223       5  4261.726
+ 9:                                       Neuron_related_prorein,Tau,No,,#12,Tau   282  4.598545       6  3485.050
+10:                                    Canine_adenovirus_2,Fiber,/,,#110,CAV-2-F   129  4.543678       5  3751.062
+ 
+                                                      GeneName AApos ReadCount BCcount  ReadNorm ReadNormZ
+ 1: Herpes_simplex_virus_type_1,HSV-1-pUL36,No,,#47,HSV-1-pUL36  2687 11.680608      16 1730.8500 12.353860
+ 2: Herpes_simplex_virus_type_1,HSV-1-pUL36,No,,#47,HSV-1-pUL36  1808 11.659317      15 1081.7331  7.720819
+ 3: Herpes_simplex_virus_type_1,HSV-1-pUL19,No,,#63,HSV-1-pUL19   845 10.622390      14  801.0081  5.717158
+ 4: Herpes_simplex_virus_type_2,HSV-2-pUL19,No,,#76,HSV-2-pUL19   845 10.622390      14  801.0081  5.717158
+ 5:   Herpes_simplex_virus_type_1,HSV-1-pUS8,No,,#62,HSV-1-pUS8    36 10.307159      14 1979.8824 14.131317
+ 6:                      Neuron_related_prorein,Tau,No,,#12,Tau   258 10.299449      14 1105.8602  7.893025
+ 7:                         West_Nile_virus,WNV-M,No,,#33,WNV-M    23  9.287924      13  821.1691  5.861055
+ 8:          West_Nile_virus,WNV-E,AZ10-918,,#36,WNV-E-AZ10-918   349  8.991439      13  740.7269  5.286903
+ 9:          West_Nile_virus,WNV-E,ArD76104,,#32,WNV-E-ArD76104   345  8.991439      13  740.7269  5.286903
+10:                West_Nile_virus,WNV-E,H-422,,#35,WNV-E-H-442   349  8.991439      13  740.7269  5.286903
+
+Str
+                                                                 GeneName AApos ReadCount BCcount  ReadNorm ReadNormZ
+ 1:           Herpes_simplex_virus_type_1,HSV-1-pUL36,No,,#47,HSV-1-pUL36   777  14.67404       5 132444.65 117.01379
+ 2:           Herpes_simplex_virus_type_1,HSV-1-pUL22,No,,#55,HSV-1-pUL22   763  12.06063       4 151758.02 134.07700
+ 3:                             Canine_adenovirus_2,Fiber,/,,#110,CAV-2-F   466  11.88766       4 144984.62 128.09275
+ 4:                     Canine_adenovirus_2,Fiber,SH01,,#108,CAV-2-F-SH01   466  11.88766       4 144984.62 128.09275
+ 5: Canine_adenovirus_2,Fiber,Toronto_A26/61,,#109,CAV-2-F-Toronto_A26/61   466  11.88766       4 144984.62 128.09275
+ 6:                                Neurotoxin,BoNT/E_Hc,No,,#22,BoNT/E_Hc   191  11.78057       4 129760.51 114.64237
+ 7:               Chikungunya_virus,CHIKV-Sp,Wuerzburg_1,,#129,CHIKV-Sp-1  1058  11.45584       4 324419.84 286.62233
+ 8:                                         Bornavirus,BDV-G,/,,#83,BDV-G   217  11.32301       4  94238.27  83.25876
+ 9:                                 Bornavirus,BDV-G,CRNP5,,#84,BDV-CRNP5   217  11.32301       4  94238.27  83.25876
+10:                                 Bornavirus,BDV-G,No/98,,#85,BDV-No/98   217  11.32301       4  94238.27  83.25876
+
+                                                     GeneName AApos ReadCount BCcount  ReadNorm ReadNormZ
+ 1:              Adeno-associated_virus,VP1,AAV1,,#125,AAV1-VP1    80  7.814078       6  3679.508  6.860340
+ 2:              Adeno-associated_virus,VP1,AAV6,,#126,AAV6-VP1    80  7.814078       6  3679.508  6.860340
+ 3:              Adeno-associated_virus,VP1,AAV8,,#127,AAV8-VP1    80  7.814078       6  3679.508  6.860340
+ 4:              Adeno-associated_virus,VP1,AAV9,,#127,AAV9-VP1    80  7.814078       6  3679.508  6.860340
+ 5:    Horseradish_peroxidase,Horseradish_peroxidase,,,#135,HRP   257  7.368854       6  1647.521  3.071758
+ 6:     Chikungunya_virus,CHIKV-Sp,Wuerzburg_1,,#129,CHIKV-Sp-1  1088  7.289175       5 21648.557 40.363134
+ 7: Herpes_simplex_virus_type_1,HSV-1-pUL36,No,,#47,HSV-1-pUL36  2532  7.155835       5 42962.881 80.103102
+ 8:   Herpes_simplex_virus_type_2,HSV-2-pUS6,No,,#72,HSV-2-pUS6   282  6.677177       5  4829.980  9.005363
+ 9:                               Bornavirus,BDV-G,/,,#83,BDV-G   419  6.585088       5  5507.248 10.268111
+10:                       Bornavirus,BDV-G,CRNP5,,#84,BDV-CRNP5   419  6.585088       5  5507.248 10.268111
+
+

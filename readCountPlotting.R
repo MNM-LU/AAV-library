@@ -1,24 +1,37 @@
 #suppressPackageStartupMessages(library(SummarizedExperiment))
-load("alignedLibraries.rda")
-load("LUTdna.rda")
+suppressPackageStartupMessages(library(GenomicAlignments))
+suppressPackageStartupMessages(library(data.table))
+suppressPackageStartupMessages(library(scales))
+suppressPackageStartupMessages(library(ShortRead))
 
-makeTable <- function(in.range){
-  table.analysis <- data.table(as.character(seqnames(in.range)), start(in.range)+(qwidth(in.range)/2), mcols(in.range)$RNAcount, 1L)
-  setkey(table.analysis, V1, V2) #Add V2 to allow for AA separation
-  table.analysis.bin <- table.analysis[,list(ReadCount=sum(V3), BCcount=sum(V4)), by=list(V1, V2)] #Add V2 to allow for AA separation
-  table.analysis.bin$normCount <- table.analysis.bin$ReadCount/mean(table.analysis.bin$ReadCount)
-  table.analysis.bin[,V2:=(V2+2)/3]
- return(table.analysis.bin)
-}
+# in.BCs <- readFastq("data/barcodes_2015-11-05_AAVlibrary_complete.fastq.gz")
+# BC.table <- rev(sort(table(sread(in.BCs))))
+# BC.table <- BC.table/mean(BC.table)
+
 
 load("completeLibraryRanges.rda")
 
-table.analysis <- data.table(as.character(seqnames(complete.ranges)), start(complete.ranges)+(qwidth(complete.ranges)/2), mcols(complete.ranges)$tCount, 1L)
-setkey(table.analysis, V1, V2) #Add V2 to allow for AA separation        
-table.analysis.bin <- table.analysis[,list(ReadCount=sum(V3), BCcount=sum(V4)), by=list(V1, V2)] #Add V2 to allow for AA separation
-table.analysis.bin$normCount <- table.analysis.bin$ReadCount/mean(table.analysis.bin$ReadCount)
-table.analysis.bin[,V2:=(V2+2)/3]
+table.analysis <- data.table(as.character(seqnames(complete.ranges)), start(complete.ranges)+(qwidth(complete.ranges)/2), mcols(complete.ranges)$tCount, 1L, mcols(complete.ranges)$tCount/as.numeric(BC.table[match(mcols(complete.ranges)$BC,names(BC.table))]))
+setkey(table.analysis, V1) #Add V2 to allow for AA separation        
+table.analysis.bin <- table.analysis[,list(ReadCount=sum(V3), BCcount=sum(V4), ReadNorm=sum(V5)), by=list(V1)] #Add V2 to allow for AA separation
+table.analysis.bin$ReadNormZ <- scale(log2(table.analysis.bin$ReadNorm), center = TRUE)
+#table.analysis.bin[,V2:=(V2+2)/3]
 library.table <- table.analysis.bin
+
+
+
+# load("alignedLibraries.rda")
+# load("LUTdna.rda")
+
+
+makeTable <- function(in.range){
+  table.analysis <- data.table(as.character(seqnames(in.range)), start(in.range)+(qwidth(in.range)/2), mcols(in.range)$RNAcount, 1L, mcols(in.range)$RNAcount/as.numeric(BC.table[match(mcols(in.range)$BC,names(BC.table))]))
+  setkey(table.analysis, V1) #Add V2 to allow for AA separation        
+  table.analysis.bin <- table.analysis[,list(ReadCount=sum(V3), BCcount=sum(V4), ReadNorm=sum(V5)), by=list(V1)] #Add V2 to allow for AA separation
+  table.analysis.bin$ReadNormZ <- scale(log2(table.analysis.bin$ReadNorm), center = TRUE)
+  #table.analysis.bin[,V2:=(V2+2)/3]
+  return(table.analysis.bin)
+}
 
 in.names.all <- list.files("output", pattern="*.rds", full.names=TRUE)
 for (in.name in in.names.all){
@@ -27,4 +40,4 @@ assign(gsub("-","_",gsub("found.","",gsub("(output/)", "", gsub("(.rds)", "", in
 
 out.names <- gsub("-","_",gsub("found.","",gsub("(output/)", "", gsub("(.rds)", "", in.names.all))))
 out.names <- c(out.names,"library.table")
-save(list = out.names, file="data/RNAtables.rda")
+save(list = out.names, file="data/RNAtablesCompleteBin.rda")
