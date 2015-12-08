@@ -10,8 +10,8 @@ suppressPackageStartupMessages(library(ShortRead))
 
 
 load("completeLibraryRanges.rda")
-
-table.analysis <- data.table(as.character(seqnames(complete.ranges)), start(complete.ranges)+(qwidth(complete.ranges)/2), mcols(complete.ranges)$tCount, 1L, mcols(complete.ranges)$tCount/as.numeric(BC.table[match(mcols(complete.ranges)$BC,names(BC.table))]))
+libSum <- as.numeric(sum(mcols(complete.ranges)$tCount))
+table.analysis <- data.table(as.character(seqnames(complete.ranges)), start(complete.ranges)+(qwidth(complete.ranges)/2), mcols(complete.ranges)$tCount, 1L, mcols(complete.ranges)$tCount)
 setkey(table.analysis, V1) #Add V2 to allow for AA separation        
 table.analysis.bin <- table.analysis[,list(ReadCount=sum(V3), BCcount=sum(V4), ReadNorm=sum(V5)), by=list(V1)] #Add V2 to allow for AA separation
 table.analysis.bin$ReadNormZ <- scale(log2(table.analysis.bin$ReadNorm), center = TRUE)
@@ -25,7 +25,8 @@ library.table <- table.analysis.bin
 
 
 makeTable <- function(in.range){
-  table.analysis <- data.table(as.character(seqnames(in.range)), start(in.range)+(qwidth(in.range)/2), mcols(in.range)$RNAcount, 1L, mcols(in.range)$RNAcount/as.numeric(BC.table[match(mcols(in.range)$BC,names(BC.table))]))
+  numRatio <- sum(mcols(in.range)$RNAcount)/libSum
+  table.analysis <- data.table(as.character(seqnames(in.range)), start(in.range)+(qwidth(in.range)/2), mcols(in.range)$RNAcount, 1L, mcols(in.range)$RNAcount/numRatio)
   setkey(table.analysis, V1) #Add V2 to allow for AA separation        
   table.analysis.bin <- table.analysis[,list(ReadCount=sum(V3), BCcount=sum(V4), ReadNorm=sum(V5)), by=list(V1)] #Add V2 to allow for AA separation
   table.analysis.bin$ReadNormZ <- scale(log2(table.analysis.bin$ReadNorm), center = TRUE)

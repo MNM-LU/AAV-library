@@ -3,6 +3,7 @@ suppressPackageStartupMessages(library(ggplot2))
 suppressPackageStartupMessages(library(DESeq2))
 suppressPackageStartupMessages(library(VennDiagram))
 suppressPackageStartupMessages(library(data.table))
+suppressPackageStartupMessages(library(beanplot))
 
 load("~/Dropbox (Bjorklund Lab)/R-projects/AAV-library/completeLibraryRanges.rda")
 purity.table <- data.table(mcols(complete.ranges)$mCount/mcols(complete.ranges)$tCount)
@@ -94,49 +95,113 @@ output.table$SNStart[2] <- output.table$SNEnd[1] <- length(seq.str)-length(inter
 output.table$SNStart[3] <- output.table$SNEnd[2] <- output.table$SNStart[2] + length(seq.SNCtx)
 
 
-fill.values <- c("Array" = rgb(193,210,234, maxColorValue = 255), "Lib" = rgb(157,190,217, maxColorValue = 255), "AAV" = rgb(38,64,135, maxColorValue = 255), "Str" = rgb(157,190,217, maxColorValue = 255),"SN" = rgb(193,210,234, maxColorValue = 255), "None" = rgb(255,255,255, maxColorValue = 255))
+fill.values <- c("Array" = rgb(193,210,234, maxColorValue = 255), "Lib" = rgb(157,190,217, maxColorValue = 255), "AAV" = rgb(38,64,135, maxColorValue = 255), "Str" = rgb(157,190,217, maxColorValue = 255),"SN" = rgb(193,210,234, maxColorValue = 255), "None" = rgb(255,255,255, maxColorValue = 255, alpha = 0))
 
 
 ggplot(output.table) + 
-  geom_rect(aes(fill=NameSN, ymax=SNEnd, ymin=SNStart, xmax=13, xmin=11)) +
-  geom_rect(aes(fill=NameStr, ymax=StrEnd, ymin=StrStart, xmax=11, xmin=9)) +
-  geom_rect(aes(fill=NameAAV, ymax=AAVend, ymin=AAVStart, xmax=9, xmin=7)) +
-  geom_rect(aes(fill=NameLib, ymax=LibEnd, ymin=LibStart, xmax=7, xmin=4)) +
-  geom_rect(aes(fill=NameArray, ymax=ArrayEnd, ymin=ArrayStart, xmax=4, xmin=0)) +
-  xlim(c(0, 13)) + 
+  scale_x_continuous(limit=c(0,10), breaks=c(seq(1,9,2)), expand =c(0,0)) + 
   scale_fill_manual(name = "Library", values = fill.values) +
-  theme(aspect.ratio=1) 
+  theme(aspect.ratio=1) + 
+  geom_rect(data=output.table, aes(fill=NameSN, ymax=SNEnd, ymin=SNStart, xmax=10, xmin=8)) +
+  geom_rect(data=output.table, aes(fill=NameStr, ymax=StrEnd, ymin=StrStart, xmax=8, xmin=6)) +
+  geom_rect(data=output.table, aes(fill=NameAAV, ymax=AAVend, ymin=AAVStart, xmax=6, xmin=4)) +
+  geom_rect(data=output.table, aes(fill=NameLib, ymax=LibEnd, ymin=LibStart, xmax=4, xmin=2)) +
+  geom_rect(data=output.table, aes(fill=NameArray, ymax=ArrayEnd, ymin=ArrayStart, xmax=2, xmin=0)) +
+  coord_polar(theta="y") 
 
 
 
 
 
+total.100x <- GAlignmentsList(readRDS("output/found.Cells293Nr3_100x_cDNA-27.rds"),
+                             readRDS("output/found.primNeuronsNr7_100x_cDNA-29.rds"),
+                             readRDS("output/found.RatNr1_100x_Ctx-6.rds"),
+                             readRDS("output/found.RatNr1_100x_SN-5.rds"),
+                             readRDS("output/found.RatNr1_100x_Str-7.rds"),
+                             readRDS("output/found.RatNr1_100x_Th-8.rds"),
+                             readRDS("output/found.RatNr7_100x_Ctx-2.rds"),
+                             readRDS("output/found.RatNr7_100x_SN-1.rds"),
+                             readRDS("output/found.RatNr7_100x_Str-3.rds"),
+                             readRDS("output/found.RatNr7_100x_Th-4.rds"),
+                             readRDS("output/found.RatNr8_100x_Ctx-10.rds"),
+                             readRDS("output/found.RatNr8_100x_SN-9.rds"),
+                             readRDS("output/found.RatNr8_100x_Str-11.rds"),
+                             readRDS("output/found.RatNr8_100x_Th-12.rds"))
+total.100x <- cbind(unlist(total.100x))[[1]]
+
+total.1000x <- GAlignmentsList(readRDS("output/found.Cells293Nr2_1000x_cDNA-26.rds"),
+                              readRDS("output/found.primNeuronsNr6_1000x_cDNA-28.rds"),
+                              readRDS("output/found.RatNr15_1000x_Ctx-14.rds"),
+                              readRDS("output/found.RatNr15_1000x_SN-13.rds"),
+                              readRDS("output/found.RatNr15_1000x_Str-15.rds"),
+                              readRDS("output/found.RatNr15_1000x_Th-16.rds"),
+                              readRDS("output/found.RatNr19_1000x_Ctx-21.rds"),
+                              readRDS("output/found.RatNr19_1000x_Str-22.rds"),
+                              readRDS("output/found.RatNr19_1000x_Th-23.rds"),
+                              readRDS("output/found.RatNr20_1000x_Str-24.rds"),
+                              readRDS("output/found.RatNr20_1000x_Th-25.rds"),
+                              readRDS("output/found.RatNr21_1000x_Ctx-18.rds"),
+                              readRDS("output/found.RatNr21_1000x_SN-17.rds"),
+                              readRDS("output/found.RatNr21_1000x_Str-19.rds"),
+                              readRDS("output/found.RatNr21_1000x_Th-20.rds"))
+
+total.1000x <- cbind(unlist(total.1000x))[[1]]
+
+
+venn.area1 <- length(unique(mcols(total.100x)$BC))
+venn.area2 <- length(unique(mcols(total.1000x)$BC))
+
+venn.n12 <- length(intersect(unique(mcols(total.100x)$BC),unique(mcols(total.1000x)$BC)))
+
+venn.colors <- c("cornflower blue", "red") 
 grid.newpage()
-venn.plot <- draw.triple.venn(area1    = venn.area1,
+venn.plot <- draw.pairwise.venn(area1    = venn.area1,
                               area2    = venn.area2,
-                              area3    = venn.area3,
-                              n12      = venn.n12,
-                              n23      = venn.n23,
-                              n13      = venn.n13,
-                              n123     = venn.n123,
-                              scaled   = FALSE,
-                              fill     = c("blue", "red", "green"),
+                              cross.area      = venn.n12,
+                              scaled   = TRUE,
+                              fill     = venn.colors,
                               alpha    = 0.3,
-                              lty      = "blank", ,
+                              lty      = "blank",
                               cex      = 2,
                               cat.cex  = 2,
-                              cat.col  = c("blue", "red", "green"),
-                              category = c("CustomArry", "PlasmidLib", "InfectiveAAV"),
-                              cat.pos  = c(0, 40, 250),
-                              cat.dist = c(0.05, 0.05, 0.05))
+                              cat.col  = venn.colors,
+                              category = c("100x", "1000x"))
 grid.draw(venn.plot)
 
 
-ggplot(browsers) + 
-  geom_rect(aes(fill=version, ymax=ymax, ymin=ymin, xmax=4, xmin=3)) +
-  geom_rect(aes(fill=browser, ymax=ymax, ymin=ymin, xmax=3, xmin=0)) +
-  xlim(c(0, 4)) + 
-  theme(aspect.ratio=1) +
-  coord_polar(theta="y")  
+venn.area1 <- length(unique(names(total.100x)))
+venn.area2 <- length(unique(names(total.1000x)))
+
+venn.n12 <- length(intersect(unique(names(total.100x)),unique(names(total.1000x))))
 
 
+grid.newpage()
+venn.plot <- draw.pairwise.venn(area1    = venn.area1,
+                                area2    = venn.area2,
+                                cross.area      = venn.n12,
+                                scaled   = TRUE,
+                                fill     = venn.colors,
+                                alpha    = 0.3,
+                                lty      = "blank",
+                                cex      = 2,
+                                cat.cex  = 2,
+                                cat.col  = venn.colors,
+                                category = c("100x", "1000x"))
+grid.draw(venn.plot)
+
+lib.BC.counts <- data.table(mcols(complete.ranges)$tCount,mcols(complete.ranges)$BC)
+lib.BC.counts <- lib.BC.counts[match(unique(lib.BC.counts$V2),lib.BC.counts$V2),]
+lib.BC.counts
+setorder(lib.BC.counts, V1)
+lib.BC.counts$V3 <- 1:nrow(lib.BC.counts)
+setkey(lib.BC.counts, V1)
+lib.BC.counts.low <- lib.BC.counts[,ReadCount=min(V1), Position=min(V3), by=list(V1)] 
+countPlot <- ggplot(lib.BC.counts,aes(x=V3, y=V1)) + geom_area() + 
+
+  geom_histogram(bin=1, stat="identity")
+, aes(fill = Library,y=ReadCount)
+
++theme_bw()+
+  scale_fill_manual(name = "Library", values = fill.values) +
+  scale_colour_manual(name = "Library", values = fill.values) +
+  facet_grid(GeneName~., scales = "free_x", space = "free_x") 
