@@ -4,6 +4,7 @@ suppressPackageStartupMessages(library(DESeq2))
 suppressPackageStartupMessages(library(VennDiagram))
 suppressPackageStartupMessages(library(data.table))
 suppressPackageStartupMessages(library(beanplot))
+suppressPackageStartupMessages(library(scales))
 
 load("~/Dropbox (Bjorklund Lab)/R-projects/AAV-library/completeLibraryRanges.rda")
 purity.table <- data.table(mcols(complete.ranges)$mCount/mcols(complete.ranges)$tCount)
@@ -191,12 +192,17 @@ grid.draw(venn.plot)
 
 lib.BC.counts <- data.table(mcols(complete.ranges)$tCount,mcols(complete.ranges)$BC)
 lib.BC.counts <- lib.BC.counts[match(unique(lib.BC.counts$V2),lib.BC.counts$V2),]
-lib.BC.counts
 setorder(lib.BC.counts, V1)
 lib.BC.counts$V3 <- 1:nrow(lib.BC.counts)
-setkey(lib.BC.counts, V1)
-lib.BC.counts.low <- lib.BC.counts[,ReadCount=min(V1), Position=min(V3), by=list(V1)] 
-countPlot <- ggplot(lib.BC.counts,aes(x=V3, y=V1)) + geom_area() + 
+setkey(lib.BC.counts, V1)    
+table.analysis.bin <- lib.BC.counts[,list(ReadCount=sum(V1), BCcount=sum(V1), ReadNorm=sum(V3)), by=lib.BC.counts$V1] 
+lib.BC.counts.low <- lib.BC.counts[,list(ReadCount=min(V1),Position=min(V3)), by=lib.BC.counts$V1] 
+lib.BC.counts.high <- lib.BC.counts[,list(ReadCount=min(V1),Position=max(V3)), by=lib.BC.counts$V1] 
+lib.BC.counts <- rbind(lib.BC.counts.low, lib.BC.counts.high)
+setorder(lib.BC.counts, ReadCount)
+lib.BC.counts$logCounts <- lib.BC.counts$ReadCount+1
+countPlot <- ggplot(lib.BC.counts,aes(x=Position, y=logCounts)) + geom_area() + 
+  scale_y_continuous(trans='log2')
 
   geom_histogram(bin=1, stat="identity")
 , aes(fill = Library,y=ReadCount)
