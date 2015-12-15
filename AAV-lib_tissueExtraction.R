@@ -89,7 +89,13 @@ colnames(load.list) <- c("Name", "BaseName")
 
 analyzeTissue <- function(indexNr) {
 #indexNr <- 13
-  in.files <- list.files(gsub("([\\])", "", dataDir), pattern=paste(load.list$BaseName[indexNr],"*", sep=""), full.names=TRUE)
+  name <- unlist(strsplit(load.list$BaseName[indexNr],"/"))
+  name <- name[!is.na(name)]
+  if (length(name)==2){
+    in.files <- list.files(paste(gsub("([\\])", "", dataDir),name[1],sep="/"), pattern=paste(name[2],"*", sep=""), full.names=TRUE)
+  } else {
+    in.files <- list.files(gsub("([\\])", "", dataDir), pattern=paste(name[1],"*", sep=""), full.names=TRUE)
+  }
   in.files.P5 <-in.files[grep("R1",in.files)]
   in.files.P7 <- in.files[grep("R2",in.files)]
 
@@ -253,14 +259,14 @@ matchRange <- function(idxFrag) {
 match.ranges.list <- mclapply(1:nrow(foundFrags), matchRange, mc.preschedule = TRUE, mc.cores = detectCores())
 match.ranges <- do.call(rbind, match.ranges.list)
 foundFragments.ranges <- allFragments.ranges[match.ranges[,1]]
+if (ncol(match.ranges) >= 2) {
 mcols(foundFragments.ranges) <- c(mcols(foundFragments.ranges), foundFrags[match.ranges[,2],2:6])
-
 o = order(-mcols(foundFragments.ranges)$RNAcount)
 foundFragments.ranges <- foundFragments.ranges[o]
-foundFragments.ranges[1:10]
-
+#foundFragments.ranges[1:10]
 #assign(paste("found.",name.out, sep=""), foundFragments.ranges)
 saveRDS(foundFragments.ranges, file=paste("output/","found.",name.out,".rds", sep=""), compress = TRUE)
+}
 }
 
 lapply(1:nrow(load.list), analyzeTissue)

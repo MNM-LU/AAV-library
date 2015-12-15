@@ -43,7 +43,7 @@ loadRDS <- function(in.name) {
 }
 
 out.range <- lapply(in.names.all, loadRDS)
-do.call(sum,mcols(out.range)$tCount)
+#do.call(sum,mcols(out.range)$tCount)
 
 
 readCounts <- lapply(out.range, function(x) sum(mcols(x)$RNAcount))
@@ -70,6 +70,8 @@ out.range.split <- mclapply(out.range.split, function(x) lapply(x, function(y) s
 MergeCounts <- function(inRanges) {
 outRanges <- inRanges[1]
 mcols(outRanges)$NormCount <- log2(sum(mcols(inRanges)$RNAcount)+1)*length(inRanges)
+mcols(outRanges)$RNAcount <- sum(mcols(inRanges)$RNAcount)
+mcols(outRanges)$BC <- length(inRanges)
 return(outRanges)
 }
 
@@ -77,28 +79,4 @@ out.range.split <- mclapply(out.range.split, function(x) lapply(x, function(y) l
 
 out.range.split <- mclapply(out.range.split,function(x) unlist(do.call(GAlignmentsList,unlist(x)), use.names=FALSE), mc.cores = detectCores())
 out.range.split <- unlist(do.call(GAlignmentsList,unlist(out.range.split)), use.names=FALSE)
-
-
-
-
-makeTable <- function(in.range){
-  numRatio <- sum(mcols(in.range)$RNAcount)/libSum
-  table.analysis <- data.table(as.character(seqnames(in.range)), start(in.range)+(qwidth(in.range)/2), mcols(in.range)$RNAcount, 1L, mcols(in.range)$RNAcount/numRatio)
-  setkey(table.analysis, V1) #Add V2 to allow for AA separation        
-  table.analysis.bin <- table.analysis[,list(ReadCount=sum(V3), BCcount=sum(V4), ReadNorm=sum(V5)), by=list(V1)] #Add V2 to allow for AA separation
-  table.analysis.bin$ReadNormZ <- scale(log2(table.analysis.bin$ReadNorm), center = TRUE)
-  #table.analysis.bin[,V2:=(V2+2)/3]
-  return(table.analysis.bin)
-}
-
-
-
-
-
-
-assign(gsub("-","_",gsub("found.","",gsub("(output/)", "", gsub("(.rds)", "", in.name)))), makeTable(readRDS(in.name)))
-
-
-out.names <- gsub("-","_",gsub("found.","",gsub("(output/)", "", gsub("(.rds)", "", in.names.all))))
-out.names <- c(out.names,"library.table")
-save(list = out.names, file="data/RNAtablesCompleteBin.rda")
+saveRDS(out.range.split, file="output/normalizedSampleRanges.RDS")
