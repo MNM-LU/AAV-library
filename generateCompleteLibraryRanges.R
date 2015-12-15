@@ -18,4 +18,5 @@ match.ranges.list <- mclapply(1:nrow(output.Table), matchRange, mc.preschedule =
 match.ranges <- do.call(rbind, match.ranges.list)
 complete.ranges <- allFragments.ranges[match.ranges[,1]]
 mcols(complete.ranges) <- c(mcols(complete.ranges), output.Table[match.ranges[,2],2:6])
-save(complete.ranges, file="completeLibraryRanges.rda")
+mcols(complete.ranges) <- cbind(mcols(complete.ranges)[,1:5],data.frame(RNAcount = mcols(complete.ranges)[,4]))
+saveRDS(complete.ranges, file="output/completeLibraryRanges.rds")

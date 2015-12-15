@@ -10,16 +10,30 @@ rep.row<-function(x,n){
   matrix(rep(x,each=n),nrow=n)
 }
 in.names.all <- list.files("output", pattern="*.rds", full.names=TRUE)
-select.Cases <- c(grep("100x_Str",in.names.all),grep("100x_Th",in.names.all),grep("100x_Ctx",in.names.all),grep("100x_SN",in.names.all),
-                  grep("100x_Mu",in.names.all),grep("100x_Sc",in.names.all),
-                  grep("primNeuronsNr7_100x",in.names.all),grep("Cells293Nr3_100x",in.names.all),
-                  grep("1000x_Str",in.names.all),grep("1000x_Th",in.names.all),grep("1000x_Ctx",in.names.all),grep("1000x_SN",in.names.all),
-                  grep("100x_Mu",in.names.all),grep("100x_Sc",in.names.all),
-                  grep("primNeuronsNr6_1000x_cDNA",in.names.all),grep("Cells293Nr2_1000x",in.names.all))
+select.Cases <- c(grep("completeLibraryRanges",in.names.all),
+                  grep("total.infectiveLib",in.names.all),
+                  grep("100x_Str",in.names.all),
+                  grep("100x_Th",in.names.all),
+                  grep("100x_Ctx",in.names.all),
+                  grep("100x_SN",in.names.all),
+                  grep("100x_Mu",in.names.all),
+                  grep("100x_Sc",in.names.all),
+                  grep("primNeuronsNr7_100x",in.names.all),
+                  grep("Cells293Nr3_100x",in.names.all),
+                  grep("1000x_Str",in.names.all),
+                  grep("1000x_Th",in.names.all),
+                  grep("1000x_Ctx",in.names.all),
+                  grep("1000x_SN",in.names.all),
+                  grep("100x_Mu",in.names.all),
+                  grep("100x_Sc",in.names.all),
+                  grep("primNeuronsNr6_1000x_cDNA",in.names.all),
+                  grep("Cells293Nr2_1000x",in.names.all))
 (in.names.all <- in.names.all[select.Cases])
-in.names.all <- in.names.all[-c(1,6,11,16,26,32,37,43)]
+in.names.all <- in.names.all[-c(3,8,13,18,28,34,40,45)]
 grouping <- data.frame(Files=gsub("-","_",gsub("found.","",gsub("(output/)", "", gsub("(.rds)", "", in.names.all)))),
-                       Group=rbind(rep.row("CNS100x_Str",4),
+                       Group=rbind("totalLib",
+                                   "infectiveLib",
+                                   rep.row("CNS100x_Str",4),
                                    rep.row("CNS100x_Th",4),
                                    rep.row("CNS100x_Ctx",4),
                                    rep.row("CNS100x_SN",4),
@@ -44,7 +58,6 @@ loadRDS <- function(in.name) {
 
 out.range <- lapply(in.names.all, loadRDS)
 #do.call(sum,mcols(out.range)$tCount)
-
 
 readCounts <- lapply(out.range, function(x) sum(mcols(x)$RNAcount))
 maxCount <- max(unlist(readCounts))
@@ -79,4 +92,4 @@ out.range.split <- mclapply(out.range.split, function(x) lapply(x, function(y) l
 
 out.range.split <- mclapply(out.range.split,function(x) unlist(do.call(GAlignmentsList,unlist(x)), use.names=FALSE), mc.cores = detectCores())
 out.range.split <- unlist(do.call(GAlignmentsList,unlist(out.range.split)), use.names=FALSE)
-saveRDS(out.range.split, file="output/normalizedSampleRanges.RDS")
+saveRDS(out.range.split, file="data/normalizedSampleRanges.RDS")
