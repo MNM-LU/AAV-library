@@ -9,10 +9,12 @@ suppressPackageStartupMessages(library(doParallel))
 
 
 all.samples <- readRDS("data/normalizedSampleRanges.RDS")
-fill.values <- c("CNS1000x_Str" = rgb(157,190,217, maxColorValue = 255), 
-                 "CNS1000x_Ctx" = rgb(38,64,135, maxColorValue = 255), 
-                 "CNS1000x_SN" = "springgreen4")
+# fill.values <- c("CNS1000x_Str" = rgb(157,190,217, maxColorValue = 255), 
+#                  "CNS1000x_Ctx" = rgb(38,64,135, maxColorValue = 255), 
+#                  "CNS1000x_SN" = "springgreen4")
 
+fill.values <- c("PerN100x_SC" = rgb(38,64,135, maxColorValue = 255), 
+                 "PerN100x_Mu" = rgb(157,190,217, maxColorValue = 255))
 
 select.samples <- all.samples[mcols(all.samples)$Group %in% names(fill.values)]
 
@@ -58,13 +60,14 @@ position <- seq(0,100,size.bin)
 plot.data <- cbind(plot.data, position_bin=cut(plot.data$AAproc, breaks=position)) 
 plot.data.bin <- ddply(plot.data, .(position_bin,GeneName,Group), summarize,
                       AAproc = position[findInterval(min(AAproc),position)],
-                      NormCount = log2(mean(RNAcount)+1)*mean(BC))
+                      NormCount = log2(mean(RNAcount)+1)*mean(BC)) # 
 #-----------------------                           
-  
+plot.data.bin[plot.data.bin$Group == names(fill.values)[2],"NormCount"] <- plot.data.bin[plot.data.bin$Group == names(fill.values)[2],"NormCount"]*-1
 
-ggplot(plot.data.bin,aes(x=AAproc,y=NormCount))+geom_histogram(bin=size.bin, stat="identity", aes(fill = Group,y=NormCount))+theme_bw()+
+ggplot(plot.data.bin,aes(x=AAproc,y=NormCount, fill = Group))+geom_bar(stat="identity", position="identity")+theme_bw()+
   scale_fill_manual(name = "Library", values = fill.values) +
   scale_colour_manual(name = "Library", values = fill.values) +
+  scale_x_continuous(limit=c(0,100), breaks=c(seq(0,100,20)), expand =c(0,0)) +
   facet_wrap(~ GeneName, ncol=5)
   #facet_grid(GeneName~., scales = "free_x", space = "free_x") 
 
