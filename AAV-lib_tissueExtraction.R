@@ -85,7 +85,7 @@ nrow(output.Table)
 
 
 load.list <- read.table("loadlist.txt", header = FALSE, skip = 0, sep="\t",stringsAsFactors = FALSE, fill=TRUE)
-colnames(load.list) <- c("Name", "BaseName")
+colnames(load.list) <- c("Name", "BaseName","GroupName")
 
 analyzeTissue <- function(indexNr) {
 #indexNr <- 13
