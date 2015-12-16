@@ -28,9 +28,11 @@ select.Cases <- c(grep("completeLibraryRanges",in.names.all),
                   grep("100x_Sc",in.names.all),
                   grep("primNeuronsNr6_1000x_cDNA",in.names.all),
                   grep("Cells293Nr2_1000x",in.names.all))
+
+
 (in.names.all <- in.names.all[select.Cases])
 in.names.all <- in.names.all[-c(3,8,13,18,28,34,40,45)]
-grouping <- data.frame(Files=gsub("-","_",gsub("found.","",gsub("(output/)", "", gsub("(.rds)", "", in.names.all)))),
+grouping <- data.frame(Sample=gsub("-","_",gsub("found.","",gsub("(output/)", "", gsub("(.rds)", "", in.names.all)))),
                        Group=rbind("totalLib",
                                    "infectiveLib",
                                    rep.row("CNS100x_Str",4),
@@ -48,17 +50,21 @@ grouping <- data.frame(Files=gsub("-","_",gsub("found.","",gsub("(output/)", "",
                                    "PerN1000x_Mu",
                                    "PerN1000x_SC",
                                    "PrimN_1000x",
-                                   "293T_1000x"))
+                                   "293T_1000x"),
+                                   stringsAsFactors = FALSE)
 
 loadRDS <- function(in.name) {
+  #in.name <- in.names.all[3]
   this.sample <- readRDS(in.name)
-  mcols(this.sample) <- cbind(mcols(this.sample),data.frame(Sample = gsub("-","_",gsub("found.","",gsub("(output/)", "", gsub("(.rds)", "", in.name)))),stringsAsFactors = FALSE))
+  this.name <- gsub("-","_",gsub("found.","",gsub("(output/)", "", gsub("(.rds)", "", in.name))))
+  this.group <- grouping[match(this.name,grouping$Sample),"Group"]
+  mcols(this.sample) <- cbind(mcols(this.sample),data.frame(Sample = this.name, Group=this.group,stringsAsFactors = FALSE))
   return(this.sample)
 }
 
 out.range <- lapply(in.names.all, loadRDS)
 #do.call(sum,mcols(out.range)$tCount)
-
+#out.range <- list(out.range[[1]][1:10000],out.range[[2]][1:10000])
 readCounts <- lapply(out.range, function(x) sum(mcols(x)$RNAcount))
 maxCount <- max(unlist(readCounts))
 readCounts <- lapply(readCounts, function(x) maxCount/x)
@@ -73,23 +79,27 @@ out.range <- lapply(1:length(readCounts), makeNormCount)
 
 out.range <- do.call(GAlignmentsList,unlist(out.range))
 (out.range <- cbind(unlist(out.range))[[1]])
-mcols(out.range)$Sample <- sedit(mcols(out.range)$Sample,as.character(grouping$Files), as.character(grouping$Group), wild.literal=FALSE)
 mcols(out.range)$NormCount <- 1
 
-out.range.split <- split(out.range,c(mcols(out.range)$Sample))
+out.range.split <- split(out.range,c(mcols(out.range)$Group))
 out.range.split <- lapply(out.range.split, function(x) split(x,seqnames(x)))
-out.range.split <- mclapply(out.range.split, function(x) lapply(x, function(y) split(y,names(y))), mc.cores = detectCores())
+out.range.split <- mclapply(out.range.split, function(x) lapply(x, function(y) split(y,names(y))), mc.preschedule = TRUE, mc.cores = detectCores())
 
 MergeCounts <- function(inRanges) {
 outRanges <- inRanges[1]
-mcols(outRanges)$NormCount <- log2(sum(mcols(inRanges)$RNAcount)+1)*length(inRanges)
-mcols(outRanges)$RNAcount <- sum(mcols(inRanges)$RNAcount)
-mcols(outRanges)$BC <- length(inRanges)
+mcols(outRanges) <- data.frame(structure=mcols(inRanges)$structure[1],
+                               LV=sum(mcols(inRanges)$LV*mcols(inRanges)$tCount)/sum(mcols(inRanges)$tCount),
+                               mCount=sum(mcols(inRanges)$mCount),
+                               tCount=sum(mcols(inRanges)$tCount),
+                               BC=length(inRanges),
+                               RNAcount=sum(mcols(inRanges)$RNAcount),
+                               NormCount=log2(sum(mcols(inRanges)$RNAcount)+1)*length(inRanges),
+                               stringsAsFactors=FALSE)
 return(outRanges)
 }
 
-out.range.split <- mclapply(out.range.split, function(x) lapply(x, function(y) lapply(y,MergeCounts)), mc.cores = detectCores())
+out.range.split <- lapply(out.range.split, function(x) mclapply(x, function(y) lapply(y,MergeCounts), mc.preschedule = TRUE, mc.cores = detectCores()))
 
-out.range.split <- mclapply(out.range.split,function(x) unlist(do.call(GAlignmentsList,unlist(x)), use.names=FALSE), mc.cores = detectCores())
+out.range.split <- mclapply(out.range.split,function(x) unlist(do.call(GAlignmentsList,unlist(x)), use.names=FALSE), mc.preschedule = TRUE, mc.cores = detectCores())
 out.range.split <- unlist(do.call(GAlignmentsList,unlist(out.range.split)), use.names=FALSE)
-saveRDS(out.range.split, file="data/normalizedSampleRanges.RDS")
+saveRDS(out.range.split, file="data/normalizedSampleRanges_tmp.RDS")
