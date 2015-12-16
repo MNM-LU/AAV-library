@@ -88,7 +88,6 @@ out.range.split <- mclapply(out.range.split, function(x) lapply(x, function(y) s
 MergeCounts <- function(inRanges) {
 outRanges <- inRanges[1]
 mcols(outRanges) <- data.frame(structure=mcols(inRanges)$structure[1],
-                               Sample=mcols(inRanges)$Sample[1],
                                Group=mcols(inRanges)$Group[1],
                                LV=sum(mcols(inRanges)$LV*mcols(inRanges)$tCount)/sum(mcols(inRanges)$tCount),
                                mCount=sum(mcols(inRanges)$mCount),
