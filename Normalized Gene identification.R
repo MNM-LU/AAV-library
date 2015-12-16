@@ -102,4 +102,4 @@ out.range.split <- lapply(out.range.split, function(x) mclapply(x, function(y) l
 
 out.range.split <- mclapply(out.range.split,function(x) unlist(do.call(GAlignmentsList,unlist(x)), use.names=FALSE), mc.preschedule = TRUE, mc.cores = detectCores())
 out.range.split <- unlist(do.call(GAlignmentsList,unlist(out.range.split)), use.names=FALSE)
-saveRDS(out.range.split, file="data/normalizedSampleRanges_tmp.RDS")
+saveRDS(out.range.split, file="data/normalizedSampleRanges.RDS")
