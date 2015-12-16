@@ -13,13 +13,13 @@ all.samples <- readRDS("data/normalizedSampleRanges.RDS")
 #                  "CNS1000x_Ctx" = rgb(38,64,135, maxColorValue = 255), 
 #                  "CNS1000x_SN" = "springgreen4")
 
-fill.values <- c("PerN100x_SC" = rgb(38,64,135, maxColorValue = 255), 
-                 "PerN100x_Mu" = rgb(157,190,217, maxColorValue = 255))
+fill.values <- c("totalLib" = rgb(38,64,135, maxColorValue = 255), 
+                 "infectiveLib_V2" = rgb(157,190,217, maxColorValue = 255))
 
+total.AAV.samples <- all.samples[!(mcols(all.samples)$Group %in% c("totalLib","infectiveLib"))]
+mcols(total.AAV.samples)$Group <- "infectiveLib"
+all.samples <- append(all.samples,total.AAV.samples)
 select.samples <- all.samples[mcols(all.samples)$Group %in% names(fill.values)]
-
-
-
 trim.names <- data.table(GeneName=levels(seqnames(select.samples)))
 trim.names[, c("Category", "Protein", "Origin", "Extra", "Number","GeneName") := tstrsplit(GeneName, ",", fixed=TRUE)]
 levels(seqnames(select.samples)) <- trim.names$GeneName
