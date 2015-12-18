@@ -32,9 +32,9 @@ library(grid)
 #'Setup parameters
 #'===================
 all.samples <- readRDS("data/normalizedSampleRanges.RDS")
-fill.values <- c("totalLib" = rgb(38,64,135, maxColorValue = 255), 
-                 "infectiveLib" = rgb(157,190,217, maxColorValue = 255))
-filterBC <- FALSE
+fill.values <- c("CNS1000x_Ctx" = rgb(38,64,135, maxColorValue = 255), 
+                 "CNS1000x_Str" = rgb(157,190,217, maxColorValue = 255))
+filterBC <- TRUE
 filterAnimal <- FALSE
 BCadjustPlot <- FALSE
 NormalizePlot <- TRUE
@@ -131,34 +131,42 @@ ggplot(plot.data.bin,aes(x=AAproc,y=NormCount, fill = Group))+geom_bar(stat="ide
   #facet_grid(GeneName~., scales = "free_x", space = "free_x") 
 
 select.samples.gr <- granges(select.samples)
-mcols(select.samples.gr) <- mcols(select.samples)[,c(1,2,3,4,5,6,9)]
+mcols(select.samples.gr) <- cbind(mcols(select.samples)[,c(1,2,3,4,5,6,9)],
+                                  DataFrame(Animals=unlist(lapply(strsplit(mcols(select.samples)$Animals, ","),function(x)length(table(x))))))
+
 o = order(-mcols(select.samples.gr)$NormCount)
 select.samples.gr <- select.samples.gr[o]
 top.sample <- select.samples.gr[mcols(select.samples.gr)$Group %in% names(fill.values)[1]]
 bottom.sample <- select.samples.gr[mcols(select.samples.gr)$Group %in% names(fill.values)[2]]
 #+ setup, fontsize: 7pt
 if (length(top.sample) >=1){
-out <- top.sample[1:min(15,length(top.sample))]
+out <- top.sample
 out.2 <- data.table(Fragment=names(out),
+                    SeqCount=0,
                   Gene=as.character(seqnames(out)),
-                  Start=start(out))
+                  startAA=(start(out)+2)/3)
 out.2 <- data.frame(out.2,as.data.frame(mcols(out)))
-return(knitr::kable(out.2[,c(1,2,5)], format = "markdown"))
+out.2[match(names(table(out.2$Fragment)),out.2$Fragment),"SeqCount"] <- as.integer(table(out.2$Fragment))
+out.2 <- out.2[out.2$SeqCount>=1,]
+return(knitr::kable(out.2[1:min(15,nrow(out.2)),c(1,3,6)], format = "markdown"))
 }
 if (length(top.sample) >=1){
-  return(knitr::kable(out.2[,c(-1,-5)], format = "markdown"))
+  return(knitr::kable(out.2[1:min(15,nrow(out.2)),c(-1,-6)], format = "markdown"))
 }
 
 if (length(bottom.sample) >=1) {
-  out <- bottom.sample[1:min(15,length(bottom.sample))]
+  out <- bottom.sample
   out.2 <- data.table(Fragment=names(out),
+                      SeqCount=0,
                       Gene=as.character(seqnames(out)),
-                      Start=start(out))
+                      startAA=(start(out)+2)/3)
   out.2 <- data.frame(out.2,as.data.frame(mcols(out)))
-  return(knitr::kable(out.2[,c(1,2,5)], format = "markdown"))
+  out.2[match(names(table(out.2$Fragment)),out.2$Fragment),"SeqCount"] <- as.integer(table(out.2$Fragment))
+  out.2 <- out.2[out.2$SeqCount>=1,]
+  return(knitr::kable(out.2[1:min(15,nrow(out.2)),c(1,3,6)], format = "markdown"))
 }
 if (length(bottom.sample) >=1) {
-  return(knitr::kable(out.2[,c(-1,-5)], format = "markdown"))
+  return(knitr::kable(out.2[1:min(15,nrow(out.2)),c(-1,-6)], format = "markdown"))
 }
 
 devtools::session_info()
