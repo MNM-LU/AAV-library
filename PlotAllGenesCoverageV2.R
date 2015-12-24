@@ -32,18 +32,18 @@ library(grid)
 #'Setup parameters
 #'===================
 all.samples <- readRDS("data/normalizedSampleRanges.RDS")
-fill.values <- c("CNS1000x_Ctx" = rgb(38,64,135, maxColorValue = 255), 
-                 "CNS1000x_Str" = rgb(157,190,217, maxColorValue = 255))
-filterBC <- TRUE
+fill.values <- c("CNS100x_SN" = rgb(38,64,135, maxColorValue = 255), 
+                 "CNS100x_Str" = rgb(157,190,217, maxColorValue = 255))
+filterBC <- FALSE
 filterAnimal <- FALSE
-BCadjustPlot <- FALSE
+AnimaladjustPlot <- FALSE
 NormalizePlot <- TRUE
 
 
 #'Generation of infective library
 #'===================
 total.AAV.samples <- all.samples[!(mcols(all.samples)$Group %in% "totalLib")]
-total.AAV.samples <- total.AAV.samples[-grep("4wks",mcols(all.samples)$Group)]
+total.AAV.samples <- total.AAV.samples[-grep("4wks",mcols(total.AAV.samples)$Group)]
 mcols(total.AAV.samples)$Group <- "infectiveLib"
 all.samples <- append(all.samples,total.AAV.samples)
 select.samples <- all.samples[mcols(all.samples)$Group %in% names(fill.values)]
@@ -79,7 +79,7 @@ plot.data.dt <- data.table(plot.data)
 plot.data.dt[,bin:=findInterval(AAproc, position)]
 plot.data.bin <- plot.data.dt[, list(.N,SeqLength=min(SeqLength),
                                         AAproc = position[findInterval(min(AAproc),position)],
-                                        BCmean=mean(BC),
+                                        BCmean=length(table(strsplit(paste(t(BC), collapse=","), ","))),
                                         AnimalCount = length(table(strsplit(paste(t(Animals), collapse=","), ","))),
                                         NormCount = log2((sum(RNAcount)/SeqLength*FullLength)+1)
                                         ), by=c("bin","GeneName","Group")]
@@ -101,8 +101,8 @@ if (filterAnimal) {
   plot.data.bin <- plot.data.bin[plot.data.bin$AnimalCount > 1,]
 }
 
-if (BCadjustPlot) {
-  plot.data.bin$NormCount <- plot.data.bin$NormCount*plot.data.bin$BC*plot.data.bin$AnimalCount/plot.data.bin$SeqLength*FullLength
+if (AnimaladjustPlot) {
+  plot.data.bin$NormCount <- plot.data.bin$NormCount*plot.data.bin$AnimalCount/plot.data.bin$SeqLength*FullLength
 }
 
 plot.data.bin[plot.data.bin$Group == names(fill.values)[2]]$NormCount <- plot.data.bin[plot.data.bin$Group == names(fill.values)[2]]$NormCount*-1
@@ -146,6 +146,7 @@ out.2 <- data.table(Fragment=names(out),
                   Gene=as.character(seqnames(out)),
                   startAA=(start(out)+2)/3)
 out.2 <- data.frame(out.2,as.data.frame(mcols(out)))
+out.2$BC <- unlist(lapply(strsplit(out.2$BC, ","),function(x) length(unique(x))))
 out.2[match(names(table(out.2$Fragment)),out.2$Fragment),"SeqCount"] <- as.integer(table(out.2$Fragment))
 out.2 <- out.2[out.2$SeqCount>=1,]
 return(knitr::kable(out.2[1:min(15,nrow(out.2)),c(1,3,6)], format = "markdown"))
@@ -161,6 +162,7 @@ if (length(bottom.sample) >=1) {
                       Gene=as.character(seqnames(out)),
                       startAA=(start(out)+2)/3)
   out.2 <- data.frame(out.2,as.data.frame(mcols(out)))
+  out.2$BC <- unlist(lapply(strsplit(out.2$BC, ","),function(x) length(unique(x))))
   out.2[match(names(table(out.2$Fragment)),out.2$Fragment),"SeqCount"] <- as.integer(table(out.2$Fragment))
   out.2 <- out.2[out.2$SeqCount>=1,]
   return(knitr::kable(out.2[1:min(15,nrow(out.2)),c(1,3,6)], format = "markdown"))
