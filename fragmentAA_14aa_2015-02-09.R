@@ -10,15 +10,17 @@
 
 #' This script generates all AA unique AA sequences for the CustomArray production  
 suppressPackageStartupMessages(library(knitr))
-suppressPackageStartupMessages(require(ShortRead))
-suppressPackageStartupMessages(require(parallel))
-suppressPackageStartupMessages(require(GeneGA))
+suppressPackageStartupMessages(library(ShortRead))
+suppressPackageStartupMessages(library(parallel))
+suppressPackageStartupMessages(library(GeneGA))
 suppressPackageStartupMessages(library(devtools))
+suppressPackageStartupMessages(library(Hmisc))
 
 #'Loading source files
 #'===================
-source("functions/AAtoDNA.R")
-allSequences <- readFasta("CustomArray/DNA Libraries for Retrograde Transport.fasta")
+source(file.path("functions", "AAtoDNA.R"))
+
+allSequences <- readFasta("DNA Libraries for Retrograde Transport.fasta")
 AAlist <- data.frame(Class=character(),
                      Family=character(),
                      Strain=character(),
@@ -27,14 +29,11 @@ AAlist <- data.frame(Class=character(),
                      Name=character(),
                      AAfragment=character(),
                      stringsAsFactors = FALSE)
-                     
 
 allSequences <- allSequences[124:129]
 
 strt<-Sys.time()
 for (i in 1:length(allSequences)){
-#for (i in 1:5){
-  #i  <- 2 
   thisID <- as.character(ShortRead::id(allSequences[i]))
   thisSeq <- sread(allSequences[i])
   thisAA <- Biostrings::translate(thisSeq, genetic.code=GENETIC_CODE, if.fuzzy.codon="solve")
