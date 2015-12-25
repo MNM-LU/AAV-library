@@ -10,14 +10,14 @@
 
 #' This script generates all AA unique AA sequences for the CustomArray production  
 suppressPackageStartupMessages(library(knitr))
-#+ setup, include=FALSE
 suppressPackageStartupMessages(require(ShortRead))
-suppressPackageStartupMessages(require(foreach))
 suppressPackageStartupMessages(require(parallel))
 suppressPackageStartupMessages(require(GeneGA))
-#setwd("~/Dropbox (Bjorklund Lab)/mnm group files/AAV WGA project/R analysis")
-source("functions/AAtoDNA.R")
+suppressPackageStartupMessages(library(devtools))
 
+#'Loading source files
+#'===================
+source("functions/AAtoDNA.R")
 allSequences <- readFasta("CustomArray/DNA Libraries for Retrograde Transport.fasta")
 AAlist <- data.frame(Class=character(),
                      Family=character(),
@@ -41,6 +41,8 @@ for (i in 1:length(allSequences)){
   AAlist[i,c("Class","Family","Strain","Note","Number","Name","AAfragment")] <- c(BBmisc::explode(thisID, sep=","),as.character(thisAA))
 }
 
+#'The generateFragments function
+#'===================
 
 
 generateFragments <- function(minLength,maxLength,frequency=1) {
@@ -90,6 +92,9 @@ row.names(sortedFragments) <- mclapply(row.names(sortedFragments), fullOPT=FALSE
 return(sortedFragments)
 }
 
+#'Execution of the function
+#'===================
+
 sortedFragments.14aa <- generateFragments(14,14,1)
 
 fivePrime <- tolower("AACCTCCAGAGAGGCAACGCT")
@@ -113,13 +118,8 @@ threePrime <- tolower("GCCAGACAAGCAGCTACCGCA")
 row.names(sortedFragments.22aa) <- paste(fivePrime,row.names(sortedFragments.22aa),threePrime, sep = "")
 sortedFragments <- c(sortedFragments.14aa,sortedFragments.14aa.G4S,sortedFragments.14aa.A5,sortedFragments.22aa)
 
-#write.table(sortedFragments,"SortedFragments_14aa_2015-02-09.txt",row.names=T,col.names=F,quote=F,sep="\t")
-
-
-
-
-# save(AAlist, file = "GeneList_2015-02-09.RData")
-# save(fragList, file = "FragmentList_14aa_2015-02-09.RData")
-# save(discardList, file = "DiscardedList_14aa_2015-02-09.RData")
+write.table(names(sortedFragments),"data/SortedFragments_all_2015-12-25.txt",row.names=F,col.names=F,quote=F,sep="\t")
 
 print(Sys.time()-strt)
+
+devtools::session_info()
