@@ -11,7 +11,7 @@ AAlist <- data.frame(NA,NA,NA,NA,NA,NA,NA)
 colnames(AAlist) <- c("Class","Family","Strain","Note","Number","Name","AAfragment")
 fragList <- data.frame(NA,NA,NA,NA,NA,NA,NA,NA,NA)
 colnames(fragList) <- c("Class","Family","Strain","Note","Number","Name","AAstart","AAstop","AAfragment")
-#allSequences <- allSequences[129:129]
+allSequences <- allSequences[120:129]
 strt<-Sys.time()
 for (i in 1:length(allSequences)){
 #for (i in 1:5){

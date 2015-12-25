@@ -1,4 +1,4 @@
-AAtoDNA <- function(inAA,species="ec",fullOPT=FALSE,optIt=1){
+AAtoDNA <- function(inAA,species="hsa",fullOPT=FALSE,optIt=1){
   require(Hmisc)
   library(GeneGA)
   humanCodon <- read.table(header = TRUE, 
@@ -24,7 +24,7 @@ T	acc
 V	gtg
 W	tgg
 Y	tac")
-
+#inAA <- row.names(sortedFragments)[1]
 inAA <- toupper(as.character(inAA))
 
 outDNA <- toupper(sedit(inAA,humanCodon$AA, humanCodon$DNA, wild.literal=FALSE))

@@ -1,17 +1,36 @@
-require(ShortRead)
-require(foreach)
-require(parallel)
-require(GeneGA)
-setwd("~/Dropbox (Bjorklund Lab)/mnm group files/AAV WGA project/R analysis")
-source("AAtoDNA.R")
-minLength <- 14
-maxLength <- 14
-allSequences <- readFasta("DNA Libraries for Retrograde Transport.fasta")
-AAlist <- data.frame(NA,NA,NA,NA,NA,NA,NA)
-colnames(AAlist) <- c("Class","Family","Strain","Note","Number","Name","AAfragment")
-fragList <- data.frame(NA,NA,NA,NA,NA,NA,NA,NA,NA)
-colnames(fragList) <- c("Class","Family","Strain","Note","Number","Name","AAstart","AAstop","AAfragment")
-#allSequences <- allSequences[129:129]
+
+#' ---
+#' title: "Custom array sequence generation"
+#' author: "Tomas Bjorklund"
+#' output: 
+#'  pdf_document:
+#'    highlight: tango
+#' geometry: margin=0.7in
+#' ---
+
+#' This script generates all AA unique AA sequences for the CustomArray production  
+suppressPackageStartupMessages(library(knitr))
+#+ setup, include=FALSE
+suppressPackageStartupMessages(require(ShortRead))
+suppressPackageStartupMessages(require(foreach))
+suppressPackageStartupMessages(require(parallel))
+suppressPackageStartupMessages(require(GeneGA))
+#setwd("~/Dropbox (Bjorklund Lab)/mnm group files/AAV WGA project/R analysis")
+source("functions/AAtoDNA.R")
+
+allSequences <- readFasta("CustomArray/DNA Libraries for Retrograde Transport.fasta")
+AAlist <- data.frame(Class=character(),
+                     Family=character(),
+                     Strain=character(),
+                     Note=character(),
+                     Number=character(),
+                     Name=character(),
+                     AAfragment=character(),
+                     stringsAsFactors = FALSE)
+                     
+
+allSequences <- allSequences[124:129]
+
 strt<-Sys.time()
 for (i in 1:length(allSequences)){
 #for (i in 1:5){
@@ -22,42 +41,85 @@ for (i in 1:length(allSequences)){
   AAlist[i,c("Class","Family","Strain","Note","Number","Name","AAfragment")] <- c(BBmisc::explode(thisID, sep=","),as.character(thisAA))
 }
 
-for (k in 1:length(AAlist[,1])){
-  thisFullAA <- AAlist[k,"AAfragment"]
-  count = length(fragList[,1])+1
-  for (l in 1:(width(thisFullAA)-minLength)){
-    for (m in (l+minLength-1):(min(l+maxLength-1,width(thisFullAA)))){
-    thisFragment <- substr(thisFullAA,l,m) ##Truncates string to the relevant fragment
-    if (substr(thisFragment,1,1)!="M") { ##This takes away any sequence that starts with a start codon ATG
-    fragList[count,c("Class","Family","Strain","Note","Number","Name","AAstart","AAstop","AAfragment")] <- c(AAlist[k,c("Class","Family","Strain","Note","Number","Name")],l,m,thisFragment) ## Inserts the fragment with information into the new data frame 
-    count <- count +1
-    }
-    }
-  }
-}
 
-fragList <- fragList[2:length(fragList[,1]),] #removes the NA line
+
+generateFragments <- function(minLength,maxLength,frequency=1) {
+#minLength=14
+#maxLength=14
+
+fragList <- data.frame(Class=character(),
+                         Family=character(),
+                         Strain=character(),
+                         Note=character(),
+                         Number=character(),
+                         Name=character(),
+                         AAstart=integer(),
+                         AAstop=integer(),
+                         AAfragment=character(),
+                         stringsAsFactors = FALSE)    
+  
+  
+makeAllFrags <- function(k){
+  #k <- 1
+    thisFullAA <- AAlist[k,"AAfragment"]
+    count = length(fragList[,1])+1
+    for (l in seq(1,(width(thisFullAA)-minLength),frequency)){
+      for (m in (l+minLength-1):(min(l+maxLength-1,width(thisFullAA)))){
+      thisFragment <- substr(thisFullAA,l,m) ##Truncates string to the relevant fragment
+      if (substr(thisFragment,1,1)!="M") { ##This takes away any sequence that starts with a start codon ATG
+      fragList[count,c("Class","Family","Strain","Note","Number","Name","AAstart","AAstop","AAfragment")] <- c(AAlist[k,c("Class","Family","Strain","Note","Number","Name")],l,m,thisFragment) ## Inserts the fragment with information into the new data frame 
+      count <- count +1
+      }
+      }
+    }
+    return(fragList)
+  }
+
+fragList <- do.call(rbind,mclapply(1:length(AAlist[,1]),makeAllFrags, mc.preschedule = TRUE, mc.cores = detectCores()))
+
+if (length(grep("[[:punct:]|X]",fragList[,"AAfragment"])) > 0) {
 discardList <- fragList[grep("[[:punct:]|X]",fragList[,"AAfragment"]),] ##This line saves  any sequence containing non AA characters into a separate list 
 fragList <- fragList[grep("[[:punct:]|X]",fragList[,"AAfragment"], invert = TRUE),] ##This line removes any sequence containing non AA characters
+}
 
-selected <- fragList[,"AAfragment"]
-sortedFragments <- rev(sort(table(selected))) ##This line sorts the fragments, finds unique strings and conts number of duplicates
+sortedFragments <- rev(sort(table(fragList[,"AAfragment"]))) ##This line sorts the fragments, finds unique strings and conts number of duplicates
 
-sequenceList <- mclapply(row.names(sortedFragments), fullOPT=FALSE, species="hsa", AAtoDNA, mc.preschedule = TRUE, mc.set.seed = TRUE,
-mc.silent = FALSE, mc.cores = (detectCores()), mc.cleanup = TRUE)
+row.names(sortedFragments) <- mclapply(row.names(sortedFragments), fullOPT=FALSE, species="hsa", 
+                         AAtoDNA, mc.preschedule = TRUE, mc.set.seed = TRUE,
+                         mc.silent = FALSE, mc.cores = detectCores(), mc.cleanup = TRUE) #
+return(sortedFragments)
+}
 
-
+sortedFragments.14aa <- generateFragments(14,14,1)
 
 fivePrime <- tolower("AACCTCCAGAGAGGCAACGCT")
 threePrime <- tolower("GCCAGACAAGCAGCTACCGCA")
-row.names(sortedFragments) <- paste(fivePrime,sequenceList,threePrime, sep = "")
-write.table(sortedFragments,"SortedFragments_14aa_2015-02-09.txt",row.names=T,col.names=F,quote=F,sep="\t")
+row.names(sortedFragments.14aa) <- paste(fivePrime,row.names(sortedFragments.14aa),threePrime, sep = "")
+
+sortedFragments.14aa.G4S <- generateFragments(14,14,3)
+sortedFragments.14aa.A5 <- sortedFragments.14aa.G4S
+
+fivePrime <- tolower("AACCTCCAGAGAGGCAACGGAGGCGGAGGAAGT")
+threePrime <- tolower("GGAGGCGGCGGAAGCAGACAAGCAGCTACCGCA")
+row.names(sortedFragments.14aa.G4S) <- paste(fivePrime,row.names(sortedFragments.14aa.G4S),threePrime, sep = "")
+
+fivePrime <- tolower("AACCTCCAGAGAGGCAACGCTGCTGCAGCAGCC")
+threePrime <- tolower("GCAGCTGCAGCTGCCAGACAAGCAGCTACCGCA")
+row.names(sortedFragments.14aa.A5) <- paste(fivePrime,row.names(sortedFragments.14aa.A5),threePrime, sep = "")
+
+sortedFragments.22aa <- generateFragments(22,22,3)
+fivePrime <- tolower("AACCTCCAGAGAGGCAACGCT")
+threePrime <- tolower("GCCAGACAAGCAGCTACCGCA")
+row.names(sortedFragments.22aa) <- paste(fivePrime,row.names(sortedFragments.22aa),threePrime, sep = "")
+sortedFragments <- c(sortedFragments.14aa,sortedFragments.14aa.G4S,sortedFragments.14aa.A5,sortedFragments.22aa)
+
+#write.table(sortedFragments,"SortedFragments_14aa_2015-02-09.txt",row.names=T,col.names=F,quote=F,sep="\t")
 
 
 
 
-save(AAlist, file = "GeneList_2015-02-09.RData")
-save(fragList, file = "FragmentList_14aa_2015-02-09.RData")
-save(discardList, file = "DiscardedList_14aa_2015-02-09.RData")
+# save(AAlist, file = "GeneList_2015-02-09.RData")
+# save(fragList, file = "FragmentList_14aa_2015-02-09.RData")
+# save(discardList, file = "DiscardedList_14aa_2015-02-09.RData")
 
 print(Sys.time()-strt)
