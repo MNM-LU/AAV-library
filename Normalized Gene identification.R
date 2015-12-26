@@ -61,14 +61,15 @@ mcols(outRanges) <- data.frame(structure=mcols(inRanges)$structure[1],
                                LV=sum(mcols(inRanges)$LV*mcols(inRanges)$tCount)/sum(mcols(inRanges)$tCount),
                                mCount=sum(mcols(inRanges)$mCount),
                                tCount=sum(mcols(inRanges)$tCount),
-                               BC=length(inRanges),
+                               BC=paste(unique(mcols(inRanges)$BC), collapse = ","),
+                               Animals=paste(unique(mcols(inRanges)$Sample), collapse = ","),
                                RNAcount=sum(mcols(inRanges)$RNAcount),
                                NormCount=log2(sum(mcols(inRanges)$RNAcount)+1)*length(inRanges),
                                stringsAsFactors=FALSE)
 return(outRanges)
 }
 
-out.range.split <- lapply(out.range.split, function(x) mclapply(x, function(y) lapply(y,MergeCounts), mc.preschedule = TRUE, mc.cores = detectCores()))
+out.range.split <- lapply(out.range.split, function(x) mclapply(x, function(y) lapply(y,MergeCounts), mc.preschedule = TRUE, mc.cores = detectCores())) 
 
 out.range.split <- mclapply(out.range.split,function(x) unlist(do.call(GAlignmentsList,unlist(x)), use.names=FALSE), mc.preschedule = TRUE, mc.cores = detectCores())
 out.range.split <- unlist(do.call(GAlignmentsList,unlist(out.range.split)), use.names=FALSE)
