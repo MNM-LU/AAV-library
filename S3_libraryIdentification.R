@@ -1,3 +1,14 @@
+
+#' ---
+#' title: "Library identification"
+#' author: "Tomas Bjorklund"
+#' output: 
+#'  pdf_document:
+#'    highlight: tango
+#' geometry: margin=0.7in
+#' ---
+
+#' This workflow aligns the library fragments to the full reference sequences using Bowtie2.  
 suppressPackageStartupMessages(library(data.table))
 suppressPackageStartupMessages(library(ShortRead))
 
