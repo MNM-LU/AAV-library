@@ -20,7 +20,7 @@ suppressPackageStartupMessages(library(Hmisc))
 #'===================
 source(file.path("functions", "AAtoDNA.R"))
 
-allSequences <- readFasta("data/DNA Libraries for Retrograde Transport.fasta")
+allSequences <- readFasta("input/DNA Libraries for Retrograde Transport.fasta")
 AAlist <- data.frame(Class=character(),
                      Family=character(),
                      Strain=character(),
@@ -93,7 +93,7 @@ row.names(sortedFragments) <- mclapply(row.names(sortedFragments), fullOPT=FALSE
                          AAtoDNA, mc.preschedule = TRUE, mc.set.seed = TRUE,
                          mc.silent = FALSE, mc.cores = detectCores(), mc.cleanup = TRUE) #
 
-sortedFragments <- sortedFragments[order(sortedFragments)]
+sortedFragments <- sortedFragments[order(row.names(sortedFragments))]
 
 return(sortedFragments)
 }
@@ -130,11 +130,11 @@ threePrime <- tolower("GCCAGACAAGCAGCTACCGCA")
 row.names(sortedFragments.22aa) <- paste(fivePrime,row.names(sortedFragments.22aa),threePrime, sep = "")
 
 #Merge all separate fragment lists into one complete list
-sortedFragments <- c(sortedFragments.22aa,sortedFragments.14aa,sortedFragments.14aa.G4S,sortedFragments.14aa.A5)
+sortedFragments <- c(sortedFragments.22aa,sortedFragments.14aa,sortedFragments.14aa.A5,sortedFragments.14aa.G4S)
 
 print(paste("Number of unique fragments:",length(unique(names(sortedFragments))), sep=" "))
 
-write.table(unique(names(sortedFragments)),"data/SortedFragments_all_2015-12-25.txt",row.names=F,col.names=F,quote=F,sep="\t")
+write.table(c("Sequence",unique(names(sortedFragments))),"data/SortedFragments_all.txt",row.names=F,col.names=F,quote=F,sep="\t")
 
 print(Sys.time()-strt)
 

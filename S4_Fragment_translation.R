@@ -1,16 +1,22 @@
+
+#' ---
+#' title: "Barcoded plasmid library translation"
+#' author: "Tomas Bjorklund"
+#' output: 
+#'  pdf_document:
+#'    highlight: tango
+#' geometry: margin=0.7in
+#' ---
+
+#' This workflow clusters every read from each unique barcode and determines the consensus fragmnt from the CustomArray and the barcode fidelity. i.e., if the barcode was monoclonal or not..  
+
+
 suppressPackageStartupMessages(library(knitr))
 suppressPackageStartupMessages(library(ShortRead))
-suppressPackageStartupMessages(library(ggplot2))
-suppressPackageStartupMessages(library(ggbio))
-suppressPackageStartupMessages(library(beanplot))
 suppressPackageStartupMessages(library(parallel))
 suppressPackageStartupMessages(library(doParallel))
 suppressPackageStartupMessages(library(data.table))
-suppressPackageStartupMessages(library(scales)) #Gives the log2 ability to ggplot2
-suppressPackageStartupMessages(library(formatR))
 suppressPackageStartupMessages(library(BSgenome))
-suppressPackageStartupMessages(library(Rsamtools))
-suppressPackageStartupMessages(library(rtracklayer))
 suppressPackageStartupMessages(library(GenomicFeatures))
 suppressPackageStartupMessages(library(GenomicAlignments))
 suppressPackageStartupMessages(library(GenomicRanges))
@@ -20,168 +26,201 @@ suppressPackageStartupMessages(library(plyr))
 suppressPackageStartupMessages(library(devtools))
 suppressPackageStartupMessages(library(Hmisc))
 suppressPackageStartupMessages(library(matrixStats))
+suppressPackageStartupMessages(library(stringdist))
 
+matchMethod="lv" #"hamming" "lv" "osa" "dl"
 
-LUT.dna <- read.table("CustomArray/Complete fragment list for Custom array 2015-02-10.txt", header = TRUE, skip = 0, sep="\t",stringsAsFactors = FALSE, fill=TRUE)
-LUT.dna <- data.table(LUT.dna)
-invisible(LUT.dna[,Sequence:=gsub("aacctccagagaggcaac","",Sequence)])
-invisible(LUT.dna[,Sequence:=gsub("agacaagcagctaccgca","",Sequence)])
-invisible(LUT.dna[,Sequence:=toupper(Sequence)])
+strt1<-Sys.time()
 
-
+load("data/LUTdna.rda")
 reads.trim <- readFastq("data/fragments_2015-11-05_AAVlibrary_complete.fastq.gz")
 reads.BC <- readFastq("data/barcodes_2015-11-05_AAVlibrary_complete.fastq.gz")
 
-
-# reads.BC.file <- "data/barcodes_2015-11-04_AAVlibrary.fastq.gz"
-# 
-# 
-# setkey(barcodeTable,BC)
-# 
-# #' Starcode based barcode reduction
-# #' ============================
-# #+ Reducing barcodes.......
-# 
-# out.name.BC.star <- tempfile(pattern = "BCsc_", tmpdir = tempdir(), fileext = ".txt")
-# system(paste("gunzip -c ",reads.BC.file," | starcode -t ",detectCores()/2," --print-clusters -d",
-#              0," -r5 -q -o ", out.name.BC.star, " 2>&1", sep = ""), 
-#        intern = TRUE, ignore.stdout = FALSE)
-# 
-# table.BC.sc <- read.table(out.name.BC.star, header = FALSE, row.names = 1, skip = 0, sep="\t",
-#                           stringsAsFactors = FALSE, fill=FALSE)
-# table.BC.sc$V2 <- NULL
-# list.BC.sc <- split(table.BC.sc, rownames(table.BC.sc))
-# list.BC.sc <- lapply(list.BC.sc, function(x) strsplit(as.character(x), ","))
-# list.BC.sc <- lapply(list.BC.sc, rbind)
-# table.BC.sc <- data.table(cbind(unlist(list.BC.sc, use.names = TRUE)), keep.rownames=TRUE)
-# invisible(table.BC.sc[,rn:=gsub("[0-9]","",rn)])
-# output.table$droppedBC <- length(unique(sread(reads.BC))) - length(unique(table.BC.sc$V1) %in% unique(sread(reads.BC)))
-# print(paste("Dropped BCs in Starcode:", output.table$droppedBC[1]))
-# 
-# setnames(table.BC.sc,'V1','BC')
-# setnames(table.BC.sc,'rn','scBC')
-# 
-# setkey(table.BC.sc,BC)
-# table.BC.sc<- unique(table.BC.sc)
-# BCs.sc.counts <- table(table.BC.sc$BC)
-# BCs.sc.counts.single <- BCs.sc.counts[BCs.sc.counts == 1]
-# table.BC.sc <- table.BC.sc[table.BC.sc$BC %in% names(BCs.sc.counts.single)]
-# 
-# barcodeTable <- merge(barcodeTable,table.BC.sc, by="BC", all = FALSE, all.x = FALSE)
-# rm(table.BC.sc)
-# rm(reads.BC)
-# setnames(barcodeTable,'BC','oldBC')
-# setnames(barcodeTable,'scBC','BC')
-# setkey(barcodeTable,BC)
-# 
-# output.table$RetainedBC <- length(unique(barcodeTable$oldBC))
-# output.table$scBC <- length(unique(barcodeTable$BC))
-# print(paste("Original unique barcodes:", output.table$RetainedBC[1]))
-# print(paste("SC reduced unique barcodes:", output.table$scBC[1]))
-# 
-# 
-# table.frag <- data.table(as.data.frame((rev(sort(table(barcodeTable$oldBC))))[1:10]), keep.rownames=TRUE)
-# setnames(table.frag, colnames(table.frag), c("Original BC", "Count"))
-# knitr::kable(table.frag, format = "markdown")
-# 
-# table.frag <- data.table(as.data.frame((rev(sort(table(barcodeTable$BC))))[1:10]), keep.rownames=TRUE)
-# setnames(table.frag, colnames(table.frag), c("SC reduced BC", "Count"))
-# knitr::kable(table.frag, format = "markdown")
-# 
-# invisible(barcodeTable[,oldBC:=NULL])
-
-#reads.BC <- reads.BC[width(sread(reads.trim)) < 75L & width(sread(reads.trim)) > 38L]
-reads.trim <- reads.trim[width(sread(reads.trim)) < 78L & width(sread(reads.trim)) > 38L]
-
-source("retrieveFASTAQID.R")
-FastQ1ID <- retrieveFASTAQID(reads.BC, PE=TRUE)
-FastQ2ID <- retrieveFASTAQID(reads.trim, PE=TRUE)
-
-hits <- intersect(FastQ2ID,FastQ1ID)
-
-reads.BC <- reads.BC[match(hits,FastQ1ID)]
-reads.trim <- reads.trim[match(hits,FastQ2ID)]
 reads.table <- sread(reads.trim)
 names(reads.table) <- sread(reads.BC)
 
-BCs.counts <- table(names(reads.table))
-BCs.single <- BCs.counts[BCs.counts == 1]
+
+
+#' Starcode based barcode reduction
+#' ============================
+#+ Reducing barcodes.......
+
+in.name.BC.star <- tempfile(pattern = "BC_", tmpdir = tempdir(), fileext = ".fastq.gz")
+out.name.BC.star <- tempfile(pattern = "BCsc_", tmpdir = tempdir(), fileext = ".txt")
+
+writeFastq(reads.BC,in.name.BC.star,compress=TRUE)
+
+system(paste("gunzip -c ",in.name.BC.star," | starcode -t ",detectCores()/2," --print-clusters -d",
+             1," -r5 -q -o ", out.name.BC.star, " 2>&1", sep = ""), 
+       intern = TRUE, ignore.stdout = FALSE)
+
+table.BC.sc <- read.table(out.name.BC.star, header = FALSE, row.names = 1, skip = 0, sep="\t",
+                          stringsAsFactors = FALSE, fill=FALSE) #, nrows = 1000
+table.BC.sc$V2 <- NULL
+
+#list.BC.sc <- split(table.BC.sc, rownames(table.BC.sc))
+list.BC.sc.list <- mclapply(1:nrow(table.BC.sc), function(x) strsplit(as.character(table.BC.sc$V3[x]), ","), mc.preschedule = TRUE, mc.cores = detectCores(), mc.cleanup = TRUE)
+names(list.BC.sc.list) <- rownames(table.BC.sc)
+list.BC.sc.list <- lapply(list.BC.sc.list, rbind)
+table.BC.sc <- data.table(cbind(unlist(list.BC.sc.list, use.names = TRUE)), keep.rownames=TRUE)
+invisible(table.BC.sc[,rn:=gsub("[0-9]","",rn)])
+SC.droppedBC <- length(unique(sread(reads.BC))) - length(unique(table.BC.sc$V1) %in% unique(sread(reads.BC)))
+print(paste("Dropped BCs in Starcode:", SC.droppedBC))
+
+rm(reads.BC,reads.trim)
+
+setnames(table.BC.sc,'V1','BC')
+setnames(table.BC.sc,'rn','scBC')
+
+setkey(table.BC.sc,BC)
+table.BC.sc<- unique(table.BC.sc)
+BCs.sc.counts <- table(table.BC.sc$BC)
+BCs.sc.counts.single <- BCs.sc.counts[BCs.sc.counts == 1]
+table.BC.sc <- table.BC.sc[table.BC.sc$BC %in% names(BCs.sc.counts.single)]
+
+temp.table <- data.table(BC=names(reads.table),Reads=as.character(reads.table))
+setkey(temp.table,BC)
+temp.table <- merge(temp.table,table.BC.sc, by="BC", all = FALSE, all.x = FALSE)
+rm(table.BC.sc)
+
+setnames(temp.table,'BC','oldBC')
+setnames(temp.table,'scBC','BC')
+setkey(temp.table,BC)
+
+RetainedBC <- length(unique(temp.table$oldBC))
+scBC <- length(unique(temp.table$BC))
+print(paste("Original unique barcodes:", RetainedBC))
+print(paste("SC reduced unique barcodes:", scBC))
+
+
+table.frag <- data.table(as.data.frame((rev(sort(table(temp.table$oldBC))))[1:10]), keep.rownames=TRUE)
+setnames(table.frag, colnames(table.frag), c("Original BC", "Count"))
+knitr::kable(table.frag, format = "markdown")
+
+table.frag <- data.table(as.data.frame((rev(sort(table(temp.table$BC))))[1:10]), keep.rownames=TRUE)
+setnames(table.frag, colnames(table.frag), c("SC reduced BC", "Count"))
+knitr::kable(table.frag, format = "markdown")
+
+invisible(temp.table[,oldBC:=NULL])
+reads.table <- DNAStringSet(temp.table$Reads)
+names(reads.table) <- temp.table$BC
+#rm(temp.table)
+
+
+
+strt2<-Sys.time()
+
+#' Aligning unique fragments to the CustomArray reference
+#' ============================
+#+ Aligning to reference.......
+
+
+LUT.fa <- tempfile(pattern = "LUT_", tmpdir = tempdir(), fileext = ".fa")
+LUT.seq = ShortRead(DNAStringSet(LUT.dna$Sequence), BStringSet(1:length(LUT.dna)))
+writeFasta(LUT.seq,LUT.fa)
+
+bowtieIDX <- tempfile(pattern = "IDX_LUT_", tmpdir = tempdir(), fileext = "")
+
+
+
+sample(nrow(temp.table.small), 1000)
+temp.table.small <- data.table(Reads=unique(temp.table$Reads), key="Reads")
+#temp.table.small <- temp.table.small[11000:12000,]
+# temp.table.small.tmp <- temp.table.small
+# temp.table.small.tmp$LUTnr <- NULL
+# 
+
+temp.table.small <- temp.table.small[order(temp.table.small$Reads)]
+temp.table.small$LUTnr <- match(temp.table.small$Reads,LUT.dna$Sequence)
+temp.table.small.exact <- temp.table.small[!is.na(temp.table.small$LUTnr),]
+strt5<-Sys.time()
+temp.table.small$LUTnr <- amatch(temp.table.small$Reads, LUT.dna$Sequence, method=matchMethod, 
+       maxDist = 30, matchNA = FALSE, useBytes = TRUE, nthread = getOption("sd_num_thread"))
+print(Sys.time()-strt5)
+
+strt3<-Sys.time()
+temp.table.small$LUTseq <- LUT.dna$Sequence[temp.table.small$LUTnr]
+temp.table.small <- temp.table.small[!is.na(temp.table.small$LUTseq)]
+temp.table.small[,LV:= stringdist(Reads,LUTseq, method=matchMethod, nthread = getOption("sd_num_thread"))]
+
+setkey(temp.table,Reads)
+temp.table.out <- merge(temp.table,temp.table.small, by="Reads", all = FALSE, all.x = FALSE)
+setkeyv(temp.table.out,c("BC","LUTnr"))
+temp.table.out[,c("Reads","LUTseq"):=NULL]
+
+#' Splitting reads into single-read and multi-read barcodes
+#' ============================
+#+ Splitting Reads.......
+
+count.list <- table(temp.table.out$BC)
+temp.table.multi <- temp.table.out[temp.table.out$BC %in% names(count.list[count.list!=1])]
+temp.table.single <- temp.table.out[temp.table.out$BC %in% names(count.list[count.list==1])]
+temp.table.single[,c("mCount","tCount"):=1]
+key(temp.table.multi)
+
+temp.table.multi[,c("LV","tCount"):= list(mean(LV), .N), by=key(temp.table.multi)]
+temp.table.multi <- unique(temp.table.multi)
+
 print("Utilized Barcodes.......")
-print(length(BCs.counts))
+print(nrow(temp.table.out))
 print("Whereof single reads.......")
-print(length(BCs.single))
-reads.table.single <- reads.table[names(reads.table) %in%  names(BCs.single)]
-reads.table.multiple <- reads.table[!(names(reads.table) %in%  names(BCs.single))]
+print(nrow(temp.table.single))
 
-reads.table.list <- split(reads.table.multiple, names(reads.table.multiple))
-rm(reads.BC,reads.trim,FastQ1ID,FastQ2ID,hits,reads.table)
+#' Splitting multi-read barcodes into clean and chimeric
+#' ============================
+#+ Splitting Clean Reads.......
 
-#reads.table.list <- reads.table.list[1:100]
+setkeyv(temp.table.multi,"BC")
+count.list <- table(temp.table.multi$BC)
 
-#reads.table.list <- reads.table.list[mcmapply(length,reads.table.list,mc.preschedule = TRUE, mc.cores = detectCores()/2L) > 3]
+temp.table.multi.clean <- temp.table.multi[temp.table.multi$BC %in% names(count.list[count.list==1])]
+temp.table.multi <- temp.table.multi[temp.table.multi$BC %in% names(count.list[count.list!=1])]
+temp.table.multi.clean[,mCount:=tCount]
 
-#reads.table.list <- reads.table.list[sapply(reads.table.list,length) > 3]
-#reads <- reads.table.list[[99]]
+print("Clean multi-read barcodes.......")
+print(nrow(temp.table.multi.clean))
+print("Chimeric multi-read barcodes.......")
+print(nrow(temp.table.multi))
 
+#' Calculate consensus alignment of chimeric barcodes
+#' ============================
+#+ Calculation consensus reads .....
 
-
-
-match.pair <- function(reads){
-uniques <- rev(sort(table(reads)))
-read.match <- adist(names(uniques),LUT.dna$Sequence)
-read.match <- do.call(rbind,lapply(1:nrow(read.match), function(i) c(which.min(read.match[i,]), min(read.match[i,]))))
-uniques <- data.table(cbind(read.match, uniques))
-uniques <- split(uniques, uniques$V1)
-uniques <- data.table(do.call(rbind, lapply(uniques,function(x) c((sum(x$V2*x$uniques)/sum(x$uniques)), sum(x$uniques)))), keep.rownames=TRUE)
-uniques <- uniques[which.max(uniques$V2),]
-uniques$V3 <- length(reads)
-return(uniques)
+calculate.consensus <- function(LUTnr,LV,tCount){
+  group.table <- data.table(LUTnr,LV,tCount,key="LUTnr")
+  group.table[, mCount:=tCount]
+  group.table[, tCount:=sum(tCount)]
+  if (max(tCount) == 1){
+    group.table <- group.table[which.min(group.table$LV),]
+  } else {
+    group.table <- group.table[which.max(group.table$mCount),]
+  }
+  if (nrow(group.table) > 1){
+    group.table[,LUTnr:=NA]
+  }
+  return(group.table[1,])
 }
 
 
-#reads.sub <- reads.table.list[90:100]
+temp.table.multi[,c("LUTnr","LV","tCount","mCount"):=calculate.consensus(LUTnr,LV,tCount), by="BC"]
+setkeyv(temp.table.multi,c("BC","LUTnr"))
+temp.table.multi <- unique(temp.table.multi)
+temp.table.multi <- temp.table.multi[!is.na(temp.table.multi$LUTnr)]
+temp.table.multi.consensus <- rbind(temp.table.multi, temp.table.multi.clean)
 
-output.Table = data.frame(matrix(vector(), length(reads.table.list), 5,
-                                 dimnames=list(c(), c("LUTnr","LV","mCount","tCount", "BC"))),
-                          stringsAsFactors=F)
+output.Table <- temp.table.multi.consensus
+save(output.Table, file="data/multipleContfragmentsNew.rda")
+output.Table <- temp.table.multi.clean
+save(output.Table, file="data/singleContfragmentsNew.rda")
 
-binSize <- 10000
-for (startPos in seq(1,length(reads.table.list),binSize)) {
-reads.sub <- reads.table.list[startPos:min((startPos+binSize-1),length(reads.table.list))]
-strt4<-Sys.time()
-match.out <- mclapply(reads.sub, match.pair, mc.preschedule = TRUE, mc.cores = detectCores()-1L )
-table.sub <- data.table(do.call(rbind,match.out))
-table.sub$BC <- names(reads.sub)
-firstRow <- sum(!is.na(output.Table[,1]))+1
-output.Table[firstRow:(firstRow+nrow(table.sub)-1),] <- table.sub
-save(output.Table, file="multipleContfragments.rda")
-print("Total fragment translation time:")
-print(Sys.time()-strt4)
-}
+print("Post-matching analysis time:")
+print(Sys.time()-strt3)
 
 
-
-match.pair.single <- function(read){
-  read.match <- adist(read,LUT.dna$Sequence)
-  min.LV <- min(read.match)
-  read.match <- which.min(read.match)
-  return(data.table(cbind(read.match, min.LV, 1L, 1L)))
-}
+print("Fragment translation time:")
+print(Sys.time()-strt2)
 
 
-output.Table = data.frame(matrix(vector(), length(reads.table.single), 5,
-                                 dimnames=list(c(), c("LUTnr","LV","mCount","tCount", "BC"))),
-                          stringsAsFactors=F)
-binSize <- 50000
-for (startPos in seq(1,length(reads.table.single),binSize)) {
-  reads.single.sub <- reads.table.single[startPos:min((startPos+binSize-1),length(reads.table.single))]
-  strt4<-Sys.time()
-  match.out.single <- mclapply(reads.single.sub, match.pair.single, mc.preschedule = TRUE, mc.cores = detectCores()-1 )
-  table.sub.single <- data.table(do.call(rbind,match.out.single))
-  table.sub.single$BC <- names(reads.single.sub)
-  firstRow <- sum(!is.na(output.Table[,1]))+1
-  output.Table[firstRow:(firstRow+nrow(table.sub.single)-1),] <- table.sub.single
-  save(output.Table, file="singleContfragments.rda")
-  print("Total fragment translation time:")
-  print(Sys.time()-strt4)
-}
+print("Total analysis time:")
+print(Sys.time()-strt1)
+devtools::session_info()

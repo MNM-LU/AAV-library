@@ -1,0 +1,2 @@
+Rscript -e "setwd('~/Dropbox/R-projects/AAV-library')" -e "rmarkdown::render('S2_AAV-lib_libraryExtraction.R')" 2>&1 | tee logs/S2_AAV-lib_libraryExtraction_runLog.txt &
+Rscript -e "setwd('~/Dropbox/R-projects/AAV-library')" -e "rmarkdown::render('S3_libraryIdentification.R')" 2>&1 | tee logs/S3_libraryIdentification_runLog.txt &

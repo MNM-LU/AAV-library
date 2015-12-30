@@ -1,8 +1,8 @@
-load("alignedLibraries.rda")
-load("LUTdna.rda")
-load("singleContfragments.rda")
+load("data/alignedLibraries.rda")
+load("data/LUTdna.rda")
+load("data/singleContfragments.rda")
 output.Table.single <- output.Table
-load("multipleContfragments.rda")
+load("data/multipleContfragments.rda")
 output.Table <- rbind(output.Table, output.Table.single)
 rm(output.Table.single)
 output.Table <- na.omit(output.Table)
@@ -19,4 +19,4 @@ match.ranges <- do.call(rbind, match.ranges.list)
 complete.ranges <- allFragments.ranges[match.ranges[,1]]
 mcols(complete.ranges) <- c(mcols(complete.ranges), output.Table[match.ranges[,2],2:6])
 mcols(complete.ranges) <- cbind(mcols(complete.ranges)[,1:5],data.frame(RNAcount = mcols(complete.ranges)[,4]))
-saveRDS(complete.ranges, file="output/completeLibraryRanges.rds")
+saveRDS(complete.ranges, file="data/completeLibraryRanges.rds")

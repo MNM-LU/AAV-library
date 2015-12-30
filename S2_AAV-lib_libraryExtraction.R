@@ -97,34 +97,10 @@ print(paste("Utilized sequences:", output.Reads))
 #' ============================
 #+ Extracting barcodes.......
 
-out.name.P5 <- tempfile(pattern = "P5_", tmpdir = tempdir(), fileext = ".fastq.gz")
-out.name.P7 <- tempfile(pattern = "P7_", tmpdir = tempdir(), fileext = ".fastq.gz")
-command.args <- paste("-Xmx12g overwrite=true k=10 rcomp=f skipr2=t qhdist=0 maskmiddle=t",
-                      " hammingdistance=1 findbestmatch=t ordered=t threads=",detectCores(),
-                      " in=", in.name.P5,
-                      " in2=", in.name.P7,
-                      " outm=", out.name.P5,
-                      " outm2=", out.name.P7,
-                      " fliteral=", "ATAACTTCGTATAATGTATGC", sep = "") 
-
-sys.out <- system2(path.expand("~/bbmap/bbduk2.sh"), args=command.args, stdout=TRUE, stderr=TRUE) #
-
-sys.out <- as.data.frame(sys.out)
-
-
-colnames(sys.out) <- c("bbduk2 Identification of real barcodes")
-invisible(sys.out[" "] <- " ")
-lengthOut <- (nrow(sys.out))
-knitr::kable(sys.out[3:lengthOut,], format = "markdown")
-
-in.name.P5 <- out.name.P5
-in.name.P7 <- out.name.P7
-
-
 out.name.P5 <- tempfile(pattern = "BC_", tmpdir = tempdir(), fileext = ".fastq.gz")
 
-sys.out <- system(paste("~/bbmap/bbduk2.sh overwrite=true k=15 mink=15 hammingdistance=1 findbestmatch=t ",
-                        "rcomp=f findbestmatch=f qhdist=0 minavgquality=0 maxns=0 minlength=18 ",
+sys.out <- system(paste("~/bbmap/bbduk2.sh overwrite=true k=18 mink=18 hammingdistance=2 findbestmatch=t ",
+                        "rcomp=f findbestmatch=f qhdist=1 minavgquality=0 maxns=0 minlength=18 ",
                         "maxlength=22 threads=", detectCores()," in=", shQuote(in.name.P5), 
                         " out=", out.name.P5," lliteral=", "GGCCTAGCGGCCGCTTTACTT",
                         " rliteral=", "ATAACTTCGTATAATGTATGC",
@@ -157,8 +133,8 @@ command.args <- paste("-Xmx12g overwrite=true k=18 mink=18 rcomp=f qhdist=1 mask
                       " hammingdistance=2 findbestmatch=t ordered=t threads=", detectCores(),
                       " in=", in.name.P7,
                       " out=", out.name.P7,
-                      " lliteral=", "AGCAACCTCCAGAGAGGCAAC",
-                      " rliteral=", "AGACAAGCAGCTACCGCAGAT", sep = "")
+                      " lliteral=", "AGCAACCTCCAGAGAGGCAACG",
+                      " rliteral=", "CAGACAAGCAGCTACCGCAGAT", sep = "")
 
 sys.out <- system2(path.expand("~/bbmap/bbduk2.sh"), args=command.args, stdout=TRUE, stderr=TRUE) # 
 
@@ -171,9 +147,11 @@ knitr::kable(sys.out[3:lengthOut,], format = "markdown")
 
 in.name.P7 <- out.name.P7
 
-source("retrieveFASTAQID.R")
+source("functions/retrieveFASTAQID.R")
 FastQ1 <- readFastq(out.name.P5)
 FastQ2 <- readFastq(out.name.P7)
+FastQ2 <- FastQ2[width(sread(FastQ2)) < 78L & width(sread(FastQ2)) > 38L]
+
 FastQ1ID <- retrieveFASTAQID(FastQ1, PE=TRUE)
 FastQ2ID <- retrieveFASTAQID(FastQ2, PE=TRUE)
 
@@ -183,8 +161,14 @@ hits <- intersect(FastQ2ID,FastQ1ID)
 FastQ1Subset <- FastQ1[match(hits,FastQ1ID)]
 FastQ2Subset <- FastQ2[match(hits,FastQ2ID)]
 
-system(paste("mv ", out.name.P7, " ./data/fragments_", name.out, ".fastq.gz", sep=""))
+out.name.P5 <- tempfile(pattern = "P5_", tmpdir = tempdir(), fileext = ".fastq.gz")
+out.name.P7 <- tempfile(pattern = "P7_", tmpdir = tempdir(), fileext = ".fastq.gz")
+writeFastq(FastQ1Subset,out.name.P5, compress=TRUE)
+writeFastq(FastQ2Subset,out.name.P7, compress=TRUE)
+
 system(paste("mv ", out.name.P5, " ./data/barcodes_", name.out, ".fastq.gz", sep=""))
+system(paste("mv ", out.name.P7, " ./data/fragments_", name.out, ".fastq.gz", sep=""))
+
 
 unlink(paste(tempdir(), "/*", sep = ""), recursive = FALSE, force = FALSE) #Cleanup of temp files
 
