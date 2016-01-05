@@ -130,9 +130,8 @@ barcodeTable <- data.table(ID=as.character(ShortRead::id(reads.BC)), BC=as.chara
 
 out.name.P7 <- tempfile(pattern = "P7_", tmpdir = tempdir(), fileext = ".fastq.gz")
 command.args <- paste("-Xmx12g overwrite=true k=18 mink=18 rcomp=f qhdist=1 maskmiddle=t",
-                      " hammingdistance=2 findbestmatch=t ordered=t threads=", detectCores(),
-                      " in=", in.name.P7,
-                      " out=", out.name.P7,
+                      " hammingdistance=2 findbestmatch=t minlength=38 maxlength=78 ordered=t ",
+                      "threads=", detectCores(), " in=", in.name.P7, " out=", out.name.P7,
                       " lliteral=", "AGCAACCTCCAGAGAGGCAACG",
                       " rliteral=", "CAGACAAGCAGCTACCGCAGAT", sep = "")
 
@@ -147,28 +146,26 @@ knitr::kable(sys.out[3:lengthOut,], format = "markdown")
 
 in.name.P7 <- out.name.P7
 
-source("functions/retrieveFASTAQID.R")
-FastQ1 <- readFastq(out.name.P5)
-FastQ2 <- readFastq(out.name.P7)
-FastQ2 <- FastQ2[width(sread(FastQ2)) < 78L & width(sread(FastQ2)) > 38L]
-
-FastQ1ID <- retrieveFASTAQID(FastQ1, PE=TRUE)
-FastQ2ID <- retrieveFASTAQID(FastQ2, PE=TRUE)
-
-
-hits <- intersect(FastQ2ID,FastQ1ID)
-
-FastQ1Subset <- FastQ1[match(hits,FastQ1ID)]
-FastQ2Subset <- FastQ2[match(hits,FastQ2ID)]
-
 out.name.P5 <- tempfile(pattern = "P5_", tmpdir = tempdir(), fileext = ".fastq.gz")
 out.name.P7 <- tempfile(pattern = "P7_", tmpdir = tempdir(), fileext = ".fastq.gz")
-writeFastq(FastQ1Subset,out.name.P5, compress=TRUE)
-writeFastq(FastQ2Subset,out.name.P7, compress=TRUE)
+out.name.P5_singlet <- tempfile(pattern = "P5_singlet_", tmpdir = tempdir(), fileext = ".fastq.gz")
+out.name.P7_singlet <- tempfile(pattern = "P7_singlet_", tmpdir = tempdir(), fileext = ".fastq.gz")
+
+sys.out <- system(paste("pairfq makepairs -c 'gzip' -f ", in.name.P5," -r ", in.name.P7,
+                        " -fp ", out.name.P5, " -rp ", out.name.P7, " -fs ",
+                        out.name.P5_singlet, " -rs ", out.name.P7_singlet,
+                        " --stats 2>&1", sep = ""), intern = TRUE, ignore.stdout = FALSE) 
+sys.out <- as.data.frame(sys.out)
+
+colnames(sys.out) <- c("pairfq pair matching")
+invisible(sys.out[" "] <- " ")
+lengthOut <- (nrow(sys.out))
+knitr::kable(sys.out[1:lengthOut,], format = "markdown")
+rm(sys.out)
+
 
 system(paste("mv ", out.name.P5, " ./data/barcodes_", name.out, ".fastq.gz", sep=""))
 system(paste("mv ", out.name.P7, " ./data/fragments_", name.out, ".fastq.gz", sep=""))
-
 
 unlink(paste(tempdir(), "/*", sep = ""), recursive = FALSE, force = FALSE) #Cleanup of temp files
 

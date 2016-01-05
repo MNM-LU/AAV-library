@@ -34,7 +34,7 @@ invisible(LUT.dna[,Sequence:=toupper(Sequence)])
 setkey(LUT.dna, "Sequence")
 LUT.dna <- unique(LUT.dna)
 LUT.dna$Names <- LUT.dna$Sequence
-save(LUT.dna,file = "data/LUTdna.rda")
+
 
 #'Split sequences based on linker and length 
 #'===================
@@ -50,6 +50,14 @@ LUT.remaining <- LUT.remaining[!(nchar(LUT.remaining$Sequence) == 70L &
                                    substr(LUT.remaining$Sequence,1,2) == "CT")]
 LUT.14aa <- LUT.remaining[nchar(LUT.remaining$Sequence) == 46L & 
                             substr(LUT.remaining$Sequence,1,2) == "CT"]
+rm(LUT.remaining)
+LUT.dna[LUT.dna$Sequence %in% LUT.14aaG4S$Sequence,"Structure"] <- "14aaG4S"
+LUT.dna[LUT.dna$Sequence %in% LUT.14aaA5$Sequence,"Structure"] <- "14aaA5"
+LUT.dna[LUT.dna$Sequence %in% LUT.22aa$Sequence,"Structure"] <- "22aa"
+LUT.dna[LUT.dna$Sequence %in% LUT.14aa$Sequence,"Structure"] <- "14aa"
+
+save(LUT.dna,file = "data/LUTdna.rda")
+
 
 #'Trim sequences
 #'===================

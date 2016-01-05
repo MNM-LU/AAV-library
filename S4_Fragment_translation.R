@@ -27,17 +27,225 @@ suppressPackageStartupMessages(library(devtools))
 suppressPackageStartupMessages(library(Hmisc))
 suppressPackageStartupMessages(library(matrixStats))
 suppressPackageStartupMessages(library(stringdist))
+suppressPackageStartupMessages(library(scales))
 
 matchMethod="lv" #"hamming" "lv" "osa" "dl"
 
 strt1<-Sys.time()
 
 load("data/LUTdna.rda")
-reads.trim <- readFastq("data/fragments_2015-11-05_AAVlibrary_complete.fastq.gz")
-reads.BC <- readFastq("data/barcodes_2015-11-05_AAVlibrary_complete.fastq.gz")
 
-reads.table <- sread(reads.trim)
-names(reads.table) <- sread(reads.BC)
+fragments.file <- "data/fragments_2015-11-05_AAVlibrary_subset.fastq.gz"
+barcodes.file <- "data/barcodes_2015-11-05_AAVlibrary_subset.fastq.gz"
+
+#' Make CustomArray reference index for Bowtie2
+#' ============================
+#+ Making Bowtie index.......
+
+
+LUT.fa <- tempfile(pattern = "LUT_14aa_", tmpdir = tempdir(), fileext = ".fa")
+LUT.seq = ShortRead(DNAStringSet(LUT.dna$Sequence), BStringSet(1:length(LUT.dna$Names)))
+writeFasta(LUT.seq,LUT.fa)
+
+LUT.14aa.fa <- tempfile(pattern = "LUT_14aa_", tmpdir = tempdir(), fileext = ".fa")
+LUT.14aa.seq = ShortRead(DNAStringSet(LUT.dna[grep("14aa",LUT.dna$Structure),Sequence]), BStringSet(1:length(LUT.dna[grep("14aa",LUT.dna$Structure),Names])))
+writeFasta(LUT.14aa.seq,LUT.14aa.fa)
+
+LUT.22aa.fa <- tempfile(pattern = "LUT_22aa_", tmpdir = tempdir(), fileext = ".fa")
+LUT.22aa.seq = ShortRead(DNAStringSet(LUT.dna[grep("22aa",LUT.dna$Structure),Sequence]), BStringSet(LUT.dna[grep("22aa",LUT.dna$Structure),Names]))
+writeFasta(LUT.22aa.seq,LUT.22aa.fa)
+
+# rm(LUT.14aa.seq,LUT.22aa.seq,LUT.seq)
+
+
+
+#'Save unique fragments as fasta file
+#'===================
+reads.trim <- readFastq(fragments.file)
+unique.reads <- unique(sread(reads.trim))
+unique.reads = ShortRead(DNAStringSet(unique.reads), BStringSet(1:length(unique.reads)))
+fragments.unique.fa <- tempfile(pattern = "FragUnique_", tmpdir = tempdir(), fileext = ".fa")
+writeFasta(unique.reads,fragments.unique.fa)
+
+
+#'Align against the 14aa library using usearch
+#'===================
+
+blast.db <- tempfile(pattern = "blastDB_", tmpdir = tempdir(), fileext = ".db")
+blast.out <- tempfile(pattern = "blastOut_", tmpdir = tempdir(), fileext = ".txt")
+
+sys.out <-  system(paste("makeblastdb -in ", LUT.fa,
+                         " -out ",blast.db," -dbtype nucl -title 'LUT' -parse_seqids 2>&1",  sep = ""),
+                   intern = TRUE, ignore.stdout = FALSE) 
+
+sys.out <- as.data.frame(sys.out)
+
+colnames(sys.out) <- c("blastn database generation")
+invisible(sys.out[" "] <- " ")
+knitr::kable(sys.out[1:(nrow(sys.out)),], format = "markdown")
+
+sys.out <-  system(paste("export SHELL=/bin/sh; cat ",fragments.unique.fa," | parallel --block ",floor(length(unique.reads)/detectCores()),
+                         " --recstart '>' --pipe blastn -max_target_seqs 10 -word_size 7",
+                         " -num_threads 2 -outfmt 10 -db ", blast.db,
+                         " -query - > ", blast.out, " 2>&1",  sep = ""),
+                   intern = TRUE, ignore.stdout = FALSE) #-word_size 7
+
+table.blastn <- data.table(read.table(blast.out, header = FALSE, skip = 0, sep=";",
+                                     stringsAsFactors = FALSE, fill=FALSE),keep.rownames=FALSE)
+warnings.out <- unique(table.blastn[grep("Warning",table.blastn$V1),])
+setnames(warnings.out,"V1", c("blastn Warnings"))
+invisible(warnings.out[" "] <- " ")
+knitr::kable(warnings.out[1:(nrow(warnings.out)),], format = "markdown")
+
+
+table.blastn <- table.blastn[-grep("Warning",table.blastn$V1),]
+
+table.blastn[,c("query id","subject id","% identity","alignment length","mismatches",
+                 "gap opens", "q. start", "q. end", "s. start", "s. end", "evalue","bit score") := tstrsplit(V1,",",fixed=TRUE),]
+table.blastn[,V1:=NULL]
+
+#'Align against the 14aa library using bowtie2
+#'===================
+
+bowtieIDX <- tempfile(pattern = "IDX_LUT_", tmpdir = tempdir(), fileext = "")
+sys.out <-  system(paste("bowtie2-build",LUT.14aa.fa,bowtieIDX,  sep = " "), 
+                   intern = TRUE, ignore.stdout = FALSE) 
+sys.out <- as.data.frame(sys.out)
+
+colnames(sys.out) <- c("Bowtie 2 build index of 14aa CustomArray fragments")
+invisible(sys.out[" "] <- " ")
+knitr::kable(sys.out[1:30,], format = "markdown")
+
+name.bowtie <- tempfile(pattern = "bowtie_", tmpdir = tempdir(), fileext = "")
+
+sys.out <-  system(paste("bowtie2 --threads ",detectCores(),
+                         " --very-sensitive",
+                         " -x ", bowtieIDX, " -U ",fragments.file," -S ", 
+                         name.bowtie, ".sam 2>&1",  sep = ""),
+                   intern = TRUE, ignore.stdout = FALSE) 
+
+sys.out <- as.data.frame(sys.out)
+
+colnames(sys.out) <- c("Bowtie 2 alignment to CustomArray fragments")
+invisible(sys.out[" "] <- " ")
+knitr::kable(sys.out[1:(nrow(sys.out)),], format = "markdown")
+
+system(paste("samtools view -@ ",detectCores()," -Sb ", name.bowtie, ".sam > ",
+             name.bowtie, ".bam",  sep = "")) 
+system(paste("samtools sort -@ ",detectCores()," ", name.bowtie, ".bam ",
+             name.bowtie, "_sort",  sep = ""))
+
+fragment.ranges.14aa <- readGAlignments(paste(name.bowtie, "_sort.bam", sep = ""), use.names=TRUE)
+
+#'Align against the 22aa library using bowtie2
+#'===================
+bowtieIDX <- tempfile(pattern = "IDX_LUT_", tmpdir = tempdir(), fileext = "")
+sys.out <-  system(paste("bowtie2-build",LUT.22aa.fa,bowtieIDX,  sep = " "), 
+                   intern = TRUE, ignore.stdout = FALSE) 
+sys.out <- as.data.frame(sys.out)
+
+colnames(sys.out) <- c("Bowtie 2 build index of 22aa CustomArray fragments")
+invisible(sys.out[" "] <- " ")
+knitr::kable(sys.out[1:30,], format = "markdown")
+
+name.bowtie <- tempfile(pattern = "bowtie_", tmpdir = tempdir(), fileext = "")
+
+sys.out <-  system(paste("bowtie2 --threads ",detectCores(),
+                         " --very-sensitive",
+                         " -x ", bowtieIDX, " -U ",fragments.file," -S ", 
+                         name.bowtie, ".sam 2>&1",  sep = ""),
+                   intern = TRUE, ignore.stdout = FALSE) 
+
+sys.out <- as.data.frame(sys.out)
+
+colnames(sys.out) <- c("Bowtie 2 alignment to CustomArray fragments")
+invisible(sys.out[" "] <- " ")
+knitr::kable(sys.out[1:(nrow(sys.out)),], format = "markdown")
+
+system(paste("samtools view -@ ",detectCores()," -Sb ", name.bowtie, ".sam > ",
+             name.bowtie, ".bam",  sep = "")) 
+system(paste("samtools sort -@ ",detectCores()," ", name.bowtie, ".bam ",
+             name.bowtie, "_sort",  sep = ""))
+
+fragment.ranges.22aa <- readGAlignments(paste(name.bowtie, "_sort.bam", sep = ""), use.names=TRUE)
+
+
+#rm(LUT.14aa.fa,LUT.22aa.fa,bowtieIDX,name.bowtie,sys.out)
+#'Merge reads and alignments
+#'===================
+
+
+reads.trim <- readFastq(fragments.file)
+reads.BC <- readFastq(barcodes.file)
+
+full.table <- data.table(Reads=as.character(sread(reads.trim)),
+                         BC=as.character(sread(reads.BC)),
+                         ID=unlist(lapply(strsplit(as.character(ShortRead::id(reads.trim)), " "),"[",1)),
+                         key="ID")
+
+found.order <- as.integer(match(seqnames(fragment.ranges.14aa),LUT.dna$Names))
+aligned.table.14aa <- data.table(ID=as.character(names(fragment.ranges.14aa)),
+                                 LUTnr14=found.order,
+                                 LUTseq14=as.character(LUT.dna$Sequence[found.order]),
+                                 Cigar14=as.character(cigar(fragment.ranges.14aa)),
+                                 key="ID")
+
+found.order <- as.integer(match(seqnames(fragment.ranges.22aa),LUT.dna$Names))
+aligned.table.22aa <- data.table(ID=as.character(names(fragment.ranges.22aa)),
+                                 LUTnr22=found.order,
+                                 LUTseq22=as.character(LUT.dna$Sequence[found.order]),
+                                 Cigar22=as.character(cigar(fragment.ranges.22aa)),
+                                 key="ID")
+
+full.table.matched <- merge(full.table,aligned.table.14aa, by="ID", all.x = TRUE)
+full.table.matched <- merge(full.table.matched,aligned.table.22aa, by="ID", all.x = TRUE)
+full.table.matched[,ID := NULL]
+
+found.order <- is.na(full.table.matched$LUTnr14) & is.na(full.table.matched$LUTnr22)
+full.table.nonFound <- full.table.matched[found.order,]
+full.table.matched <- full.table.matched[!found.order,]
+
+print(paste("Percent of all reads successfully aligned:", percent(nrow(full.table.matched)/nrow(full.table))))
+
+#rm(aligned.table.14aa,aligned.table.22aa,full.table,fragment.ranges.14aa,fragment.ranges.22aa,found.order)
+
+reads.nonFound <- data.table(Reads=unique(full.table.nonFound$Reads), key="Reads")
+#reads.nonFound <- reads.nonFound[sample(nrow(reads.nonFound), 1000),]
+strt3<-Sys.time()
+reads.nonFound$LUTnr <- amatch(reads.nonFound$Reads, LUT.dna$Sequence, method=matchMethod, 
+                               maxDist = 8, matchNA = FALSE, useBytes = TRUE, nthread = getOption("sd_num_thread"))
+print(Sys.time()-strt3)
+reads.nonFound[,LUTseq := LUT.dna$Sequence[LUTnr]]
+full.table.nonFound <- merge(full.table.nonFound,reads.nonFound, by="Reads", all=FALSE, all.x = FALSE)
+
+#' Aligning unique fragments to the CustomArray reference
+#' ============================
+#+ Aligning to reference.......
+
+
+temp.table.small <- full.table.matched #[sample(nrow(full.table.matched), 10000),]
+
+strt3<-Sys.time()
+temp.table.small[,LV14:= stringdist(Reads,LUTseq14, method=matchMethod, nthread = getOption("sd_num_thread"))]
+temp.table.small[,LV22:= stringdist(Reads,LUTseq22, method=matchMethod, nthread = getOption("sd_num_thread"))]
+full.table.nonFound[,LV:= stringdist(Reads,LUTseq, method=matchMethod, nthread = getOption("sd_num_thread"))]
+temp.table.small.22aa <- temp.table.small[(temp.table.small$LV22 <= temp.table.small$LV14) | is.na(temp.table.small$LV14),]
+temp.table.small.14aa <- temp.table.small[(temp.table.small$LV14 < temp.table.small$LV22) | is.na(temp.table.small$LV22),]
+temp.table.small.22aa[,c("LV14","LUTseq14","LUTnr14","Cigar14") := NULL]
+temp.table.small.14aa[,c("LV22","LUTseq22","LUTnr22","Cigar22") := NULL]
+full.table.nonFound[,c("LV14","LUTseq14","LUTnr14","Cigar14","LV22","LUTseq22","LUTnr22") := NULL]
+temp.table.small.22aa$LUTlib <- "22aa"
+temp.table.small.14aa$LUTlib <- "14aa"
+full.table.nonFound$LUTlib <- "Manual"
+setnames(temp.table.small.22aa,c("LV22","LUTseq22","LUTnr22","Cigar22"),c("LV","LUTseq","LUTnr","Cigar"))
+setnames(temp.table.small.14aa,c("LV14","LUTseq14","LUTnr14","Cigar14"),c("LV","LUTseq","LUTnr","Cigar"))
+setnames(full.table.nonFound,c("Cigar22"),c("Cigar"))
+
+temp.table.small <- rbind(temp.table.small.22aa,temp.table.small.14aa,full.table.nonFound)
+
+
+setkeyv(temp.table.small,c("BC","LUTnr"))
+
 
 
 
@@ -45,46 +253,37 @@ names(reads.table) <- sread(reads.BC)
 #' ============================
 #+ Reducing barcodes.......
 
-in.name.BC.star <- tempfile(pattern = "BC_", tmpdir = tempdir(), fileext = ".fastq.gz")
 out.name.BC.star <- tempfile(pattern = "BCsc_", tmpdir = tempdir(), fileext = ".txt")
 
-writeFastq(reads.BC,in.name.BC.star,compress=TRUE)
-
-system(paste("gunzip -c ",in.name.BC.star," | starcode -t ",detectCores()/2," --print-clusters -d",
+system(paste("gunzip -c ",barcodes.file," | starcode -t ",detectCores()-1," --print-clusters -d",
              1," -r5 -q -o ", out.name.BC.star, " 2>&1", sep = ""), 
        intern = TRUE, ignore.stdout = FALSE)
 
-table.BC.sc <- read.table(out.name.BC.star, header = FALSE, row.names = 1, skip = 0, sep="\t",
-                          stringsAsFactors = FALSE, fill=FALSE) #, nrows = 1000
-table.BC.sc$V2 <- NULL
+table.BC.sc <- data.table(read.table(out.name.BC.star, header = FALSE, row.names = 1, skip = 0, sep="\t",
+                                     stringsAsFactors = FALSE, fill=FALSE),keep.rownames=TRUE) #, nrows = 1000
+table.BC.sc[,V2 := NULL]
 
-#list.BC.sc <- split(table.BC.sc, rownames(table.BC.sc))
-list.BC.sc.list <- mclapply(1:nrow(table.BC.sc), function(x) strsplit(as.character(table.BC.sc$V3[x]), ","), mc.preschedule = TRUE, mc.cores = detectCores(), mc.cleanup = TRUE)
-names(list.BC.sc.list) <- rownames(table.BC.sc)
-list.BC.sc.list <- lapply(list.BC.sc.list, rbind)
-table.BC.sc <- data.table(cbind(unlist(list.BC.sc.list, use.names = TRUE)), keep.rownames=TRUE)
-invisible(table.BC.sc[,rn:=gsub("[0-9]","",rn)])
+table.BC.sc <- table.BC.sc[, strsplit(as.character(V3),",",fixed=TRUE), by=rn]
+
 SC.droppedBC <- length(unique(sread(reads.BC))) - length(unique(table.BC.sc$V1) %in% unique(sread(reads.BC)))
 print(paste("Dropped BCs in Starcode:", SC.droppedBC))
 
 rm(reads.BC,reads.trim)
 
-setnames(table.BC.sc,'V1','BC')
-setnames(table.BC.sc,'rn','scBC')
+setnames(table.BC.sc,c("V1","rn"),c("BC","scBC"))
 
 setkey(table.BC.sc,BC)
-table.BC.sc<- unique(table.BC.sc)
-BCs.sc.counts <- table(table.BC.sc$BC)
-BCs.sc.counts.single <- BCs.sc.counts[BCs.sc.counts == 1]
-table.BC.sc <- table.BC.sc[table.BC.sc$BC %in% names(BCs.sc.counts.single)]
 
-temp.table <- data.table(BC=names(reads.table),Reads=as.character(reads.table))
-setkey(temp.table,BC)
-temp.table <- merge(temp.table,table.BC.sc, by="BC", all = FALSE, all.x = FALSE)
+#' Replacing barcodes with Starcode reduced versions
+#' ============================
+
+setkey(temp.table.small,BC)
+
+temp.table <- merge(temp.table.small,table.BC.sc, by="BC", all = FALSE, all.x = FALSE)
 rm(table.BC.sc)
 
-setnames(temp.table,'BC','oldBC')
-setnames(temp.table,'scBC','BC')
+setnames(temp.table,c("BC","scBC"),c("oldBC","BC"))
+
 setkey(temp.table,BC)
 
 RetainedBC <- length(unique(temp.table$oldBC))
@@ -102,63 +301,22 @@ setnames(table.frag, colnames(table.frag), c("SC reduced BC", "Count"))
 knitr::kable(table.frag, format = "markdown")
 
 invisible(temp.table[,oldBC:=NULL])
-reads.table <- DNAStringSet(temp.table$Reads)
-names(reads.table) <- temp.table$BC
-#rm(temp.table)
 
-
-
-strt2<-Sys.time()
-
-#' Aligning unique fragments to the CustomArray reference
-#' ============================
-#+ Aligning to reference.......
-
-
-LUT.fa <- tempfile(pattern = "LUT_", tmpdir = tempdir(), fileext = ".fa")
-LUT.seq = ShortRead(DNAStringSet(LUT.dna$Sequence), BStringSet(1:length(LUT.dna)))
-writeFasta(LUT.seq,LUT.fa)
-
-bowtieIDX <- tempfile(pattern = "IDX_LUT_", tmpdir = tempdir(), fileext = "")
-
-
-
-sample(nrow(temp.table.small), 1000)
-temp.table.small <- data.table(Reads=unique(temp.table$Reads), key="Reads")
-#temp.table.small <- temp.table.small[11000:12000,]
-# temp.table.small.tmp <- temp.table.small
-# temp.table.small.tmp$LUTnr <- NULL
-# 
-
-temp.table.small <- temp.table.small[order(temp.table.small$Reads)]
-temp.table.small$LUTnr <- match(temp.table.small$Reads,LUT.dna$Sequence)
-temp.table.small.exact <- temp.table.small[!is.na(temp.table.small$LUTnr),]
-strt5<-Sys.time()
-temp.table.small$LUTnr <- amatch(temp.table.small$Reads, LUT.dna$Sequence, method=matchMethod, 
-       maxDist = 30, matchNA = FALSE, useBytes = TRUE, nthread = getOption("sd_num_thread"))
-print(Sys.time()-strt5)
-
-strt3<-Sys.time()
-temp.table.small$LUTseq <- LUT.dna$Sequence[temp.table.small$LUTnr]
-temp.table.small <- temp.table.small[!is.na(temp.table.small$LUTseq)]
-temp.table.small[,LV:= stringdist(Reads,LUTseq, method=matchMethod, nthread = getOption("sd_num_thread"))]
-
-setkey(temp.table,Reads)
-temp.table.out <- merge(temp.table,temp.table.small, by="Reads", all = FALSE, all.x = FALSE)
-setkeyv(temp.table.out,c("BC","LUTnr"))
-temp.table.out[,c("Reads","LUTseq"):=NULL]
 
 #' Splitting reads into single-read and multi-read barcodes
 #' ============================
 #+ Splitting Reads.......
-
+temp.table.out <- temp.table
 count.list <- table(temp.table.out$BC)
 temp.table.multi <- temp.table.out[temp.table.out$BC %in% names(count.list[count.list!=1])]
+temp.table.multi <- temp.table.multi[order(BC)]
 temp.table.single <- temp.table.out[temp.table.out$BC %in% names(count.list[count.list==1])]
 temp.table.single[,c("mCount","tCount"):=1]
+setkeyv(temp.table.multi,c("BC","LUTnr"))
 key(temp.table.multi)
 
 temp.table.multi[,c("LV","tCount"):= list(mean(LV), .N), by=key(temp.table.multi)]
+
 temp.table.multi <- unique(temp.table.multi)
 
 print("Utilized Barcodes.......")
@@ -200,7 +358,7 @@ calculate.consensus <- function(LUTnr,LV,tCount){
   }
   return(group.table[1,])
 }
-
+#temp.table.multi <- temp.table.multi[1:10000,]
 
 temp.table.multi[,c("LUTnr","LV","tCount","mCount"):=calculate.consensus(LUTnr,LV,tCount), by="BC"]
 setkeyv(temp.table.multi,c("BC","LUTnr"))

@@ -1,0 +1,65 @@
+
+
+processing file: S4_Fragment_translation.spin.Rmd
+  |                                                                         |                                                                 |   0%  |                                                                         |...                                                              |   4%
+  ordinary text without R code
+
+  |                                                                         |......                                                           |   9%
+label: unnamed-chunk-1
+  |                                                                         |........                                                         |  13%
+  ordinary text without R code
+
+  |                                                                         |...........                                                      |  17%
+label: Making Bowtie index.......
+  |                                                                         |..............                                                   |  22%
+  ordinary text without R code
+
+  |                                                                         |.................                                                |  26%
+label: unnamed-chunk-2
+[samopen] SAM header is present: 76305 sequences.
+  |                                                                         |....................                                             |  30%
+  ordinary text without R code
+
+  |                                                                         |.......................                                          |  35%
+label: unnamed-chunk-3
+[samopen] SAM header is present: 16093 sequences.
+  |                                                                         |.........................                                        |  39%
+  ordinary text without R code
+
+  |                                                                         |............................                                     |  43%
+label: unnamed-chunk-4
+  |                                                                         |...............................                                  |  48%
+  ordinary text without R code
+
+  |                                                                         |..................................                               |  52%
+label: Aligning to reference.......
+  |                                                                         |.....................................                            |  57%
+  ordinary text without R code
+
+  |                                                                         |........................................                         |  61%
+label: Reducing barcodes.......
+  |                                                                         |..........................................                       |  65%
+  ordinary text without R code
+
+  |                                                                         |.............................................                    |  70%
+label: unnamed-chunk-5
+  |                                                                         |................................................                 |  74%
+  ordinary text without R code
+
+  |                                                                         |...................................................              |  78%
+label: Splitting Reads.......
+  |                                                                         |......................................................           |  83%
+  ordinary text without R code
+
+  |                                                                         |.........................................................        |  87%
+label: Splitting Clean Reads.......
+  |                                                                         |...........................................................      |  91%
+  ordinary text without R code
+
+  |                                                                         |..............................................................   |  96%
+label: Calculation consensus reads .....
+Quitting from lines 309-348 (S4_Fragment_translation.spin.Rmd) 
+Error in print(Sys.time() - strt2) : object 'strt2' not found
+Calls: <Anonymous> ... withCallingHandlers -> withVisible -> eval -> eval -> print
+
+Execution halted
