@@ -83,9 +83,19 @@ sys.out <-  system(paste("export SHELL=/bin/sh; cat ",fragments.unique.fa," | pa
                          " -num_threads 1 -outfmt 10 -db ", blast.db,
                          " -query - > ", blast.out, " 2>&1",  sep = ""),
                    intern = TRUE, ignore.stdout = FALSE) # -word_size 7
+<<<<<<< HEAD
+
+
 
 table.blastn <- data.table(read.table(blast.out, header = FALSE, skip = 0, sep=";",
                                       stringsAsFactors = FALSE, fill=FALSE),keep.rownames=FALSE)
+
+system(paste("mv", blast.out, "./data/blastOutput.csv", sep=" "))
+=======
+
+table.blastn <- data.table(read.table(blast.out, header = FALSE, skip = 0, sep=";",
+                                      stringsAsFactors = FALSE, fill=FALSE),keep.rownames=FALSE)
+>>>>>>> 9f6d172dd7f075847796eb65fc85284d93dd827a
 
 if (length(grep("Warning",table.blastn$V1)) != 0) {
   warnings.out <- unique(table.blastn[grep("Warning",table.blastn$V1),])
