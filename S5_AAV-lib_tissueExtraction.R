@@ -31,64 +31,48 @@ suppressPackageStartupMessages(library(plyr))
 suppressPackageStartupMessages(library(devtools))
 
 
-#+ setup, include=FALSE
-opts_chunk$set(fig.width = 7.5, fig.height = 8)
-opts_chunk$set(comment = NA)
+# #+ setup, include=FALSE
+# opts_chunk$set(fig.width = 7.5, fig.height = 8)
+# opts_chunk$set(comment = NA)
+# 
+# config <- read.table("config_tissue.txt", header = FALSE, skip = 0, sep="\t",stringsAsFactors = FALSE, fill=TRUE)
+# colnames(config) <- c("Parameter", "Value")
+# 
+# #'Sequencing files
+# #'===================
+# knitr::kable(config, format = "markdown")
+# dataDir <- config$Value[1]
+# paired.alignment <- as.logical(config$Value[5])
+# 
+# #'Analysis parameters
+# #'===================
+# bb.dir <- config$Value[6]
+# fragmentTemplate  <- config$Value[7]
+# run.subset <- as.logical(config$Value[9])
+# align.p7 <- as.logical(config$Value[10])
+# max.cores <- as.integer(config$Value[11])
+# subset.count <- as.integer(config$Value[12])
+# 
+# #'Script execution
+# #'===================
+# strt<-Sys.time()
+# 
+# id.backbone.L <- file.path(bb.dir, "Ltrim.fa") 
+# id.backbone.R <- file.path(bb.dir, "Rtrim.fa")
+# id.BC.L <- file.path(bb.dir, "BC-L.fa")
+# id.BC.R <- file.path(bb.dir, "BC-R.fa")
+# id.uncut <- file.path(bb.dir, "uncut.fa")
 
-
-config <- read.table("config_tissue.txt", header = FALSE, skip = 0, sep="\t",stringsAsFactors = FALSE, fill=TRUE)
-
-colnames(config) <- c("Parameter", "Value")
-#setwd("~/Dropbox (Bjorklund Lab)/Shared/NGS data")
-script.dir <- normalizePath("../SharedFunctions/")
-# source(file.path(script.dir, "buildFragLengthTable.R"))
-# source(file.path(script.dir, "makePEfastq.R"))
-# source(file.path(script.dir, "retrieveFASTAQID.R"))
-source(file.path(script.dir, "buildFragTableSC3.R"))
-
-#'Sequencing files
-#'===================
-knitr::kable(config, format = "markdown")
-dataDir <- config$Value[1]
-paired.alignment <- as.logical(config$Value[5])
-
-#'Analysis parameters
-#'===================
-bb.dir <- config$Value[6]
-fragmentTemplate  <- config$Value[7]
-run.subset <- as.logical(config$Value[9])
-align.p7 <- as.logical(config$Value[10])
-max.cores <- as.integer(config$Value[11])
-subset.count <- as.integer(config$Value[12])
-
-#'Script execution
-#'===================
-strt<-Sys.time()
-
-id.backbone.L <- file.path(bb.dir, "Ltrim.fa") 
-id.backbone.R <- file.path(bb.dir, "Rtrim.fa")
-id.BC.L <- file.path(bb.dir, "BC-L.fa")
-id.BC.R <- file.path(bb.dir, "BC-R.fa")
-id.uncut <- file.path(bb.dir, "uncut.fa")
-
-load("singleContfragments.rda")
-output.Table.single <- output.Table
-load("multipleContfragments.rda")
-output.Table <- rbind(output.Table, output.Table.single)
-load("alignedLibraries.rda")
-load("LUTdna.rda")
-
-output.Table <- na.omit(output.Table)
-nrow(output.Table)
-#output.Table <-output.Table[(output.Table$LV < 4),] #(output.Table$mCount/output.Table$tCount > 0.5) & 
-nrow(output.Table)
-
+load("data/multipleContfragments.rda")
+load("data/alignedLibraries.rda")
+load("data/LUTdna.rda")
 
 load.list <- read.table("loadlist.txt", header = FALSE, skip = 0, sep="\t",stringsAsFactors = FALSE, fill=TRUE)
+dataDir <- "../../Shared/NGS\\ data/Original\\ sequencing\\ files/2015-09-24_NS500551_102_H3MNJAFXX/Originals"
 colnames(load.list) <- c("Name", "BaseName","GroupName")
 
 analyzeTissue <- function(indexNr) {
-#indexNr <- 13
+#indexNr <- 15
   name <- unlist(strsplit(load.list$BaseName[indexNr],"/"))
   name <- name[!is.na(name)]
   if (length(name)==2){
@@ -114,7 +98,7 @@ name.out <- load.list$Name[indexNr]
 
 out.name.P5 <- tempfile(pattern = "P5_", tmpdir = tempdir(), fileext = ".fastq.gz")
 out.name.P7 <- tempfile(pattern = "P7_", tmpdir = tempdir(), fileext = ".fastq.gz")
-command.args <- paste("-Xmx12g overwrite=true k=10 rcomp=f skipr1=t qhdist=0 maskmiddle=t hammingdistance=0 findbestmatch=t ordered=t threads=",detectCores(),
+command.args <- paste("-Xmx12g overwrite=true k=10 rcomp=f skipr1=t qhdist=0 maskmiddle=t hammingdistance=1 findbestmatch=t ordered=t threads=",detectCores(),
                       " in=", in.name.P5,
                       " in2=", in.name.P7,
                       " outm=", out.name.P5,
@@ -144,39 +128,30 @@ print(paste("Utilized sequences:", nr.Reads))
 #' ============================
 #+ Extracting barcodes.......
 
-out.name.P5 <- tempfile(pattern = "P5_", tmpdir = tempdir(), fileext = ".fastq.gz")
-out.name.P7 <- tempfile(pattern = "P7_", tmpdir = tempdir(), fileext = ".fastq.gz")
-command.args <- paste("-Xmx12g overwrite=true k=12 rcomp=f skipr2=t qhdist=0 maskmiddle=t hammingdistance=2 findbestmatch=t ordered=t threads=",detectCores(),
-                      " in=", in.name.P5,
-                      " in2=", in.name.P7,
-                      " outm=", out.name.P5,
-                      " outm2=", out.name.P7,
-                      " fliteral=", "ATAACTTCGTATA", sep = "") #Length 48-72 bp k=18 mink=10 qhdist=0 hammingdistance=3 findbestmatch=t ,
-
-sys.out <- system2(path.expand("~/bbmap/bbduk2.sh"), args=command.args, stdout=TRUE, stderr=TRUE) #
-
-sys.out <- as.data.frame(sys.out)
-
-
-colnames(sys.out) <- c("bbduk2 Identification of real barcodes")
-invisible(sys.out[" "] <- " ")
-lengthOut <- (nrow(sys.out))
-knitr::kable(sys.out[3:lengthOut,], format = "markdown")
-
-in.name.P5 <- out.name.P5
-in.name.P7 <- out.name.P7
 
 
 out.name.BC <- tempfile(pattern = "BC_", tmpdir = tempdir(), fileext = ".fastq.gz")
 
 sys.out <- system(paste("~/bbmap/bbduk2.sh overwrite=true k=12 mink=12 hammingdistance=2 findbestmatch=t ",
-                        "trd=t rcomp=f skipr2=t findbestmatch=f qhdist=0 minavgquality=0 ordered=t maxns=0 minlength=18 ",
+                        "trd=t rcomp=f skipr2=t findbestmatch=f qhdist=1 minavgquality=0 ordered=t maxns=0 minlength=18 ",
                         "maxlength=22 threads=", detectCores()," in=", shQuote(in.name.P5),
                         " out=", out.name.BC,
                         " lliteral=", "GGCCTAGCGGCCGCTTTACTT",
-                        " rliteral=", "ATAACTTCGTATA",
+                        " rliteral=", "ATAACTTCGTATAATGTATGC",
                         " 2>&1", sep = ""), intern = TRUE, ignore.stdout = FALSE) #" fliteral=",id.uncut,
 sys.out <- as.data.frame(sys.out)
+
+# 
+# sys.out <- system(paste("~/bbmap/bbduk2.sh overwrite=true k=18 mink=18 hammingdistance=2 findbestmatch=t ",
+#                         "rcomp=f findbestmatch=f qhdist=1 minavgquality=0 maxns=0 minlength=18 ",
+#                         "maxlength=22 threads=", detectCores()," in=", shQuote(in.name.P5), 
+#                         " out=", out.name.BC," lliteral=", "GGCCTAGCGGCCGCTTTACTT",
+#                         " rliteral=", "ATAACTTCGTATAATGTATGC",
+#                         " 2>&1", sep = ""), intern = TRUE, ignore.stdout = FALSE) 
+# sys.out <- as.data.frame(sys.out)
+
+
+
 
 colnames(sys.out) <- c("bbduk2 Extraction of barcodes")
 invisible(sys.out[" "] <- " ")
