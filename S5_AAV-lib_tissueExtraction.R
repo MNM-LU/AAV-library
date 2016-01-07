@@ -155,8 +155,8 @@ foundFrags$fragment <- LUT.dna$Sequence[as.integer(foundFrags$LUTnr)]
 
 matchRange <- function(idxFrag) {
   #idxFrag <- 23
-  machRanges <- which(names(allFragments.ranges) == foundFrags$fragment[idxFrag])
-  return(cbind(machRanges,idxFrag))
+  matchRanges <- which(names(allFragments.ranges) == foundFrags$fragment[idxFrag])
+  return(cbind(matchRanges,idxFrag))
 }
 match.ranges.list <- mclapply(1:nrow(foundFrags), matchRange, mc.preschedule = TRUE, mc.cores = detectCores())
 match.ranges <- do.call(rbind, match.ranges.list)
@@ -176,6 +176,18 @@ return(log.table)
 
 all.logs <- lapply(1:nrow(load.list), analyzeTissue)
 all.logs <- rbindlist(all.logs, use.names=FALSE )
+
+
+# Make a Complete library sample
+# ============================
+in.names.all <- list.files("output", pattern="*.rds", full.names=TRUE)
+out.range <- lapply(in.names.all, readRDS)
+out.range <- do.call(GAlignmentsList,unlist(out.range))
+out.range <- cbind(unlist(out.range))[[1]]
+saveRDS(out.range, file="output/total.infectiveLib.rds")
+
+
+
 
 knitr::kable(all.logs, format = "markdown")
 

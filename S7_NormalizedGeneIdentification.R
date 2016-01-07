@@ -1,4 +1,17 @@
-#suppressPackageStartupMessages(library(SummarizedExperiment))
+
+#' ---
+#' title: "Normalize Library counts"
+#' author: "Tomas Bjorklund"
+#' output: 
+#'  pdf_document:
+#'    highlight: tango
+#' geometry: margin=0.7in
+#' ---
+
+#' This workflow normalizes read counts between samples.  
+
+
+suppressPackageStartupMessages(library(knitr))
 suppressPackageStartupMessages(library(GenomicAlignments))
 suppressPackageStartupMessages(library(data.table))
 suppressPackageStartupMessages(library(scales))
@@ -27,24 +40,29 @@ loadRDS <- function(in.name) {
   this.sample <- readRDS(in.name)
   this.name <- gsub("-","_",gsub("found.","",gsub("(output/)", "", gsub("(.rds)", "", in.name))))
   this.group <- grouping[match(this.name,grouping$Sample),"Group"]
-  mcols(this.sample) <- cbind(mcols(this.sample),data.frame(Sample = this.name, Group=this.group,stringsAsFactors = FALSE))
+  if (this.name == "completeLibraryRanges"){
+    mcols(this.sample) <- cbind(mcols(this.sample),data.frame(RNAcount=mcols(this.sample)$tCount, Sample = this.name, Group=this.group,stringsAsFactors = FALSE))
+  } else {
+    mcols(this.sample) <- cbind(mcols(this.sample),data.frame(Sample = this.name, Group=this.group,stringsAsFactors = FALSE))
+  }
   return(this.sample)
 }
 
 out.range <- lapply(in.names.all, loadRDS)
-#do.call(sum,mcols(out.range)$tCount)
-#out.range <- list(out.range[[1]][1:10000],out.range[[2]][1:10000])
+
 readCounts <- lapply(out.range, function(x) sum(mcols(x)$RNAcount))
 maxCount <- max(unlist(readCounts))
 readCounts <- lapply(readCounts, function(x) maxCount/x)
 
 makeNormCount <- function(inIndex){
+  #inIndex <- 43
   thisRange <- out.range[[inIndex]]
   mcols(thisRange)$RNAcount <- mcols(thisRange)$RNAcount*readCounts[[inIndex]]
   return(thisRange)
   }
 
-out.range <- lapply(1:length(readCounts), makeNormCount)
+
+out.range.tmp <- lapply(1:length(readCounts), makeNormCount)
 
 out.range <- do.call(GAlignmentsList,unlist(out.range))
 (out.range <- cbind(unlist(out.range))[[1]])
