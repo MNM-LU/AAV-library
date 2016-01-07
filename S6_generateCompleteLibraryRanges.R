@@ -31,6 +31,6 @@ foundFragments.ranges <- allFragments.ranges[output.Table$idxFrag]
 output.Table[,c("Reads","BC","fragment","idxFrag"):=NULL]
 mcols(foundFragments.ranges) <- c(mcols(foundFragments.ranges), output.Table)
   
-saveRDS(foundFragments.ranges, file="data/completeLibraryRanges.rds")
+saveRDS(foundFragments.ranges, file="output/completeLibraryRanges.rds")
 
 devtools::session_info()
