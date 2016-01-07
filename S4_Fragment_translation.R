@@ -35,8 +35,8 @@ strt1<-Sys.time()
 
 load("data/LUTdna.rda")
 
-fragments.file <- "data/fragments_2015-11-05_AAVlibrary_subset.fastq.gz"
-barcodes.file <- "data/barcodes_2015-11-05_AAVlibrary_subset.fastq.gz"
+fragments.file <- "data/fragments_AAVlibrary_complete.fastq.gz"
+barcodes.file <- "data/barcodes_AAVlibrary_complete.fastq.gz"
 
 #' Make CustomArray reference index for Bowtie2
 #' ============================
@@ -63,12 +63,15 @@ writeFasta(LUT.22aa.seq,LUT.22aa.fa)
 #'===================
 reads.trim <- readFastq(fragments.file)
 unique.reads <- unique(sread(reads.trim))
-unique.reads = ShortRead(DNAStringSet(unique.reads), BStringSet(1:length(unique.reads)))
+
+#unique.reads <- unique.reads[sample(length(unique.reads), 25000)]
+
+unique.reads <- ShortRead(DNAStringSet(unique.reads), BStringSet(1:length(unique.reads)))
 fragments.unique.fa <- tempfile(pattern = "FragUnique_", tmpdir = tempdir(), fileext = ".fa")
 writeFasta(unique.reads,fragments.unique.fa)
 
 
-#'Align against the 14aa library using usearch
+#'Align against the library using blast
 #'===================
 
 blast.db <- tempfile(pattern = "blastDB_", tmpdir = tempdir(), fileext = ".db")
@@ -92,162 +95,33 @@ sys.out <-  system(paste("export SHELL=/bin/sh; cat ",fragments.unique.fa," | pa
 
 table.blastn <- data.table(read.table(blast.out, header = FALSE, skip = 0, sep=";",
                                      stringsAsFactors = FALSE, fill=FALSE),keep.rownames=FALSE)
+
+if (length(grep("Warning",table.blastn$V1)) != 0) {
 warnings.out <- unique(table.blastn[grep("Warning",table.blastn$V1),])
+table.blastn <- table.blastn[-grep("Warning",table.blastn$V1),]
 setnames(warnings.out,"V1", c("blastn Warnings"))
 invisible(warnings.out[" "] <- " ")
 knitr::kable(warnings.out[1:(nrow(warnings.out)),], format = "markdown")
+}
 
+table.blastn[,c("Reads","LUTnr","identity","alignmentLength","mismatches",
+                 "gapOpens", "q_start", "q_end", "s_start", "s_end", "evalue","bitScore") := tstrsplit(V1,",",fixed=TRUE),]
+table.blastn[,c("V1","identity","alignmentLength","gapOpens", "q_start", "q_end", "s_start", "s_end", "evalue"):=NULL]
 
-table.blastn <- table.blastn[-grep("Warning",table.blastn$V1),]
+table.blastn[,Reads:= as.character(sread(unique.reads)[as.integer(Reads)])]
+table.blastn[,bitScore:= as.numeric(bitScore)]
+table.blastn[,mismatches:= as.numeric(mismatches)]
+sort.order <- order(table.blastn$Reads,-table.blastn$bitScore)
+table.blastn <- table.blastn[sort.order]
+table.blastn.topHit <- table.blastn[!duplicated(table.blastn$Reads)]
 
-table.blastn[,c("query id","subject id","% identity","alignment length","mismatches",
-                 "gap opens", "q. start", "q. end", "s. start", "s. end", "evalue","bit score") := tstrsplit(V1,",",fixed=TRUE),]
-table.blastn[,V1:=NULL]
-
-#'Align against the 14aa library using bowtie2
-#'===================
-
-bowtieIDX <- tempfile(pattern = "IDX_LUT_", tmpdir = tempdir(), fileext = "")
-sys.out <-  system(paste("bowtie2-build",LUT.14aa.fa,bowtieIDX,  sep = " "), 
-                   intern = TRUE, ignore.stdout = FALSE) 
-sys.out <- as.data.frame(sys.out)
-
-colnames(sys.out) <- c("Bowtie 2 build index of 14aa CustomArray fragments")
-invisible(sys.out[" "] <- " ")
-knitr::kable(sys.out[1:30,], format = "markdown")
-
-name.bowtie <- tempfile(pattern = "bowtie_", tmpdir = tempdir(), fileext = "")
-
-sys.out <-  system(paste("bowtie2 --threads ",detectCores(),
-                         " --very-sensitive",
-                         " -x ", bowtieIDX, " -U ",fragments.file," -S ", 
-                         name.bowtie, ".sam 2>&1",  sep = ""),
-                   intern = TRUE, ignore.stdout = FALSE) 
-
-sys.out <- as.data.frame(sys.out)
-
-colnames(sys.out) <- c("Bowtie 2 alignment to CustomArray fragments")
-invisible(sys.out[" "] <- " ")
-knitr::kable(sys.out[1:(nrow(sys.out)),], format = "markdown")
-
-system(paste("samtools view -@ ",detectCores()," -Sb ", name.bowtie, ".sam > ",
-             name.bowtie, ".bam",  sep = "")) 
-system(paste("samtools sort -@ ",detectCores()," ", name.bowtie, ".bam ",
-             name.bowtie, "_sort",  sep = ""))
-
-fragment.ranges.14aa <- readGAlignments(paste(name.bowtie, "_sort.bam", sep = ""), use.names=TRUE)
-
-#'Align against the 22aa library using bowtie2
-#'===================
-bowtieIDX <- tempfile(pattern = "IDX_LUT_", tmpdir = tempdir(), fileext = "")
-sys.out <-  system(paste("bowtie2-build",LUT.22aa.fa,bowtieIDX,  sep = " "), 
-                   intern = TRUE, ignore.stdout = FALSE) 
-sys.out <- as.data.frame(sys.out)
-
-colnames(sys.out) <- c("Bowtie 2 build index of 22aa CustomArray fragments")
-invisible(sys.out[" "] <- " ")
-knitr::kable(sys.out[1:30,], format = "markdown")
-
-name.bowtie <- tempfile(pattern = "bowtie_", tmpdir = tempdir(), fileext = "")
-
-sys.out <-  system(paste("bowtie2 --threads ",detectCores(),
-                         " --very-sensitive",
-                         " -x ", bowtieIDX, " -U ",fragments.file," -S ", 
-                         name.bowtie, ".sam 2>&1",  sep = ""),
-                   intern = TRUE, ignore.stdout = FALSE) 
-
-sys.out <- as.data.frame(sys.out)
-
-colnames(sys.out) <- c("Bowtie 2 alignment to CustomArray fragments")
-invisible(sys.out[" "] <- " ")
-knitr::kable(sys.out[1:(nrow(sys.out)),], format = "markdown")
-
-system(paste("samtools view -@ ",detectCores()," -Sb ", name.bowtie, ".sam > ",
-             name.bowtie, ".bam",  sep = "")) 
-system(paste("samtools sort -@ ",detectCores()," ", name.bowtie, ".bam ",
-             name.bowtie, "_sort",  sep = ""))
-
-fragment.ranges.22aa <- readGAlignments(paste(name.bowtie, "_sort.bam", sep = ""), use.names=TRUE)
-
-
-#rm(LUT.14aa.fa,LUT.22aa.fa,bowtieIDX,name.bowtie,sys.out)
-#'Merge reads and alignments
-#'===================
-
-
-reads.trim <- readFastq(fragments.file)
 reads.BC <- readFastq(barcodes.file)
 
 full.table <- data.table(Reads=as.character(sread(reads.trim)),
                          BC=as.character(sread(reads.BC)),
-                         ID=unlist(lapply(strsplit(as.character(ShortRead::id(reads.trim)), " "),"[",1)),
-                         key="ID")
+                         key="Reads")
 
-found.order <- as.integer(match(seqnames(fragment.ranges.14aa),LUT.dna$Names))
-aligned.table.14aa <- data.table(ID=as.character(names(fragment.ranges.14aa)),
-                                 LUTnr14=found.order,
-                                 LUTseq14=as.character(LUT.dna$Sequence[found.order]),
-                                 Cigar14=as.character(cigar(fragment.ranges.14aa)),
-                                 key="ID")
-
-found.order <- as.integer(match(seqnames(fragment.ranges.22aa),LUT.dna$Names))
-aligned.table.22aa <- data.table(ID=as.character(names(fragment.ranges.22aa)),
-                                 LUTnr22=found.order,
-                                 LUTseq22=as.character(LUT.dna$Sequence[found.order]),
-                                 Cigar22=as.character(cigar(fragment.ranges.22aa)),
-                                 key="ID")
-
-full.table.matched <- merge(full.table,aligned.table.14aa, by="ID", all.x = TRUE)
-full.table.matched <- merge(full.table.matched,aligned.table.22aa, by="ID", all.x = TRUE)
-full.table.matched[,ID := NULL]
-
-found.order <- is.na(full.table.matched$LUTnr14) & is.na(full.table.matched$LUTnr22)
-full.table.nonFound <- full.table.matched[found.order,]
-full.table.matched <- full.table.matched[!found.order,]
-
-print(paste("Percent of all reads successfully aligned:", percent(nrow(full.table.matched)/nrow(full.table))))
-
-#rm(aligned.table.14aa,aligned.table.22aa,full.table,fragment.ranges.14aa,fragment.ranges.22aa,found.order)
-
-reads.nonFound <- data.table(Reads=unique(full.table.nonFound$Reads), key="Reads")
-#reads.nonFound <- reads.nonFound[sample(nrow(reads.nonFound), 1000),]
-strt3<-Sys.time()
-reads.nonFound$LUTnr <- amatch(reads.nonFound$Reads, LUT.dna$Sequence, method=matchMethod, 
-                               maxDist = 8, matchNA = FALSE, useBytes = TRUE, nthread = getOption("sd_num_thread"))
-print(Sys.time()-strt3)
-reads.nonFound[,LUTseq := LUT.dna$Sequence[LUTnr]]
-full.table.nonFound <- merge(full.table.nonFound,reads.nonFound, by="Reads", all=FALSE, all.x = FALSE)
-
-#' Aligning unique fragments to the CustomArray reference
-#' ============================
-#+ Aligning to reference.......
-
-
-temp.table.small <- full.table.matched #[sample(nrow(full.table.matched), 10000),]
-
-strt3<-Sys.time()
-temp.table.small[,LV14:= stringdist(Reads,LUTseq14, method=matchMethod, nthread = getOption("sd_num_thread"))]
-temp.table.small[,LV22:= stringdist(Reads,LUTseq22, method=matchMethod, nthread = getOption("sd_num_thread"))]
-full.table.nonFound[,LV:= stringdist(Reads,LUTseq, method=matchMethod, nthread = getOption("sd_num_thread"))]
-temp.table.small.22aa <- temp.table.small[(temp.table.small$LV22 <= temp.table.small$LV14) | is.na(temp.table.small$LV14),]
-temp.table.small.14aa <- temp.table.small[(temp.table.small$LV14 < temp.table.small$LV22) | is.na(temp.table.small$LV22),]
-temp.table.small.22aa[,c("LV14","LUTseq14","LUTnr14","Cigar14") := NULL]
-temp.table.small.14aa[,c("LV22","LUTseq22","LUTnr22","Cigar22") := NULL]
-full.table.nonFound[,c("LV14","LUTseq14","LUTnr14","Cigar14","LV22","LUTseq22","LUTnr22") := NULL]
-temp.table.small.22aa$LUTlib <- "22aa"
-temp.table.small.14aa$LUTlib <- "14aa"
-full.table.nonFound$LUTlib <- "Manual"
-setnames(temp.table.small.22aa,c("LV22","LUTseq22","LUTnr22","Cigar22"),c("LV","LUTseq","LUTnr","Cigar"))
-setnames(temp.table.small.14aa,c("LV14","LUTseq14","LUTnr14","Cigar14"),c("LV","LUTseq","LUTnr","Cigar"))
-setnames(full.table.nonFound,c("Cigar22"),c("Cigar"))
-
-temp.table.small <- rbind(temp.table.small.22aa,temp.table.small.14aa,full.table.nonFound)
-
-
-setkeyv(temp.table.small,c("BC","LUTnr"))
-
-
-
+full.table <- merge(full.table,table.blastn.topHit, by="Reads", all.x = FALSE)
 
 #' Starcode based barcode reduction
 #' ============================
@@ -268,7 +142,7 @@ table.BC.sc <- table.BC.sc[, strsplit(as.character(V3),",",fixed=TRUE), by=rn]
 SC.droppedBC <- length(unique(sread(reads.BC))) - length(unique(table.BC.sc$V1) %in% unique(sread(reads.BC)))
 print(paste("Dropped BCs in Starcode:", SC.droppedBC))
 
-rm(reads.BC,reads.trim)
+#rm(reads.BC,reads.trim)
 
 setnames(table.BC.sc,c("V1","rn"),c("BC","scBC"))
 
@@ -277,50 +151,52 @@ setkey(table.BC.sc,BC)
 #' Replacing barcodes with Starcode reduced versions
 #' ============================
 
-setkey(temp.table.small,BC)
+setkey(full.table,BC)
 
-temp.table <- merge(temp.table.small,table.BC.sc, by="BC", all = FALSE, all.x = FALSE)
+full.table <- merge(full.table,table.BC.sc, by="BC", all = FALSE, all.x = FALSE)
 rm(table.BC.sc)
 
-setnames(temp.table,c("BC","scBC"),c("oldBC","BC"))
+setnames(full.table,c("BC","scBC"),c("oldBC","BC"))
 
-setkey(temp.table,BC)
+setkey(full.table,BC)
 
-RetainedBC <- length(unique(temp.table$oldBC))
-scBC <- length(unique(temp.table$BC))
+RetainedBC <- length(unique(full.table$oldBC))
+scBC <- length(unique(full.table$BC))
 print(paste("Original unique barcodes:", RetainedBC))
 print(paste("SC reduced unique barcodes:", scBC))
 
 
-table.frag <- data.table(as.data.frame((rev(sort(table(temp.table$oldBC))))[1:10]), keep.rownames=TRUE)
+table.frag <- data.table(as.data.frame((rev(sort(table(full.table$oldBC))))[1:10]), keep.rownames=TRUE)
 setnames(table.frag, colnames(table.frag), c("Original BC", "Count"))
 knitr::kable(table.frag, format = "markdown")
 
-table.frag <- data.table(as.data.frame((rev(sort(table(temp.table$BC))))[1:10]), keep.rownames=TRUE)
+table.frag <- data.table(as.data.frame((rev(sort(table(full.table$BC))))[1:10]), keep.rownames=TRUE)
 setnames(table.frag, colnames(table.frag), c("SC reduced BC", "Count"))
 knitr::kable(table.frag, format = "markdown")
 
-invisible(temp.table[,oldBC:=NULL])
+invisible(full.table[,oldBC:=NULL])
 
 
 #' Splitting reads into single-read and multi-read barcodes
 #' ============================
 #+ Splitting Reads.......
-temp.table.out <- temp.table
-count.list <- table(temp.table.out$BC)
-temp.table.multi <- temp.table.out[temp.table.out$BC %in% names(count.list[count.list!=1])]
-temp.table.multi <- temp.table.multi[order(BC)]
-temp.table.single <- temp.table.out[temp.table.out$BC %in% names(count.list[count.list==1])]
+
+count.list <- table(full.table$BC)
+full.table <- full.table[order(full.table$BC),]
+temp.table.multi <- full.table[full.table$BC %in% names(count.list[count.list!=1]),]
+temp.table.single <- full.table[full.table$BC %in% names(count.list[count.list==1]),]
 temp.table.single[,c("mCount","tCount"):=1]
+temp.table.single$Mode <- "Amb"
 setkeyv(temp.table.multi,c("BC","LUTnr"))
 key(temp.table.multi)
 
-temp.table.multi[,c("LV","tCount"):= list(mean(LV), .N), by=key(temp.table.multi)]
-
+temp.table.multi[,mismatches:= as.numeric(mismatches)]
+temp.table.multi[,c("bitScore","mismatches" ,"tCount"):= list(mean(bitScore),median(mismatches), .N), by=key(temp.table.multi)]
+temp.table.multi$Mode <- "Def"
 temp.table.multi <- unique(temp.table.multi)
 
-print("Utilized Barcodes.......")
-print(nrow(temp.table.out))
+print("Utilized reads.......")
+print(nrow(full.table))
 print("Whereof single reads.......")
 print(nrow(temp.table.single))
 
@@ -338,46 +214,127 @@ temp.table.multi.clean[,mCount:=tCount]
 print("Clean multi-read barcodes.......")
 print(nrow(temp.table.multi.clean))
 print("Chimeric multi-read barcodes.......")
-print(nrow(temp.table.multi))
+print(length(unique(temp.table.multi$BC)))
 
 #' Calculate consensus alignment of chimeric barcodes
 #' ============================
 #+ Calculation consensus reads .....
 
-calculate.consensus <- function(LUTnr,LV,tCount){
-  group.table <- data.table(LUTnr,LV,tCount,key="LUTnr")
-  group.table[, mCount:=tCount]
-  group.table[, tCount:=sum(tCount)]
-  if (max(tCount) == 1){
-    group.table <- group.table[which.min(group.table$LV),]
+table.blastn <- table.blastn[table.blastn$Reads %in% temp.table.multi$Reads,]
+
+# calculate.consensus <- function(Reads,LUTnr,bitScore,tCount){
+#   #invisible(lapply(c("Reads","LUTnr","bitScore","tCount"), function(x) assign(x, temp.table.multi[temp.table.multi$BC %in% "AAATCTGTGCGGGTTTAAGC",x, with=FALSE], envir = .GlobalEnv)))
+#     
+#   group.table <- data.table(Reads,tCount,key="Reads")
+#   group.table[, c("mCount","tCount"):=list(tCount,sum(tCount))]
+#   score.table <- table.blastn[table.blastn$Reads %in% group.table$Reads,]
+#   group.table <- merge(group.table,score.table,by="Reads")
+#   group.table[,c("bitScore","mismatches" ,"mCount"):= list(max(bitScore),median(mismatches), sum(mCount)), by="LUTnr"]
+#   group.table <- group.table[group.table$mCount == max(group.table$mCount),]
+#   group.table <- group.table[which.max(group.table$bitScore),]
+#   
+#   if (max(group.table$mCount) == 1){
+#     group.table$Mode <- "Amb"
+#   } else {
+#     group.table$Mode <- "Def"
+#   }
+# 
+#   return(group.table[1,])
+# }
+# #temp.table.multi <- temp.table.multi[1:10000,]
+# #temp.table.multi.sub <- temp.table.multi[4100000:4100100,]
+# strt8 <- Sys.time()
+# temp.table.multi.sub[,c("Reads","tCount","mCount","LUTnr","mismatches","bitScore","Mode"):=calculate.consensus(Reads,LUTnr,bitScore,tCount), by="BC"]
+# print(Sys.time()-strt8)
+
+
+#Second alternative
+
+# calculate.consensus <- function(group.table){
+#   #group.table <- temp.table.multi[temp.table.multi$BC %in% "GTTTGCGTGTTGCCGCGTGC",]
+#   group.table[, c("mCount","tCount"):=list(tCount,sum(tCount))]
+#   score.table <- table.blastn[table.blastn$Reads %in% group.table$Reads,]
+#   group.table <- merge(group.table,score.table,by="Reads", allow.cartesian=TRUE)
+#   group.table[,c("bitScore","mismatches" ,"mCount"):= list(max(bitScore),median(mismatches), sum(mCount)), by="LUTnr"]
+#   group.table <- group.table[group.table$mCount == max(group.table$mCount),]
+#   group.table <- group.table[which.max(group.table$bitScore),]
+#   
+#   if (max(group.table$mCount) == 1){
+#     group.table$Mode <- "Amb"
+#   } else {
+#     group.table$Mode <- "Def"
+#   }
+#   
+#   return(group.table[1,])
+# }
+# #temp.table.multi <- temp.table.multi[4100000:4100100,]
+# setkey(temp.table.multi,BC)
+# 
+# temp.table.multi[,c("LUTnr","bitScore","mismatches"):=NULL]
+# temp.table.multi.table <- split(temp.table.multi,temp.table.multi$BC)
+# temp.table.multi.table <- mclapply(temp.table.multi.table, calculate.consensus, 
+#                                        mc.preschedule = TRUE, mc.cores = detectCores())
+# temp.table.multi <- rbindlist(temp.table.multi.table)
+
+#Third alternative
+
+
+
+calculate.consensus <- function(Reads,LUTnr,bitScore,tCount){
+  #invisible(lapply(c("Reads","LUTnr","bitScore","tCount"), function(x) assign(x, temp.table.multi[temp.table.multi$BC %in% "AAATCTGTGCGGGTTTAAGC",x, with=FALSE], envir = .GlobalEnv)))
+    
+  group.table <- data.table(Reads,tCount,key="Reads")
+  group.table[, c("mCount","tCount"):=list(tCount,sum(tCount))]
+  score.table <- table.blastn[table.blastn$Reads %in% group.table$Reads,]
+  group.table <- merge(group.table,score.table,by="Reads")
+  group.table[,c("bitScore","mismatches" ,"mCount"):= list(max(bitScore),median(mismatches), sum(mCount)), by="LUTnr"]
+  group.table <- group.table[group.table$mCount == max(group.table$mCount),]
+  group.table <- group.table[which.max(group.table$bitScore),]
+  
+  if (max(group.table$mCount) == 1){
+    group.table$Mode <- "Amb"
   } else {
-    group.table <- group.table[which.max(group.table$mCount),]
+    group.table$Mode <- "Def"
   }
-  if (nrow(group.table) > 1){
-    group.table[,LUTnr:=NA]
-  }
+
   return(group.table[1,])
 }
-#temp.table.multi <- temp.table.multi[1:10000,]
 
-temp.table.multi[,c("LUTnr","LV","tCount","mCount"):=calculate.consensus(LUTnr,LV,tCount), by="BC"]
+#temp.table.multi <- temp.table.multi[1:10000,]
+#temp.table.multi.sub <- temp.table.multi[4100000:4100100,]
+split.table <- data.table(BC=unique(temp.table.multi$BC), key="BC")
+split.table$Cut <- cut(1:nrow(split.table),detectCores()/2)
+temp.table.multi <- merge(temp.table.multi,split.table, by="BC")
+setkey(temp.table.multi,"Cut")
+
+rm(table.blastn.topHit, split.table,reads.BC,reads.trim, unique.reads,full.table,LUT.dna)
+gc()
+
+print(system.time(temp.table.multi.table <- split(temp.table.multi,temp.table.multi$Cut)))
+
+strt8 <- Sys.time()
+# temp.table.multi.table <- mclapply(temp.table.multi.table, function(x) x[,c("Reads","tCount","mCount","LUTnr","mismatches","bitScore","Mode"):=calculate.consensus(Reads,LUTnr,bitScore,tCount), by="BC"], 
+#                                    mc.preschedule = FALSE, mc.cores = detectCores()/2)
+
+temp.table.multi.table <- mclapply(temp.table.multi.table, function(x) x[,j=list(calculate.consensus(Reads,LUTnr,bitScore,tCount)), by="BC"], 
+                                   mc.preschedule = FALSE, mc.cores = detectCores()/2)
+
+temp.table.multi <- rbindlist(temp.table.multi.table)
+temp.table.multi[,"Cut":=NULL]
+print(Sys.time()-strt8)
+
+
+
 setkeyv(temp.table.multi,c("BC","LUTnr"))
-temp.table.multi <- unique(temp.table.multi)
-temp.table.multi <- temp.table.multi[!is.na(temp.table.multi$LUTnr)]
+#temp.table.multi <- unique(temp.table.multi)
 temp.table.multi.consensus <- rbind(temp.table.multi, temp.table.multi.clean)
 
-output.Table <- temp.table.multi.consensus
+print(paste("Total number of definitive Barcodes:", length(grep("Def",temp.table.multi.consensus$Mode))))
+print(paste("Total number of ambiguous Barcodes:", length(grep("Amb",temp.table.multi.consensus$Mode))))
+print(paste("Total number of single-read Barcodes:", nrow(temp.table.single)))
+
+output.Table <- rbind(temp.table.multi.consensus,temp.table.single)
 save(output.Table, file="data/multipleContfragmentsNew.rda")
-output.Table <- temp.table.multi.clean
-save(output.Table, file="data/singleContfragmentsNew.rda")
-
-print("Post-matching analysis time:")
-print(Sys.time()-strt3)
-
-
-print("Fragment translation time:")
-print(Sys.time()-strt2)
-
 
 print("Total analysis time:")
 print(Sys.time()-strt1)
