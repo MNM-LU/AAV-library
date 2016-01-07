@@ -30,40 +30,7 @@ suppressPackageStartupMessages(library(Gviz))
 suppressPackageStartupMessages(library(plyr))
 suppressPackageStartupMessages(library(devtools))
 
-
-# #+ setup, include=FALSE
-# opts_chunk$set(fig.width = 7.5, fig.height = 8)
-# opts_chunk$set(comment = NA)
-# 
-# config <- read.table("config_tissue.txt", header = FALSE, skip = 0, sep="\t",stringsAsFactors = FALSE, fill=TRUE)
-# colnames(config) <- c("Parameter", "Value")
-# 
-# #'Sequencing files
-# #'===================
-# knitr::kable(config, format = "markdown")
-# dataDir <- config$Value[1]
-# paired.alignment <- as.logical(config$Value[5])
-# 
-# #'Analysis parameters
-# #'===================
-# bb.dir <- config$Value[6]
-# fragmentTemplate  <- config$Value[7]
-# run.subset <- as.logical(config$Value[9])
-# align.p7 <- as.logical(config$Value[10])
-# max.cores <- as.integer(config$Value[11])
-# subset.count <- as.integer(config$Value[12])
-# 
-# #'Script execution
-# #'===================
-# strt<-Sys.time()
-# 
-# id.backbone.L <- file.path(bb.dir, "Ltrim.fa") 
-# id.backbone.R <- file.path(bb.dir, "Rtrim.fa")
-# id.BC.L <- file.path(bb.dir, "BC-L.fa")
-# id.BC.R <- file.path(bb.dir, "BC-R.fa")
-# id.uncut <- file.path(bb.dir, "uncut.fa")
-
-load("data/multipleContfragments.rda")
+load("data/multipleContfragmentsComplete.rda")
 load("data/alignedLibraries.rda")
 load("data/LUTdna.rda")
 
@@ -71,8 +38,17 @@ load.list <- read.table("loadlist.txt", header = FALSE, skip = 0, sep="\t",strin
 dataDir <- "../../Shared/NGS\\ data/Original\\ sequencing\\ files/2015-09-24_NS500551_102_H3MNJAFXX/Originals"
 colnames(load.list) <- c("Name", "BaseName","GroupName")
 
+log.table <- data.table(Name="Name",
+                        Reads=NA,
+                        Purity=NA,
+                        BCs=NA,
+                        SCdroppedBC=NA,
+                        allBCs=NA,
+                        scBCs=NA)
+
 analyzeTissue <- function(indexNr) {
 #indexNr <- 15
+  
   name <- unlist(strsplit(load.list$BaseName[indexNr],"/"))
   name <- name[!is.na(name)]
   if (length(name)==2){
@@ -88,13 +64,11 @@ in.name.P7 <- tempfile(pattern = "P7_", tmpdir = tempdir(), fileext = ".fastq.gz
 system(paste("cat '", paste(as.character(in.files.P5), collapse="' '"), "' > ", in.name.P5, " 2>&1", sep = ""), intern = TRUE, ignore.stdout = FALSE)
 system(paste("cat '", paste(as.character(in.files.P7), collapse="' '"), "' > ", in.name.P7, " 2>&1", sep = ""), intern = TRUE, ignore.stdout = FALSE)
 
+log.table$Name <- load.list$Name[indexNr]
+name.out <- log.table$Name
 
-name.out <- load.list$Name[indexNr]
-
-
-#' Selection of real amplicons
-#' ============================
-#+ Selecting real amplicons.......
+# Selection of real amplicons
+# ============================
 
 out.name.P5 <- tempfile(pattern = "P5_", tmpdir = tempdir(), fileext = ".fastq.gz")
 out.name.P7 <- tempfile(pattern = "P7_", tmpdir = tempdir(), fileext = ".fastq.gz")
@@ -106,118 +80,71 @@ command.args <- paste("-Xmx12g overwrite=true k=10 rcomp=f skipr1=t qhdist=0 mas
                       " fliteral=", "CGCCACAACATCGAGGACGGCAGCGTG", sep = "") #Length 48-72 bp k=18 mink=10 qhdist=0 hammingdistance=3 findbestmatch=t , ATATCATGGCCGACAAGCAGA
 
 sys.out <- system2(path.expand("~/bbmap/bbduk2.sh"), args=command.args, stdout=TRUE, stderr=TRUE) #
-
-sys.out <- as.data.frame(sys.out)
-
-
-colnames(sys.out) <- c("bbduk2 Identification of real amplicons")
-invisible(sys.out[" "] <- " ")
-lengthOut <- (nrow(sys.out))
-knitr::kable(sys.out[3:lengthOut,], format = "markdown")
+log.table$Purity <- strsplit(sys.out[grep("Contaminants",sys.out)],split = "\t")[[1]][2]
 
 in.name.P5 <- out.name.P5
 in.name.P7 <- out.name.P7
 
-nr.Reads <- as.integer(system(paste("gunzip -c ",shQuote(gsub("([\\])", "", in.name.P5)),
+log.table$Reads <- as.integer(system(paste("gunzip -c ",shQuote(gsub("([\\])", "", in.name.P5)),
                                               " | echo $((`wc -l`/4)) 2>&1", sep = ""), intern = TRUE, 
                                         ignore.stdout = FALSE)) #Stores the read count utilized
-print(paste("Utilized sequences:", nr.Reads))
 
 
-#' Extraction of barcodes
-#' ============================
-#+ Extracting barcodes.......
-
-
+# Extraction of barcodes
+# ============================
 
 out.name.BC <- tempfile(pattern = "BC_", tmpdir = tempdir(), fileext = ".fastq.gz")
 
 sys.out <- system(paste("~/bbmap/bbduk2.sh overwrite=true k=12 mink=12 hammingdistance=2 findbestmatch=t ",
-                        "trd=t rcomp=f skipr2=t findbestmatch=f qhdist=1 minavgquality=0 ordered=t maxns=0 minlength=18 ",
+                        "trd=t rcomp=f skipr2=t findbestmatch=f qhdist=0 minavgquality=0 ordered=t maxns=0 minlength=18 ",
                         "maxlength=22 threads=", detectCores()," in=", shQuote(in.name.P5),
                         " out=", out.name.BC,
                         " lliteral=", "GGCCTAGCGGCCGCTTTACTT",
-                        " rliteral=", "ATAACTTCGTATAATGTATGC",
+                        " rliteral=", "ATAACTTCGTATA",
                         " 2>&1", sep = ""), intern = TRUE, ignore.stdout = FALSE) #" fliteral=",id.uncut,
-sys.out <- as.data.frame(sys.out)
 
-# 
-# sys.out <- system(paste("~/bbmap/bbduk2.sh overwrite=true k=18 mink=18 hammingdistance=2 findbestmatch=t ",
-#                         "rcomp=f findbestmatch=f qhdist=1 minavgquality=0 maxns=0 minlength=18 ",
-#                         "maxlength=22 threads=", detectCores()," in=", shQuote(in.name.P5), 
-#                         " out=", out.name.BC," lliteral=", "GGCCTAGCGGCCGCTTTACTT",
-#                         " rliteral=", "ATAACTTCGTATAATGTATGC",
-#                         " 2>&1", sep = ""), intern = TRUE, ignore.stdout = FALSE) 
-# sys.out <- as.data.frame(sys.out)
-
-
-
-
-colnames(sys.out) <- c("bbduk2 Extraction of barcodes")
-invisible(sys.out[" "] <- " ")
-lengthOut <- (nrow(sys.out))
-knitr::kable(sys.out[3:lengthOut,], format = "markdown")
-rm(sys.out)
+log.table$BCs <- strsplit(sys.out[grep("Result:",sys.out)],split = "\t")[[1]][2]
 
 reads.BC <- readFastq(out.name.BC)
-sread(reads.BC)
-unique(sread(reads.BC))
-barcodeTable <- data.table(ID=as.character(ShortRead::id(reads.BC)), BC=as.character(sread(reads.BC)))
+barcodeTable <- data.table(ID=as.character(ShortRead::id(reads.BC)), BC=as.character(sread(reads.BC)), key="BC")
 
-setkey(barcodeTable,BC)
-
-#' Starcode based barcode reduction
-#' ============================
-#+ Reducing barcodes.......
+# Starcode based barcode reduction
+# ============================
 
 out.name.BC.star <- tempfile(pattern = "BCsc_", tmpdir = tempdir(), fileext = ".txt")
-system(paste("gunzip -c ",out.name.BC," | starcode -t ",detectCores()/2," --print-clusters -d",
-             config$Value[8]," -r5 -q -o ", out.name.BC.star, " 2>&1", sep = ""), 
+
+system(paste("gunzip -c ",out.name.BC," | starcode -t ",detectCores()-1," --print-clusters -d",
+             1," -r5 -q -o ", out.name.BC.star, " 2>&1", sep = ""), 
        intern = TRUE, ignore.stdout = FALSE)
 
-table.BC.sc <- read.table(out.name.BC.star, header = FALSE, row.names = 1, skip = 0, sep="\t",
-                          stringsAsFactors = FALSE, fill=FALSE)
-table.BC.sc$V2 <- NULL
-list.BC.sc <- split(table.BC.sc, rownames(table.BC.sc))
-list.BC.sc <- lapply(list.BC.sc, function(x) strsplit(as.character(x), ","))
-list.BC.sc <- lapply(list.BC.sc, rbind)
-table.BC.sc <- data.table(cbind(unlist(list.BC.sc, use.names = TRUE)), keep.rownames=TRUE)
-invisible(table.BC.sc[,rn:=gsub("[0-9]","",rn)])
-droppedBC <- length(unique(sread(reads.BC))) - length(unique(table.BC.sc$V1) %in% unique(sread(reads.BC)))
-print(paste("Dropped BCs in Starcode:", droppedBC))
+table.BC.sc <- data.table(read.table(out.name.BC.star, header = FALSE, row.names = 1, skip = 0, sep="\t",
+                                     stringsAsFactors = FALSE, fill=FALSE),keep.rownames=TRUE, key="rn") #, nrows = 1000
+table.BC.sc[,V2 := NULL]
 
-setnames(table.BC.sc,'V1','BC')
-setnames(table.BC.sc,'rn','scBC')
+table.BC.sc <- table.BC.sc[, strsplit(as.character(V3),",",fixed=TRUE), by=rn]
+
+log.table$SCdroppedBC <- length(unique(sread(reads.BC))) - length(unique(table.BC.sc$V1) %in% unique(sread(reads.BC)))
+
+
+setnames(table.BC.sc,c("V1","rn"),c("BC","scBC"))
+
+# Replacing barcodes with Starcode reduced versions
+# ============================
+
 
 setkey(table.BC.sc,BC)
-table.BC.sc<- unique(table.BC.sc)
-BCs.sc.counts <- table(table.BC.sc$BC)
-BCs.sc.counts.single <- BCs.sc.counts[BCs.sc.counts == 1]
-table.BC.sc <- table.BC.sc[table.BC.sc$BC %in% names(BCs.sc.counts.single)]
 
-barcodeTable <- merge(barcodeTable,table.BC.sc, by="BC", all = FALSE, all.x = FALSE)
-rm(table.BC.sc)
-rm(reads.BC)
-setnames(barcodeTable,'BC','oldBC')
-setnames(barcodeTable,'scBC','BC')
+barcodeTable <- barcodeTable[table.BC.sc,nomatch=0]
+
+setnames(barcodeTable,c("BC","scBC"),c("oldBC","BC"))
+
 setkey(barcodeTable,BC)
 
-RetainedBC <- length(unique(barcodeTable$oldBC))
-scBC <- length(unique(barcodeTable$BC))
-print(paste("Original unique barcodes:", RetainedBC))
-print(paste("SC reduced unique barcodes:", scBC))
-
-
-table.frag <- data.table(as.data.frame((rev(sort(table(barcodeTable$oldBC))))[1:10]), keep.rownames=TRUE)
-setnames(table.frag, colnames(table.frag), c("Original BC", "Count"))
-knitr::kable(table.frag, format = "markdown")
-
-table.frag <- data.table(as.data.frame((rev(sort(table(barcodeTable$BC))))[1:15]), keep.rownames=TRUE)
-setnames(table.frag, colnames(table.frag), c("SC reduced BC", "Count"))
-knitr::kable(table.frag, format = "markdown")
+log.table$allBCs <- length(unique(barcodeTable$oldBC))
+log.table$scBCs <- length(unique(barcodeTable$BC))
 
 invisible(barcodeTable[,oldBC:=NULL])
-
+setkey(output.Table,"BC")
 
 BCcount <- rev(sort(table(barcodeTable$BC)))
 
@@ -235,16 +162,22 @@ match.ranges.list <- mclapply(1:nrow(foundFrags), matchRange, mc.preschedule = T
 match.ranges <- do.call(rbind, match.ranges.list)
 foundFragments.ranges <- allFragments.ranges[match.ranges[,1]]
 if (ncol(match.ranges) >= 2) {
-mcols(foundFragments.ranges) <- c(mcols(foundFragments.ranges), foundFrags[match.ranges[,2],2:6])
+foundFrags <- foundFrags[match.ranges[,"idxFrag"],]
+foundFrags[,c("Reads","BC","fragment"):=NULL]
+mcols(foundFragments.ranges) <- c(mcols(foundFragments.ranges), foundFrags[match.ranges[,"idxFrag"],])
 o = order(-mcols(foundFragments.ranges)$RNAcount)
 foundFragments.ranges <- foundFragments.ranges[o]
 #foundFragments.ranges[1:10]
 #assign(paste("found.",name.out, sep=""), foundFragments.ranges)
 saveRDS(foundFragments.ranges, file=paste("output/","found.",name.out,".rds", sep=""), compress = TRUE)
 }
+return(log.table)
 }
 
-lapply(1:nrow(load.list), analyzeTissue)
+all.logs <- lapply(1:nrow(load.list), analyzeTissue)
+all.logs <- rbindlist(all.logs, use.names=FALSE )
+
+knitr::kable(all.logs, format = "markdown")
 
 unlink(paste(tempdir(), "/*", sep = ""), recursive = FALSE, force = FALSE) #Cleanup of temp files
 
