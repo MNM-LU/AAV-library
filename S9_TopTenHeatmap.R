@@ -48,7 +48,6 @@ trim.names[, c("Category", "Protein", "Origin", "Extra", "Number","GeneName") :=
 trim.names$GeneName <- gsub("/","-",trim.names$GeneName)
 trim.names$GeneName <- gsub("_","-",trim.names$GeneName)
 levels(seqnames(select.samples)) <- trim.names$GeneName
-select.samples <- select.samples[mcols(select.samples)$LV < 3 & mcols(select.samples)$mCount/mcols(select.samples)$tCount > 0.5]
 mcols(select.samples) <- cbind(mcols(select.samples), DataFrame(SeqCount=0))
 select.samples.list <- split(select.samples, mcols(select.samples)$Group)
 setCount <- function(inRange){
@@ -69,10 +68,11 @@ select.samples <- unlist(do.call(GAlignmentsList,unlist(select.samples.list)), u
 #'===================
 o = order(-mcols(select.samples)$NormCount)
 select.samples <- select.samples[o]
-sampleList <- unique(mcols(select.samples)$Group)
-#sampleList <- sampleList[c(4,7,9,2)]
-sampleList <- sampleList[c(6,5,3,1)]
-#sampleList <- sampleList[c(8,12,10,11)]
+# sampleList <- unique(mcols(select.samples)$Group)
+sampleList <- c("CNS100x_Str","CNS100x_Th","CNS100x_Ctx","CNS100x_SN")
+#sampleList <- c("CNS1000x_Str","CNS1000x_Th","CNS1000x_Ctx","CNS1000x_SN")
+#sampleList <- sampleList[c(4,3,1,2,5,7,6,9)]
+#sampleList <- c("PrimN_100x","PrimN_1000x","293T_100x","293T_1000x")
 
 topTen.list <- table(unlist(lapply(sampleList, function(x) names(select.samples[mcols(select.samples)$Group == x][1:min(10,length(select.samples[mcols(select.samples)$Group == x]))]))))
 select.samples.top <- select.samples[names(select.samples) %in% names(topTen.list)]

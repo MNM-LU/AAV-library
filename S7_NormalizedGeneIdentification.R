@@ -55,7 +55,7 @@ maxCount <- max(unlist(readCounts))
 readCounts <- lapply(readCounts, function(x) maxCount/x)
 
 makeNormCount <- function(inIndex){
-  #inIndex <- 43
+  #inIndex <- 38
   thisRange <- out.range[[inIndex]]
   mcols(thisRange)$RNAcount <- mcols(thisRange)$RNAcount*readCounts[[inIndex]]
   return(thisRange)
@@ -67,6 +67,7 @@ out.range.tmp <- lapply(1:length(readCounts), makeNormCount)
 out.range <- do.call(GAlignmentsList,unlist(out.range))
 (out.range <- cbind(unlist(out.range))[[1]])
 mcols(out.range)$NormCount <- 1
+#out.range <- out.range[mcols(out.range)$Mode == "Def"] #Selects only defined i.e., trusted reads
 
 out.range.split <- split(out.range,c(mcols(out.range)$Group))
 out.range.split <- lapply(out.range.split, function(x) split(x,seqnames(x)))
@@ -76,7 +77,7 @@ MergeCounts <- function(inRanges) {
 outRanges <- inRanges[1]
 mcols(outRanges) <- data.frame(structure=mcols(inRanges)$structure[1],
                                Group=mcols(inRanges)$Group[1],
-                               LV=sum(mcols(inRanges)$LV*mcols(inRanges)$tCount)/sum(mcols(inRanges)$tCount),
+                               bitScore=sum(mcols(inRanges)$bitScore*mcols(inRanges)$tCount)/sum(mcols(inRanges)$tCount),
                                mCount=sum(mcols(inRanges)$mCount),
                                tCount=sum(mcols(inRanges)$tCount),
                                BC=paste(unique(mcols(inRanges)$BC), collapse = ","),

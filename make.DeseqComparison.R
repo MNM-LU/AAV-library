@@ -3,7 +3,7 @@ suppressPackageStartupMessages(library(ggbio))
 suppressPackageStartupMessages(library(data.table))
 library("pheatmap")
 attach("data/RNAtablesCompleteBin.rda")
-sample.names <- ls("file:data/RNAtablesCompleteBin.rda")
+sample.names <- ls("file:RNAtablesCompleteBin.rda")
 o = c(3,53,11,47,51,34,13,48,52,35,7,45,49,32,9,46,50,33,43,44,6,2,23,30,36,40,17,25,31,37,41,18,19,29,38,15,21,27,28,4,1)
 sample.names <- sample.names[o]
 full.coldata <- data.frame(Condition=rbind("PlasmidLib",

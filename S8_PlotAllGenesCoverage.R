@@ -52,7 +52,7 @@ trim.names[, c("Category", "Protein", "Origin", "Extra", "Number","GeneName") :=
 trim.names$GeneName <- gsub("/","-",trim.names$GeneName)
 trim.names$GeneName <- gsub("_","-",trim.names$GeneName)
 levels(seqnames(select.samples)) <- trim.names$GeneName
-select.samples <- select.samples[mcols(select.samples)$LV < 3 & mcols(select.samples)$mCount/mcols(select.samples)$tCount > 0.5]
+#select.samples <- select.samples[mcols(select.samples)$LV < 3 & mcols(select.samples)$mCount/mcols(select.samples)$tCount > 0.5]
 
 geneTable <- data.frame(seqlengths(select.samples))
 colnames(geneTable) <- "SeqLength"
