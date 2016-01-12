@@ -20,7 +20,7 @@ suppressPackageStartupMessages(library(Hmisc))
 #'===================
 source(file.path("functions", "AAtoDNA.R"))
 
-allSequences <- readFasta("input/DNA Libraries for Retrograde Transport.fasta")
+allSequences <- readFasta("input/DNA-lib_RetrogradeTransport.fasta")
 AAlist <- data.frame(Class=character(),
                      Family=character(),
                      Strain=character(),
@@ -103,7 +103,7 @@ return(sortedFragments)
 
 sortedFragments.14aa <- generateFragments(14,14,1)
 
-#Add the overhangs for amplication PCR and Gibson assembly into the AAV plasmid
+#'Add the overhangs for amplication PCR and Gibson assembly into the AAV plasmid
 fivePrime <- tolower("AACCTCCAGAGAGGCAACGCT")
 threePrime <- tolower("GCCAGACAAGCAGCTACCGCA")
 row.names(sortedFragments.14aa) <- paste(fivePrime,row.names(sortedFragments.14aa),threePrime, sep = "")
@@ -111,25 +111,30 @@ row.names(sortedFragments.14aa) <- paste(fivePrime,row.names(sortedFragments.14a
 sortedFragments.14aa.G4S <- generateFragments(14,14,3)
 sortedFragments.14aa.A5 <- sortedFragments.14aa.G4S
 
-#Add the overhangs including G4S spacers for amplication PCR and Gibson assembly into the AAV plasmid
+#'Add the overhangs including G4S spacers for amplication PCR and Gibson assembly into the AAV plasmid
+
 fivePrime <- tolower("AACCTCCAGAGAGGCAACGGAGGCGGAGGAAGT")
 threePrime <- tolower("GGAGGCGGCGGAAGCAGACAAGCAGCTACCGCA")
 row.names(sortedFragments.14aa.G4S) <- paste(fivePrime,row.names(sortedFragments.14aa.G4S),threePrime, sep = "")
 
-#Add the overhangs including A5 spacers for amplication PCR and Gibson assembly into the AAV plasmid
+#'Add the overhangs including A5 spacers for amplication PCR and Gibson assembly into the AAV plasmid
+
 fivePrime <- tolower("AACCTCCAGAGAGGCAACGCTGCTGCAGCAGCC")
 threePrime <- tolower("GCAGCTGCAGCTGCCAGACAAGCAGCTACCGCA")
 row.names(sortedFragments.14aa.A5) <- paste(fivePrime,row.names(sortedFragments.14aa.A5),threePrime, sep = "")
 
-#Generate 22aa fragments
+#'Generate 22aa fragments
+
 sortedFragments.22aa <- generateFragments(22,22,3)
 
-#Add the overhangs for amplication PCR and Gibson assembly into the AAV plasmid
+#'Add the overhangs for amplication PCR and Gibson assembly into the AAV plasmid
+
 fivePrime <- tolower("AACCTCCAGAGAGGCAACGCT")
 threePrime <- tolower("GCCAGACAAGCAGCTACCGCA")
 row.names(sortedFragments.22aa) <- paste(fivePrime,row.names(sortedFragments.22aa),threePrime, sep = "")
 
-#Merge all separate fragment lists into one complete list
+#'Merge all separate fragment lists into one complete list
+
 sortedFragments <- c(sortedFragments.22aa,sortedFragments.14aa,sortedFragments.14aa.A5,sortedFragments.14aa.G4S)
 
 print(paste("Number of unique fragments:",length(unique(names(sortedFragments))), sep=" "))

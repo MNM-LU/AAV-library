@@ -89,7 +89,7 @@ writeFasta(LUT.22aa.seq,LUT.22aa.fa)
 #'Build Bowtie index
 #'===================
 
-seqs.original <- readFasta("input/DNA Libraries for Retrograde Transport_fPolChikv.fasta")
+seqs.original <- readFasta("input/DNA-lib_RetrogradeTransport.fasta")
 
 seqs.AA <- Biostrings::translate(sread(seqs.original), genetic.code=GENETIC_CODE, if.fuzzy.codon="error")
 
