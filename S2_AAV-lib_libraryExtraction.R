@@ -34,10 +34,9 @@ paired.alignment <- as.logical(config$Value[5])
 #'Analysis parameters
 #'===================
 knitr::kable(config, format = "markdown")
-run.subset <- as.logical(config$Value[9])
-align.p7 <- as.logical(config$Value[10])
-max.cores <- as.integer(config$Value[11])
-subset.count <- as.integer(config$Value[12])
+run.subset <- as.logical(config$Value[6])
+max.cores <- as.integer(config$Value[7])
+subset.count <- as.integer(config$Value[8])
 
 strt<-Sys.time()
 

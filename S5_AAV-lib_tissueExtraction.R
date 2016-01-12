@@ -35,7 +35,7 @@ load("data/alignedLibraries.rda")
 load("data/LUTdna.rda")
 
 load.list <- read.table("input/loadlist.txt", header = FALSE, skip = 0, sep="\t",stringsAsFactors = FALSE, fill=TRUE)
-dataDir <- "../../Shared/NGS\\ data/Original\\ sequencing\\ files/2015-09-24_NS500551_102_H3MNJAFXX/Originals"
+dataDir <- "seqFiles/RNA"
 colnames(load.list) <- c("Name", "BaseName","GroupName")
 
 log.table <- data.table(Name="Name",

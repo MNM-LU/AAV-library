@@ -1,3 +1,15 @@
+
+#' ---
+#' title: "Generate library analysis plots"
+#' author: "Tomas Bjorklund"
+#' output: 
+#'  pdf_document:
+#'    highlight: tango
+#' geometry: margin=0.7in
+#' ---
+
+#' This script visualizes components of the library 
+suppressPackageStartupMessages(library(knitr))
 suppressPackageStartupMessages(library(GenomicAlignments))
 suppressPackageStartupMessages(library(ggplot2))
 suppressPackageStartupMessages(library(DESeq2))
@@ -6,7 +18,7 @@ suppressPackageStartupMessages(library(data.table))
 suppressPackageStartupMessages(library(beanplot))
 suppressPackageStartupMessages(library(scales))
 
-load("~/Dropbox (Bjorklund Lab)/R-projects/AAV-library/completeLibraryRanges.rda")
+complete.ranges <- readRDS("output/completeLibraryRanges.rds")
 purity.table <- data.table(mcols(complete.ranges)$mCount/mcols(complete.ranges)$tCount)
 purity.table$BCwidth <- width(mcols(complete.ranges)$BC)
 qplot(mcols(complete.ranges)$tCount, stat = "ecdf", geom = "step")
@@ -26,16 +38,7 @@ ggplot(purity.table,aes(x = BCwidth, fill = as.character(BCwidth)))+geom_histogr
   scale_x_continuous(limit=c(17,23), breaks=c(seq(18,22,1)), expand =c(0,0))
 
 #Plot Venn diagrams of fragments
-load("~/Dropbox (Bjorklund Lab)/R-projects/AAV-library/completeLibraryRanges.rda")
-LUT.dna <- read.table("Complete fragment list for Custom array 2015-02-10.txt", header = TRUE, skip = 0, sep="\t",stringsAsFactors = FALSE, fill=TRUE)
-LUT.dna <- data.table(LUT.dna)
-invisible(LUT.dna[,Sequence:=gsub("aacctccagagaggcaac","",Sequence)])
-invisible(LUT.dna[,Sequence:=gsub("agacaagcagctaccgca","",Sequence)])
-invisible(LUT.dna[,Sequence:=toupper(Sequence)])
-setkey(LUT.dna, "Sequence")
-LUT.dna <- unique(LUT.dna)
-LUT.dna$Names <- LUT.dna$Sequence
-
+load("data/LUTdna.rda")
 
 total.library <- readRDS("output/total.infectiveLib.rds")
 total.str <- GAlignmentsList(readRDS("output/found.RatNr15_1000x_Str-15_RatNr19_1000x_Str-22_RatNr20_1000x_Str-24_RatNr21_1000x_Str-19.rds"),readRDS("output/found.RatNr1_100x_Str-7_RatNr7_100x_Str-3_RatNr8_100x_Str-11.rds"))

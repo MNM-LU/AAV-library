@@ -44,7 +44,6 @@ reads.BC <- readFastq(barcodes.file)
 #' ============================
 #+ Making Bowtie index.......
 
-
 LUT.fa <- tempfile(pattern = "LUT_14aa_", tmpdir = tempdir(), fileext = ".fa")
 LUT.seq = ShortRead(DNAStringSet(LUT.dna$Sequence), BStringSet(1:length(LUT.dna$Names)))
 writeFasta(LUT.seq,LUT.fa)
@@ -55,7 +54,7 @@ unique.reads <- unique(sread(reads.trim))
 
 #'Select subset
 #'===================
-#unique.reads <- unique.reads[sample(length(unique.reads), 50000)]
+unique.reads <- unique.reads[sample(length(unique.reads), 50000)]
 
 unique.reads <- ShortRead(DNAStringSet(unique.reads), BStringSet(1:length(unique.reads)))
 fragments.unique.fa <- tempfile(pattern = "FragUnique_", tmpdir = tempdir(), fileext = ".fa")
@@ -89,7 +88,6 @@ table.blastn <- data.table(read.table(blast.out, header = FALSE, skip = 0, sep="
 
 system(paste("mv", blast.out, "./data/blastOutput.csv", sep=" "))
 
-
 if (length(grep("Warning",table.blastn$V1)) != 0) {
   warnings.out <- unique(table.blastn[grep("Warning",table.blastn$V1),])
   table.blastn <- table.blastn[-grep("Warning",table.blastn$V1),]
@@ -105,7 +103,11 @@ table.blastn[,c("V1","identity","alignmentLength","gapOpens", "q_start", "q_end"
 table.blastn[,Reads:= as.character(sread(unique.reads)[as.integer(Reads)])]
 table.blastn[,bitScore:= as.numeric(bitScore)]
 table.blastn[,mismatches:= as.numeric(mismatches)]
-setkey(table.blastn,Reads)
+setkeyv(table.blastn,c("Reads","LUTnr"))
+setorder(table.blastn,Reads,LUTnr,-bitScore) #This makes sure that a fragment is only aligned once to the reference in the top ten matches
+table.blastn <- unique(table.blastn)
+
+
 table.blastn.topHit <- table.blastn[table.blastn[, .I[which.max(bitScore)], by="Reads"]$V1] # Select only rows with the highest bitScore
 
 full.table <- data.table(Reads=as.character(sread(reads.trim)),
@@ -218,17 +220,19 @@ print(length(unique(temp.table.multi$BC)))
 #' ============================
 #+ Calculation consensus reads .....
 
-#table.blastn <- table.blastn[table.blastn$Reads %in% temp.table.multi$Reads,]
 setkey(temp.table.multi,"BC")
 temp.table.multi[, "mCount":=tCount]
 temp.table.multi[, "tCount":=sum(tCount), by="BC"]
 
 setkey(temp.table.multi,"Reads")
 temp.table.multi[,c("LUTnr","bitScore","mismatches"):=NULL]
+setkey(table.blastn,"Reads")
 temp.table.multi <- temp.table.multi[table.blastn, nomatch=0, allow.cartesian=TRUE]
 
 setkeyv(temp.table.multi,c("BC","LUTnr"))
-temp.table.multi[,c("bitScore","mismatches" ,"mCount"):= list(max(bitScore),median(mismatches), sum(mCount)), by=key(temp.table.multi)]
+temp.table.multi[,c("bitScore","mismatches" ,"mCount"):= list(max(bitScore),
+                                                              median(mismatches), 
+                                                              sum(mCount)), by=key(temp.table.multi)]
 temp.table.multi <- unique(temp.table.multi)
 
 setkeyv(temp.table.multi,"BC")
