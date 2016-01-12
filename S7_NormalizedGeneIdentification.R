@@ -90,7 +90,7 @@ out.range <- lapply(1:length(readCounts), makeNormCount)
 out.range <- do.call(GAlignmentsList,unlist(out.range))
 out.range <- cbind(unlist(out.range))[[1]]
 mcols(out.range)$NormCount <- 1
-#out.range <- out.range[mcols(out.range)$Mode == "Def"] #Selects only defined i.e., trusted reads
+out.range <- out.range[mcols(out.range)$Mode == "Def"] #Selects only defined i.e., trusted reads
 
 #' Split the GAlignments into list based on group
 #' ============================
@@ -120,4 +120,4 @@ out.range.split <- lapply(out.range.split, function(x) mclapply(x, function(y) l
 
 out.range.split <- mclapply(out.range.split,function(x) unlist(do.call(GAlignmentsList,unlist(x)), use.names=FALSE), mc.preschedule = TRUE, mc.cores = detectCores())
 out.range.split <- unlist(do.call(GAlignmentsList,unlist(out.range.split)), use.names=FALSE)
-saveRDS(out.range.split, file="data/normalizedSampleRanges.RDS")
+saveRDS(out.range.split, file="data/normalizedSampleRangesDefined.RDS")
