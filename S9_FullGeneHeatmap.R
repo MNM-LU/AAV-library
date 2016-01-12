@@ -51,7 +51,8 @@ setkeyv(select.samples.binCat,c("Group","Category"))
 select.samples.binCat[,c("BCcount","NormCount"):=list(unlist(lapply(strsplit(paste(BC, collapse=","), ","),function(x) length(unique(x)))),
                                                       mean(NormCount)), by=key(select.samples.binCat)]
 select.samples.binCat <- unique(select.samples.binCat)
-select.samples.binCat <- select.samples.binCat[,c("Group","Category","BCcount","NormCount"), with = FALSE]
+select.samples.binCat <- select.samples.binCat[,c("Group","Category",
+                                                  "BCcount","NormCount"), with = FALSE]
 select.samples.binCat[,totBC:=sum(BCcount), by="Group"]
 max.count <- max(select.samples.binCat$totBC)
 select.samples.binCat[,BCcountN:=BCcount/totBC*max.count]
@@ -83,7 +84,9 @@ select.samples.binGene[,NormCountBC:=BCcountNseq*NormCount]
 
 select.samples.binPos <<- select.samples
 setkeyv(select.samples.binPos,c("Group","structure","Sequence"))
-select.samples.binPos <- unique(select.samples.binPos) #Due to key, this removes replicates if identical sequence mapped to multiple genes
+select.samples.binPos <- unique(select.samples.binPos) 
+#Due to key, this removes replicates if identical sequence mapped to multiple genes
+
 select.samples.binPos[,AA:=((start+2)/3)+floor((width/3)/2)]
 setkeyv(select.samples.binPos,c("Group","Category","GeneName","AA"))
 select.samples.binPos[,c("BCcount","NormCount","AnimalCount","mainStruct","mismatches"):=
@@ -92,8 +95,11 @@ select.samples.binPos[,c("BCcount","NormCount","AnimalCount","mainStruct","misma
                              unlist(lapply(strsplit(paste(Animals, collapse=","), ","),function(x) length(unique(x)))),
                              paste(unique(structure), collapse=","),
                              median(mismatches)), by=key(select.samples.binPos)]
+
 select.samples.binPos <- unique(select.samples.binPos)
-select.samples.binPos <- select.samples.binPos[,c("Group","GeneName","AA","NormCount","BCcount","AnimalCount","mainStruct","mismatches","seqlength"), with = FALSE]
+select.samples.binPos <- select.samples.binPos[,c("Group","GeneName","AA","NormCount",
+                                                  "BCcount","AnimalCount","mainStruct",
+                                                  "mismatches","seqlength"), with = FALSE]
 select.samples.binPos[,totBC:=sum(BCcount), by="Group"]
 max.count <- max(select.samples.binPos$totBC)
 select.samples.binPos[,BCcountN:=BCcount/totBC*max.count]
@@ -111,7 +117,9 @@ plotCategory <- function(select.samples.table,plot.col,sample.select){
 setkey(select.samples.table,Group)
 select.samples.select <- select.samples.table[sample.select]
 eval(parse(text=paste("setorder(select.samples.select,Group, -", plot.col,")", sep="")))
-select.samples.matrix <- acast(select.samples.select, Category~Group, value.var=plot.col) #Utilizes reshape 2 to make matrix for heatmap
+select.samples.matrix <- acast(select.samples.select, Category~Group, value.var=plot.col) 
+#Utilizes reshape 2 to make matrix for heatmap
+
 select.samples.matrix[is.na(select.samples.matrix)] <- 0
 select.samples.matrix <- select.samples.matrix[,sample.select]
 return(pheatmap(select.samples.matrix, cluster_rows=TRUE, show_rownames=TRUE, cluster_cols=FALSE))
@@ -131,7 +139,9 @@ plotGene <- function(select.samples.table,plot.col,sample.select){
 setkey(select.samples.table,Group)
 select.samples.select <- select.samples.table[sample.select]
 eval(parse(text=paste("setorder(select.samples.select,Group, -", plot.col,")", sep="")))
-select.samples.matrix <- acast(select.samples.select, GeneName~Group, value.var=plot.col) #Utilizes reshape 2 to make matrix for heatmap
+select.samples.matrix <- acast(select.samples.select, GeneName~Group, value.var=plot.col) 
+#Utilizes reshape 2 to make matrix for heatmap
+
 select.samples.matrix[is.na(select.samples.matrix)] <- 0
 select.samples.matrix <- select.samples.matrix[,sample.select]
 return(pheatmap(select.samples.matrix, cluster_rows=TRUE, show_rownames=TRUE, cluster_cols=FALSE))

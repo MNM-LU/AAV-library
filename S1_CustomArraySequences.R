@@ -37,7 +37,8 @@ for (i in 1:length(allSequences)){
   thisID <- as.character(ShortRead::id(allSequences[i]))
   thisSeq <- sread(allSequences[i])
   thisAA <- Biostrings::translate(thisSeq, genetic.code=GENETIC_CODE, if.fuzzy.codon="solve")
-  AAlist[i,c("Class","Family","Strain","Note","Number","Name","AAfragment")] <- c(BBmisc::explode(thisID, sep=","),as.character(thisAA))
+  AAlist[i,c("Class","Family","Strain","Note",
+             "Number","Name","AAfragment")] <- c(BBmisc::explode(thisID, sep=","),as.character(thisAA))
 }
 
 #'The generateFragments function
@@ -67,7 +68,11 @@ makeAllFrags <- function(k){
       thisFragment <- substr(thisFullAA,l,m) 
       #Take away any sequence that starts with a start codon ATG:
       if (substr(thisFragment,1,1)!="M") { 
-      fragList[count,c("Class","Family","Strain","Note","Number","Name","AAstart","AAstop","AAfragment")] <- c(AAlist[k,c("Class","Family","Strain","Note","Number","Name")],l,m,thisFragment) ## Inserts the fragment with information into the new data frame 
+      fragList[count,c("Class","Family","Strain","Note","Number",
+                       "Name","AAstart","AAstop",
+                       "AAfragment")] <- c(AAlist[k,c("Class","Family","Strain",
+                                                      "Note","Number","Name")],l,m,thisFragment) 
+      ## Inserts the fragment with information into the new data frame 
       count <- count +1
       }
       }
@@ -106,7 +111,8 @@ sortedFragments.14aa <- generateFragments(14,14,1)
 #'Add the overhangs for amplication PCR and Gibson assembly into the AAV plasmid
 fivePrime <- tolower("AACCTCCAGAGAGGCAACGCT")
 threePrime <- tolower("GCCAGACAAGCAGCTACCGCA")
-row.names(sortedFragments.14aa) <- paste(fivePrime,row.names(sortedFragments.14aa),threePrime, sep = "")
+row.names(sortedFragments.14aa) <- paste(fivePrime,row.names(sortedFragments.14aa),
+                                         threePrime, sep = "")
 
 sortedFragments.14aa.G4S <- generateFragments(14,14,3)
 sortedFragments.14aa.A5 <- sortedFragments.14aa.G4S
@@ -115,13 +121,15 @@ sortedFragments.14aa.A5 <- sortedFragments.14aa.G4S
 
 fivePrime <- tolower("AACCTCCAGAGAGGCAACGGAGGCGGAGGAAGT")
 threePrime <- tolower("GGAGGCGGCGGAAGCAGACAAGCAGCTACCGCA")
-row.names(sortedFragments.14aa.G4S) <- paste(fivePrime,row.names(sortedFragments.14aa.G4S),threePrime, sep = "")
+row.names(sortedFragments.14aa.G4S) <- paste(fivePrime,row.names(sortedFragments.14aa.G4S),
+                                             threePrime, sep = "")
 
 #'Add the overhangs including A5 spacers for amplication PCR and Gibson assembly into the AAV plasmid
 
 fivePrime <- tolower("AACCTCCAGAGAGGCAACGCTGCTGCAGCAGCC")
 threePrime <- tolower("GCAGCTGCAGCTGCCAGACAAGCAGCTACCGCA")
-row.names(sortedFragments.14aa.A5) <- paste(fivePrime,row.names(sortedFragments.14aa.A5),threePrime, sep = "")
+row.names(sortedFragments.14aa.A5) <- paste(fivePrime,row.names(sortedFragments.14aa.A5),
+                                            threePrime, sep = "")
 
 #'Generate 22aa fragments
 
@@ -131,15 +139,18 @@ sortedFragments.22aa <- generateFragments(22,22,3)
 
 fivePrime <- tolower("AACCTCCAGAGAGGCAACGCT")
 threePrime <- tolower("GCCAGACAAGCAGCTACCGCA")
-row.names(sortedFragments.22aa) <- paste(fivePrime,row.names(sortedFragments.22aa),threePrime, sep = "")
+row.names(sortedFragments.22aa) <- paste(fivePrime,row.names(sortedFragments.22aa),
+                                         threePrime, sep = "")
 
 #'Merge all separate fragment lists into one complete list
 
-sortedFragments <- c(sortedFragments.22aa,sortedFragments.14aa,sortedFragments.14aa.A5,sortedFragments.14aa.G4S)
+sortedFragments <- c(sortedFragments.22aa,sortedFragments.14aa,
+                     sortedFragments.14aa.A5,sortedFragments.14aa.G4S)
 
 print(paste("Number of unique fragments:",length(unique(names(sortedFragments))), sep=" "))
 
-write.table(c("Sequence",unique(names(sortedFragments))),"data/SortedFragments_all.txt",row.names=F,col.names=F,quote=F,sep="\t")
+write.table(c("Sequence",unique(names(sortedFragments))),
+            "data/SortedFragments_all.txt",row.names=F,col.names=F,quote=F,sep="\t")
 
 print(Sys.time()-strt)
 

@@ -40,7 +40,7 @@ reads.trim <- readFastq(fragments.file)
 reads.BC <- readFastq(barcodes.file)
 
 
-#' Make CustomArray reference index for Bowtie2
+#' Make CustomArray reference index for Blast
 #' ============================
 #+ Making Bowtie index.......
 
@@ -54,7 +54,7 @@ unique.reads <- unique(sread(reads.trim))
 
 #'Select subset
 #'===================
-unique.reads <- unique.reads[sample(length(unique.reads), 50000)]
+#unique.reads <- unique.reads[sample(length(unique.reads), 50000)]
 
 unique.reads <- ShortRead(DNAStringSet(unique.reads), BStringSet(1:length(unique.reads)))
 fragments.unique.fa <- tempfile(pattern = "FragUnique_", tmpdir = tempdir(), fileext = ".fa")
@@ -77,7 +77,8 @@ colnames(sys.out) <- c("blastn database generation")
 invisible(sys.out[" "] <- " ")
 knitr::kable(sys.out[1:(nrow(sys.out)),], format = "markdown")
 
-sys.out <-  system(paste("export SHELL=/bin/sh; cat ",fragments.unique.fa," | parallel --block ",floor(length(unique.reads)/detectCores()),
+sys.out <-  system(paste("export SHELL=/bin/sh; cat ",fragments.unique.fa," | parallel --block ",
+                         floor(length(unique.reads)/detectCores()),
                          " --recstart '>' --pipe blastn -max_target_seqs 10 -word_size 7",
                          " -num_threads 1 -outfmt 10 -db ", blast.db,
                          " -query - > ", blast.out, " 2>&1",  sep = ""),
@@ -97,8 +98,11 @@ if (length(grep("Warning",table.blastn$V1)) != 0) {
 }
 
 table.blastn[,c("Reads","LUTnr","identity","alignmentLength","mismatches",
-                "gapOpens", "q_start", "q_end", "s_start", "s_end", "evalue","bitScore") := tstrsplit(V1,",",fixed=TRUE),]
-table.blastn[,c("V1","identity","alignmentLength","gapOpens", "q_start", "q_end", "s_start", "s_end", "evalue"):=NULL]
+                "gapOpens", "q_start", "q_end", "s_start", "s_end", 
+                "evalue","bitScore") := tstrsplit(V1,",",fixed=TRUE),]
+
+table.blastn[,c("V1","identity","alignmentLength","gapOpens", "q_start", 
+                "q_end", "s_start", "s_end", "evalue"):=NULL]
 
 table.blastn[,Reads:= as.character(sread(unique.reads)[as.integer(Reads)])]
 table.blastn[,bitScore:= as.numeric(bitScore)]
@@ -126,7 +130,7 @@ print(paste("Alignment percentage:", percent(nrow(full.table)/all.reads)))
 out.name.BC.star <- tempfile(pattern = "BCsc_", tmpdir = tempdir(), fileext = ".txt")
 
 system(paste("gunzip -c ",barcodes.file," | starcode -t ",detectCores()-1," --print-clusters -d",
-             1," -r5 -q -o ", out.name.BC.star, " 2>&1", sep = ""), 
+             2," -r5 -q -o ", out.name.BC.star, " 2>&1", sep = ""), 
        intern = TRUE, ignore.stdout = FALSE)
 
 table.BC.sc <- data.table(read.table(out.name.BC.star, header = FALSE, row.names = 1, skip = 0, sep="\t",
@@ -190,7 +194,10 @@ temp.table.single$Mode <- "Amb"
 setkeyv(temp.table.multi,c("BC","LUTnr"))
 
 
-temp.table.multi[,c("bitScore","mismatches" ,"tCount"):= list(mean(bitScore),median(mismatches), .N), by=key(temp.table.multi)]
+temp.table.multi[,c("bitScore","mismatches" ,"tCount"):= list(mean(bitScore),
+                                                              median(mismatches), .N), 
+                 by=key(temp.table.multi)]
+
 temp.table.multi$Mode <- "Def"
 temp.table.multi <- unique(temp.table.multi)
 
@@ -236,11 +243,17 @@ temp.table.multi[,c("bitScore","mismatches" ,"mCount"):= list(max(bitScore),
 temp.table.multi <- unique(temp.table.multi)
 
 setkeyv(temp.table.multi,"BC")
-temp.table.multi <- temp.table.multi[temp.table.multi[, .I[mCount == max(mCount)], by=key(temp.table.multi)]$V1] # Select only rows with the highest mCount
-temp.table.multi <- temp.table.multi[temp.table.multi[, .I[which.max(bitScore)], by=key(temp.table.multi)]$V1] # Select only rows with the highest bitScore
+temp.table.multi <- temp.table.multi[temp.table.multi[, .I[mCount == max(mCount)], 
+                                                      by=key(temp.table.multi)]$V1] 
+# Select only rows with the highest mCount
+
+temp.table.multi <- temp.table.multi[temp.table.multi[, .I[which.max(bitScore)], 
+                                                      by=key(temp.table.multi)]$V1] 
+# Select only rows with the highest bitScore
+
 temp.table.multi[temp.table.multi$mCount==1]$Mode <- "Amb"
 
-print(paste("Number of barcodes with false mCount",
+print(paste("Number of barcodes with false mCount:",
             nrow(temp.table.multi[mCount > tCount])))
 
 temp.table.multi.consensus <- rbind(temp.table.multi, temp.table.multi.clean)

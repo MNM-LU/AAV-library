@@ -37,7 +37,8 @@ all.samples <- append(all.samples,total.AAV.samples)
 #'Plotting function
 #'===================
 
-plotPair <- function(topSample,bottomSample,filterBC=FALSE,filterAnimal=FALSE,AnimaladjustPlot=FALSE,NormalizePlot=TRUE) {
+plotPair <- function(topSample,bottomSample,filterBC=FALSE,filterAnimal=FALSE,
+                     AnimaladjustPlot=FALSE,NormalizePlot=TRUE) {
 # Select samples
 #===================
 
@@ -53,7 +54,8 @@ fill.values <- eval(parse(text=paste("c(", topSample,"= rgb(38,64,135, maxColorV
 
 select.samples <- all.samples[mcols(all.samples)$Group %in% names(fill.values)]
 trim.names <- data.table(GeneName=levels(seqnames(select.samples)))
-trim.names[, c("Category", "Protein", "Origin", "Extra", "Number","GeneName") := tstrsplit(GeneName, ",", fixed=TRUE)]
+trim.names[, c("Category", "Protein", "Origin", 
+               "Extra", "Number","GeneName") := tstrsplit(GeneName, ",", fixed=TRUE)]
 trim.names$GeneName <- gsub("/|_","-",trim.names$GeneName)
 levels(seqnames(select.samples)) <- trim.names$GeneName
 
@@ -161,7 +163,8 @@ if (length(bottom.sample) >=1) {
 #Output plot
 #===================
 
-plot.out <- ggplot(plot.data.bin,aes(x=AAproc,y=NormCount, fill = Group))+geom_bar(stat="identity", position="identity")+theme_bw()+
+plot.out <- ggplot(plot.data.bin,aes(x=AAproc,y=NormCount, fill = Group)) + 
+  geom_bar(stat="identity", position="identity")+theme_bw() +
   scale_fill_manual(name = "Library", values = fill.values) +
   scale_colour_manual(name = "Library", values = fill.values) +
   scale_x_continuous(limit=c(0,100), breaks=c(seq(0,100,20)), expand =c(0,0)) +
@@ -174,7 +177,8 @@ plot.out <- ggplot(plot.data.bin,aes(x=AAproc,y=NormCount, fill = Group))+geom_b
         axis.text = element_text(size = rel(0.5)),
         axis.ticks = element_line(size = rel(0.5)),
         axis.ticks.length = unit(.05, "cm"),
-        strip.text.x = element_text(size = rel(0.5), colour = "black", angle = 0, lineheight=0.1, vjust=0.1),
+        strip.text.x = element_text(size = rel(0.5), colour = "black", 
+                                    angle = 0, lineheight=0.1, vjust=0.1),
         strip.background = element_blank(),
         strip.background = element_rect(size = 0),
         panel.margin.y = unit(-0.15, "cm"),

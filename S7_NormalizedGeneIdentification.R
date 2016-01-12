@@ -25,7 +25,8 @@ suppressPackageStartupMessages(library(Hmisc))
 #+ Generating load list.......
 
 in.names.all <- list.files("output", pattern="*.rds", full.names=TRUE)
-load.list <- read.table("input/loadlist.txt", header = FALSE, skip = 0, sep="\t",stringsAsFactors = FALSE, fill=TRUE)
+load.list <- read.table("input/loadlist.txt", header = FALSE, skip = 0, sep="\t",
+                        stringsAsFactors = FALSE, fill=TRUE)
 colnames(load.list) <- c("Name", "BaseName","GroupName")
 load.list <- rbind(load.list,c("completeLibraryRanges","","totalLib"))
 load.list <- load.list[-grep("Untreat",load.list$Name),]
@@ -98,7 +99,8 @@ out.range <- out.range[mcols(out.range)$Mode == "Def"] #Selects only defined i.e
 
 out.range.split <- split(out.range,c(mcols(out.range)$Group))
 out.range.split <- lapply(out.range.split, function(x) split(x,seqnames(x)))
-out.range.split <- mclapply(out.range.split, function(x) lapply(x, function(y) split(y,names(y))), mc.preschedule = TRUE, mc.cores = detectCores())
+out.range.split <- mclapply(out.range.split, function(x) lapply(x, function(y) split(y,names(y))), 
+                            mc.preschedule = TRUE, mc.cores = detectCores())
 
 MergeCounts <- function(inRanges) {
 outRanges <- inRanges[1]

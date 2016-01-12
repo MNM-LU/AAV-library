@@ -90,10 +90,12 @@ writeFasta(LUT.22aa.seq,LUT.22aa.fa)
 
 seqs.original <- readFasta("input/DNA-lib_RetrogradeTransport.fasta")
 
-seqs.AA <- Biostrings::translate(sread(seqs.original), genetic.code=GENETIC_CODE, if.fuzzy.codon="error")
+seqs.AA <- Biostrings::translate(sread(seqs.original), genetic.code=GENETIC_CODE, 
+                                 if.fuzzy.codon="error")
 
 source("functions/AAtoDNA.R")
-seqs.optimized = ShortRead(DNAStringSet(sapply(seqs.AA, function(x) AAtoDNA(x, species="hsa"))), BStringSet(gsub("([ ])", "_", ShortRead::id(seqs.original))))
+seqs.optimized = ShortRead(DNAStringSet(sapply(seqs.AA, function(x) AAtoDNA(x, species="hsa"))), 
+                           BStringSet(gsub("([ ])", "_", ShortRead::id(seqs.original))))
 
 bowtie.fasta <- tempfile(pattern = "bowtie_", tmpdir = tempdir(), fileext = ".fa")
 

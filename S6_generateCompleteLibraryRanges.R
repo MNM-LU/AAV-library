@@ -24,7 +24,8 @@ load("data/multipleContfragmentsComplete.rda")
 output.Table$fragment <- LUT.dna$Sequence[as.integer(output.Table$LUTnr)]
 setkey(output.Table,fragment)
 
-range.idx <- data.table(fragment=names(allFragments.ranges), idxFrag=1:length(allFragments.ranges), key="fragment")
+range.idx <- data.table(fragment=names(allFragments.ranges), 
+                        idxFrag=1:length(allFragments.ranges), key="fragment")
 output.Table <- output.Table[range.idx, nomatch=0, allow.cartesian=TRUE]
 
 foundFragments.ranges <- allFragments.ranges[output.Table$idxFrag]
