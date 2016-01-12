@@ -20,12 +20,12 @@ suppressPackageStartupMessages(library(multicore))
 suppressPackageStartupMessages(library(plyr))
 suppressPackageStartupMessages(library(Hmisc))
 
-#' Generate load list anfd grouping names
+#' Generate load list and grouping names
 #' ============================
 #+ Generating load list.......
 
 in.names.all <- list.files("output", pattern="*.rds", full.names=TRUE)
-load.list <- read.table("loadlist.txt", header = FALSE, skip = 0, sep="\t",stringsAsFactors = FALSE, fill=TRUE)
+load.list <- read.table("input/loadlist.txt", header = FALSE, skip = 0, sep="\t",stringsAsFactors = FALSE, fill=TRUE)
 colnames(load.list) <- c("Name", "BaseName","GroupName")
 load.list <- rbind(load.list,c("completeLibraryRanges","","totalLib"))
 load.list <- load.list[-grep("Untreat",load.list$Name),]

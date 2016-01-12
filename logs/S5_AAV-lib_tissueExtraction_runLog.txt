@@ -1,0 +1,14 @@
+
+
+processing file: S5_AAV-lib_tissueExtraction.spin.Rmd
+  |                                                                         |                                                                 |   0%  |                                                                         |......................                                           |  33%
+  ordinary text without R code
+
+  |                                                                         |...........................................                      |  67%
+label: unnamed-chunk-1
+Quitting from lines 12-197 (S5_AAV-lib_tissueExtraction.spin.Rmd) 
+Error in .Method(..., deparse.level = deparse.level) : 
+  number of columns for arg 2 do not match those of first arg
+Calls: <Anonymous> ... withVisible -> eval -> eval -> do.call -> do.call -> <Anonymous>
+
+Execution halted

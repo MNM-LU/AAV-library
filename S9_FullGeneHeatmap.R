@@ -31,7 +31,7 @@ suppressPackageStartupMessages(library(devtools))
 
 #'Setup parameters
 #'===================
-select.samples <- readRDS("data/normalizedSampleRanges.RDS")
+select.samples <- readRDS("data/normalizedSampleRangesDefined.RDS")
 mcols(select.samples)$Sequence <- names(select.samples)
 names(select.samples) <- make.names(names(select.samples), unique=TRUE)
 length.Table <- data.table(seqnames=names(seqlengths(select.samples)),

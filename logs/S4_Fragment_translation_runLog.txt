@@ -1,0 +1,62 @@
+
+
+processing file: S4_Fragment_translation.spin.Rmd
+  |                                                                         |                                                                 |   0%  |                                                                         |...                                                              |   5%
+  ordinary text without R code
+
+  |                                                                         |......                                                           |  10%
+label: unnamed-chunk-1
+  |                                                                         |.........                                                        |  14%
+  ordinary text without R code
+
+  |                                                                         |............                                                     |  19%
+label: Making Bowtie index.......
+  |                                                                         |...............                                                  |  24%
+  ordinary text without R code
+
+  |                                                                         |...................                                              |  29%
+label: unnamed-chunk-2
+  |                                                                         |......................                                           |  33%
+  ordinary text without R code
+
+  |                                                                         |.........................                                        |  38%
+label: unnamed-chunk-3
+  |                                                                         |............................                                     |  43%
+  ordinary text without R code
+
+  |                                                                         |...............................                                  |  48%
+label: unnamed-chunk-4
+  |                                                                         |..................................                               |  52%
+  ordinary text without R code
+
+  |                                                                         |.....................................                            |  57%
+label: Reducing barcodes.......
+  |                                                                         |........................................                         |  62%
+  ordinary text without R code
+
+  |                                                                         |...........................................                      |  67%
+label: unnamed-chunk-5
+  |                                                                         |..............................................                   |  71%
+  ordinary text without R code
+
+  |                                                                         |..................................................               |  76%
+label: Splitting Reads.......
+  |                                                                         |.....................................................            |  81%
+  ordinary text without R code
+
+  |                                                                         |........................................................         |  86%
+label: Splitting Clean Reads.......
+  |                                                                         |...........................................................      |  90%
+  ordinary text without R code
+
+  |                                                                         |..............................................................   |  95%
+label: Calculation consensus reads .....
+  |                                                                         |.................................................................| 100%
+  ordinary text without R code
+
+
+output file: S4_Fragment_translation.knit.md
+
+/usr/bin/pandoc +RTS -K512m -RTS S4_Fragment_translation.utf8.md --to latex --from markdown+autolink_bare_uris+ascii_identifiers+tex_math_single_backslash-implicit_figures --output S4_Fragment_translation.pdf --template /home/lcadmin/R/x86_64-pc-linux-gnu-library/3.2/rmarkdown/rmd/latex/default.tex --highlight-style tango --latex-engine pdflatex 
+
+Output created: S4_Fragment_translation.pdf

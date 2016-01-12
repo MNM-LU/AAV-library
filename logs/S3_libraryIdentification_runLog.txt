@@ -46,25 +46,25 @@ label: Align to reference...
 
   |                                                                         |...........................................                      |  67%
 label: unnamed-chunk-8
-[samopen] SAM header is present: 135 sequences.
+[samopen] SAM header is present: 131 sequences.
   |                                                                         |..............................................                   |  70%
   ordinary text without R code
 
   |                                                                         |................................................                 |  74%
 label: unnamed-chunk-9
-[samopen] SAM header is present: 135 sequences.
+[samopen] SAM header is present: 131 sequences.
   |                                                                         |...................................................              |  78%
   ordinary text without R code
 
   |                                                                         |.....................................................            |  81%
 label: unnamed-chunk-10
-[samopen] SAM header is present: 135 sequences.
+[samopen] SAM header is present: 131 sequences.
   |                                                                         |.......................................................          |  85%
   ordinary text without R code
 
   |                                                                         |..........................................................       |  89%
 label: unnamed-chunk-11
-[samopen] SAM header is present: 135 sequences.
+[samopen] SAM header is present: 131 sequences.
   |                                                                         |............................................................     |  93%
   ordinary text without R code
 

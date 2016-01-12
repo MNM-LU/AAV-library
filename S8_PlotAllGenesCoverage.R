@@ -40,6 +40,14 @@ all.samples <- append(all.samples,total.AAV.samples)
 plotPair <- function(topSample,bottomSample,filterBC=FALSE,filterAnimal=FALSE,AnimaladjustPlot=FALSE,NormalizePlot=TRUE) {
 # Select samples
 #===================
+
+  topSample <- "CNS100x_Ctx"
+  bottomSample <- "CNS100x_Str"
+  filterBC <- FALSE
+  filterAnimal <- FALSE
+  AnimaladjustPlot <- FALSE
+  NormalizePlot <- TRUE
+  
 fill.values <- eval(parse(text=paste("c(", topSample,"= rgb(38,64,135, maxColorValue = 255), ",
                                      bottomSample,"= rgb(157,190,217, maxColorValue = 255))",sep="")))
 
@@ -103,36 +111,15 @@ if (AnimaladjustPlot) {
 
 plot.data.bin[plot.data.bin$Group == names(fill.values)[2]]$NormCount <- plot.data.bin[plot.data.bin$Group == names(fill.values)[2]]$NormCount*-1
 
-#===================
-#Output plot
-#===================
-
-plot.out <- ggplot(plot.data.bin,aes(x=AAproc,y=NormCount, fill = Group))+geom_bar(stat="identity", position="identity")+theme_bw()+
-  scale_fill_manual(name = "Library", values = fill.values) +
-  scale_colour_manual(name = "Library", values = fill.values) +
-  scale_x_continuous(limit=c(0,100), breaks=c(seq(0,100,20)), expand =c(0,0)) +
-  facet_wrap(~ GeneName, ncol=5)+   
-  theme(plot.margin=unit(x=c(0,0,0,0),units="mm"),
-    legend.position="bottom",
-    legend.margin=unit(-0.5,"cm"),
-    legend.key.height=unit(0, "cm"),
-    plot.background=element_rect(fill="white"),
-    axis.text = element_text(size = rel(0.5)),
-    axis.ticks = element_line(size = rel(0.5)),
-    axis.ticks.length = unit(.05, "cm"),
-    strip.text.x = element_text(size = rel(0.5), colour = "black", angle = 0, lineheight=0.1, vjust=0.1),
-    strip.background = element_blank(),
-    strip.background = element_rect(size = 0),
-    panel.margin.y = unit(-0.15, "cm"),
-    panel.margin.x = unit(0, "cm"))
 
 #===================
 # Sort and select top samples
 #===================
 
+
 select.samples.gr <- granges(select.samples)
 
-mcols(select.samples.gr) <- cbind(mcols(select.samples)[,c(1,2,3,4,5,6,9)],
+mcols(select.samples.gr) <- cbind(mcols(select.samples)[,c(1,2,4,5,6,7,10)],
                                   DataFrame(Animals=unlist(lapply(strsplit(mcols(select.samples)$Animals, ","),function(x)length(table(x))))))
 
 o = order(-mcols(select.samples.gr)$NormCount)
@@ -151,8 +138,8 @@ if (length(top.sample) >=1){
   out.2[match(names(table(out.2$Fragment)),out.2$Fragment),"SeqCount"] <- as.integer(table(out.2$Fragment))
   out.2 <- out.2[out.2$SeqCount>=1,]
   setnames(out.2, "Fragment", paste(topSample,"- Fragment"))
-  top.sample.out.1 <- out.2[1:min(15,nrow(out.2)),c(1,3,6)]
-  top.sample.out.2 <- out.2[1:min(15,nrow(out.2)),c(-1,-6)]
+  top.sample.out.1 <- out.2[1:min(15,nrow(out.2)),c(1,3)]
+  top.sample.out.2 <- out.2[1:min(15,nrow(out.2)),c(-1,-2,-6)]
 } else {top.sample.out.1 <- top.sample.out.2 <- NA}
 
 if (length(bottom.sample) >=1) {
@@ -167,8 +154,31 @@ if (length(bottom.sample) >=1) {
   out.2 <- out.2[out.2$SeqCount>=1,]
   setnames(out.2, "Fragment", paste(bottomSample,"- Fragment"))
   bottom.sample.out.1 <- out.2[1:min(15,nrow(out.2)),c(1,3,6)]
-  bottom.sample.out.2 <-out.2[1:min(15,nrow(out.2)),c(-1,-6)]
+  bottom.sample.out.2 <-out.2[1:min(15,nrow(out.2)),c(-1,-2,-6)]
 } else {bottom.sample.out.1 <- bottom.sample.out.2 <- NA}
+
+#===================
+#Output plot
+#===================
+
+plot.out <- ggplot(plot.data.bin,aes(x=AAproc,y=NormCount, fill = Group))+geom_bar(stat="identity", position="identity")+theme_bw()+
+  scale_fill_manual(name = "Library", values = fill.values) +
+  scale_colour_manual(name = "Library", values = fill.values) +
+  scale_x_continuous(limit=c(0,100), breaks=c(seq(0,100,20)), expand =c(0,0)) +
+  facet_wrap(~ GeneName, ncol=5)+   
+  theme(plot.margin=unit(x=c(0,0,0,0),units="mm"),
+        legend.position="bottom",
+        legend.margin=unit(-0.5,"cm"),
+        legend.key.height=unit(0, "cm"),
+        plot.background=element_rect(fill="white"),
+        axis.text = element_text(size = rel(0.5)),
+        axis.ticks = element_line(size = rel(0.5)),
+        axis.ticks.length = unit(.05, "cm"),
+        strip.text.x = element_text(size = rel(0.5), colour = "black", angle = 0, lineheight=0.1, vjust=0.1),
+        strip.background = element_blank(),
+        strip.background = element_rect(size = 0),
+        panel.margin.y = unit(-0.15, "cm"),
+        panel.margin.x = unit(0, "cm"))
 
 out.list <- list(plot=plot.out,
                  plotBin=plot.data.bin,

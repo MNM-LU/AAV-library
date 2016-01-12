@@ -31,11 +31,12 @@ label: unnamed-chunk-2
 
   |                                                                         |............................................................     |  92%
 label: Splitting groups.......
-Quitting from lines 106-132 (S7_NormalizedGeneIdentification.spin.Rmd) 
-Error in parse(text = x, srcfile = src) : <text>:12:32: unexpected symbol
-11:                                mismatches=median(mcols(inRanges)$mismatches)
-12:                                mCount
-                                   ^
-Calls: <Anonymous> ... <Anonymous> -> parse_all -> parse_all.character -> parse
+  |                                                                         |.................................................................| 100%
+  ordinary text without R code
 
-Execution halted
+
+output file: S7_NormalizedGeneIdentification.knit.md
+
+/usr/bin/pandoc +RTS -K512m -RTS S7_NormalizedGeneIdentification.utf8.md --to latex --from markdown+autolink_bare_uris+ascii_identifiers+tex_math_single_backslash-implicit_figures --output S7_NormalizedGeneIdentification.pdf --template /home/lcadmin/R/x86_64-pc-linux-gnu-library/3.2/rmarkdown/rmd/latex/default.tex --highlight-style tango --latex-engine pdflatex 
+
+Output created: S7_NormalizedGeneIdentification.pdf

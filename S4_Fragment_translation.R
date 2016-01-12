@@ -240,6 +240,9 @@ temp.table.multi <- temp.table.multi[temp.table.multi[, .I[mCount == max(mCount)
 temp.table.multi <- temp.table.multi[temp.table.multi[, .I[which.max(bitScore)], by=key(temp.table.multi)]$V1] # Select only rows with the highest bitScore
 temp.table.multi[temp.table.multi$mCount==1]$Mode <- "Amb"
 
+print(paste("Number of barcodes with false mCount",
+            nrow(temp.table.multi[mCount > tCount])))
+
 temp.table.multi.consensus <- rbind(temp.table.multi, temp.table.multi.clean)
 
 print(paste("Total number of definitive Barcodes:", 

@@ -29,7 +29,7 @@ suppressPackageStartupMessages(library(biovizBase))
 suppressPackageStartupMessages(library(Gviz))
 suppressPackageStartupMessages(library(plyr))
 suppressPackageStartupMessages(library(devtools))
-
+strt <- Sys.time()
 load("data/multipleContfragmentsComplete.rda")
 load("data/alignedLibraries.rda")
 load("data/LUTdna.rda")
@@ -172,19 +172,12 @@ saveRDS(foundFragments.ranges, file=paste("output/","found.",name.out,".rds", se
 return(log.table)
 }
 
+#'Analysis summary
+#'============================
+
 all.logs <- lapply(1:nrow(load.list), analyzeTissue)
 all.logs <- rbindlist(all.logs, use.names=FALSE )
-
-
-# Make a Complete library sample
-# ============================
-in.names.all <- list.files("output", pattern="*.rds", full.names=TRUE)
-out.range <- lapply(in.names.all, readRDS)
-out.range <- do.call(GAlignmentsList,unlist(out.range))
-out.range <- cbind(unlist(out.range))[[1]]
-saveRDS(out.range, file="output/total.infectiveLib.rds")
-
-
+knitr::kable(all.logs, format = "markdown")
 
 
 knitr::kable(all.logs, format = "markdown")
