@@ -163,7 +163,7 @@ match.ranges <- do.call(rbind, match.ranges.list)
 foundFragments.ranges <- allFragments.ranges[match.ranges[,1]]
 if (ncol(match.ranges) >= 2) {
 foundFrags <- foundFrags[match.ranges[,"idxFrag"],]
-foundFrags[,c("Reads","BC","fragment"):=NULL]
+foundFrags[,c("Reads","fragment"):=NULL]
 mcols(foundFragments.ranges) <- c(mcols(foundFragments.ranges), foundFrags[match.ranges[,"idxFrag"],])
 o = order(-mcols(foundFragments.ranges)$RNAcount)
 foundFragments.ranges <- foundFragments.ranges[o]

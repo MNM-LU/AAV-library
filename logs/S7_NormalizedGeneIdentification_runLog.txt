@@ -1,0 +1,41 @@
+
+
+processing file: S7_NormalizedGeneIdentification.spin.Rmd
+  |                                                                         |                                                                 |   0%  |                                                                         |.....                                                            |   8%
+  ordinary text without R code
+
+  |                                                                         |..........                                                       |  15%
+label: unnamed-chunk-1
+  |                                                                         |...............                                                  |  23%
+  ordinary text without R code
+
+  |                                                                         |....................                                             |  31%
+label: Generating load list.......
+  |                                                                         |.........................                                        |  38%
+  ordinary text without R code
+
+  |                                                                         |..............................                                   |  46%
+label: Loading alignments.......
+  |                                                                         |...................................                              |  54%
+  ordinary text without R code
+
+  |                                                                         |........................................                         |  62%
+label: Normalizing RNA counts.......
+  |                                                                         |.............................................                    |  69%
+  ordinary text without R code
+
+  |                                                                         |..................................................               |  77%
+label: unnamed-chunk-2
+  |                                                                         |.......................................................          |  85%
+  ordinary text without R code
+
+  |                                                                         |............................................................     |  92%
+label: Splitting groups.......
+Quitting from lines 106-132 (S7_NormalizedGeneIdentification.spin.Rmd) 
+Error in parse(text = x, srcfile = src) : <text>:12:32: unexpected symbol
+11:                                mismatches=median(mcols(inRanges)$mismatches)
+12:                                mCount
+                                   ^
+Calls: <Anonymous> ... <Anonymous> -> parse_all -> parse_all.character -> parse
+
+Execution halted

@@ -17,11 +17,13 @@ suppressPackageStartupMessages(library(data.table))
 suppressPackageStartupMessages(library(scales))
 suppressPackageStartupMessages(library(ShortRead))
 suppressPackageStartupMessages(library(multicore))
-library(plyr)
-library(Hmisc)
-rep.row<-function(x,n){
-  matrix(rep(x,each=n),nrow=n)
-}
+suppressPackageStartupMessages(library(plyr))
+suppressPackageStartupMessages(library(Hmisc))
+
+#' Generate load list anfd grouping names
+#' ============================
+#+ Generating load list.......
+
 in.names.all <- list.files("output", pattern="*.rds", full.names=TRUE)
 load.list <- read.table("loadlist.txt", header = FALSE, skip = 0, sep="\t",stringsAsFactors = FALSE, fill=TRUE)
 colnames(load.list) <- c("Name", "BaseName","GroupName")
@@ -31,24 +33,42 @@ load.list <- load.list[-grep("Untreat",load.list$Name),]
 select.Cases <- c(unlist(sapply(load.list$Name, function(x) grep(x,in.names.all), simplify = TRUE)))
 
 (in.names.all <- in.names.all[select.Cases])
-grouping <- data.frame(Sample=gsub("-","_",gsub("found.","",gsub("(output/)", "", gsub("(.rds)", "", in.names.all)))),
+
+
+grouping <- data.frame(Sample=gsub("-","_",gsub("found.|(output/)|(.rds)", "", in.names.all)),
                        Group=load.list[match(names(select.Cases),load.list$Name),"GroupName"],
                        stringsAsFactors = FALSE)
+
+#' Load the desired alignment files and annotating group
+#' ============================
+#+ Loading alignments.......
 
 loadRDS <- function(in.name) {
   #in.name <- in.names.all[3]
   this.sample <- readRDS(in.name)
-  this.name <- gsub("-","_",gsub("found.","",gsub("(output/)", "", gsub("(.rds)", "", in.name))))
+  this.name <- gsub("-","_",gsub("found.|(output/)|(.rds)", "", in.name))
   this.group <- grouping[match(this.name,grouping$Sample),"Group"]
+  
   if (this.name == "completeLibraryRanges"){
-    mcols(this.sample) <- cbind(mcols(this.sample),data.frame(RNAcount=mcols(this.sample)$tCount, Sample = this.name, Group=this.group,stringsAsFactors = FALSE))
+    mcols(this.sample) <- cbind(mcols(this.sample),
+                                data.frame(RNAcount=mcols(this.sample)$tCount, 
+                                           Sample = this.name, Group=this.group,
+                                           stringsAsFactors = FALSE))
+    #This is required, as the total library alignment does not have any RNA counts
   } else {
-    mcols(this.sample) <- cbind(mcols(this.sample),data.frame(Sample = this.name, Group=this.group,stringsAsFactors = FALSE))
+    mcols(this.sample) <- cbind(mcols(this.sample),
+                                data.frame(Sample = this.name, Group=this.group,
+                                           stringsAsFactors = FALSE))
   }
   return(this.sample)
 }
 
 out.range <- lapply(in.names.all, loadRDS)
+
+#' Normalizing read counts to correct for variable read depth
+#' ============================
+#+ Normalizing RNA counts.......
+
 
 readCounts <- lapply(out.range, function(x) sum(mcols(x)$RNAcount))
 maxCount <- max(unlist(readCounts))
@@ -62,12 +82,19 @@ makeNormCount <- function(inIndex){
   }
 
 
-out.range.tmp <- lapply(1:length(readCounts), makeNormCount)
+out.range <- lapply(1:length(readCounts), makeNormCount)
+
+#' Flatten into one GAlignments object
+#' ============================
 
 out.range <- do.call(GAlignmentsList,unlist(out.range))
-(out.range <- cbind(unlist(out.range))[[1]])
+out.range <- cbind(unlist(out.range))[[1]]
 mcols(out.range)$NormCount <- 1
 #out.range <- out.range[mcols(out.range)$Mode == "Def"] #Selects only defined i.e., trusted reads
+
+#' Split the GAlignments into list based on group
+#' ============================
+#+ Splitting groups.......
 
 out.range.split <- split(out.range,c(mcols(out.range)$Group))
 out.range.split <- lapply(out.range.split, function(x) split(x,seqnames(x)))
@@ -78,6 +105,7 @@ outRanges <- inRanges[1]
 mcols(outRanges) <- data.frame(structure=mcols(inRanges)$structure[1],
                                Group=mcols(inRanges)$Group[1],
                                bitScore=sum(mcols(inRanges)$bitScore*mcols(inRanges)$tCount)/sum(mcols(inRanges)$tCount),
+                               mismatches=median(mcols(inRanges)$mismatches),
                                mCount=sum(mcols(inRanges)$mCount),
                                tCount=sum(mcols(inRanges)$tCount),
                                BC=paste(unique(mcols(inRanges)$BC), collapse = ","),
