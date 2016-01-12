@@ -6,3 +6,4 @@ Rscript -e "setwd('~/Dropbox/R-projects/AAV-library')" -e "rmarkdown::render('S5
 Rscript -e "setwd('~/Dropbox/R-projects/AAV-library')" -e "rmarkdown::render('S6_generateCompleteLibraryRanges.R')" 2>&1 | tee logs/S6_generateCompleteLibraryRanges_runLog.txt &
 Rscript -e "setwd('~/Dropbox/R-projects/AAV-library')" -e "rmarkdown::render('S7_NormalizedGeneIdentification.R')" 2>&1 | tee logs/S7_NormalizedGeneIdentification_runLog.txt &
 Rscript -e "setwd('~/Dropbox/R-projects/AAV-library')" -e "rmarkdown::render('S8_PlotAllGenesCoverage.R')" 2>&1 | tee logs/S8_PlotAllGenesCoverage_runLog.txt &
+Rscript -e "setwd('~/Dropbox/R-projects/AAV-library')" -e "rmarkdown::render('S9_FullGeneHeatmap.R')" 2>&1 | tee logs/S9_FullGeneHeatmap_runLog.txt &
