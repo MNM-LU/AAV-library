@@ -20,7 +20,7 @@ suppressPackageStartupMessages(library(Hmisc))
 opts_chunk$set(fig.width = 7.5, fig.height = 8)
 opts_chunk$set(comment = NA)
 
-config <- read.table("config.txt", header = FALSE, skip = 0, sep="\t",stringsAsFactors = FALSE, fill=TRUE)
+config <- read.table("input/config.txt", header = FALSE, skip = 0, sep="\t",stringsAsFactors = FALSE, fill=TRUE)
 colnames(config) <- c("Parameter", "Value")
 
 #'Sequencing files

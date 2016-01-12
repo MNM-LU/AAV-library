@@ -34,7 +34,7 @@ load("data/multipleContfragmentsComplete.rda")
 load("data/alignedLibraries.rda")
 load("data/LUTdna.rda")
 
-load.list <- read.table("loadlist.txt", header = FALSE, skip = 0, sep="\t",stringsAsFactors = FALSE, fill=TRUE)
+load.list <- read.table("input/loadlist.txt", header = FALSE, skip = 0, sep="\t",stringsAsFactors = FALSE, fill=TRUE)
 dataDir <- "../../Shared/NGS\\ data/Original\\ sequencing\\ files/2015-09-24_NS500551_102_H3MNJAFXX/Originals"
 colnames(load.list) <- c("Name", "BaseName","GroupName")
 
@@ -167,8 +167,6 @@ foundFrags[,c("Reads","fragment"):=NULL]
 mcols(foundFragments.ranges) <- c(mcols(foundFragments.ranges), foundFrags[match.ranges[,"idxFrag"],])
 o = order(-mcols(foundFragments.ranges)$RNAcount)
 foundFragments.ranges <- foundFragments.ranges[o]
-#foundFragments.ranges[1:10]
-#assign(paste("found.",name.out, sep=""), foundFragments.ranges)
 saveRDS(foundFragments.ranges, file=paste("output/","found.",name.out,".rds", sep=""), compress = TRUE)
 }
 return(log.table)

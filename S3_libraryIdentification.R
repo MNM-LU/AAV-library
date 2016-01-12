@@ -39,7 +39,6 @@ LUT.dna$Names <- LUT.dna$Sequence
 #'Split sequences based on linker and length 
 #'===================
 
-#output.Table$LUTseq <- LUT.dna$Sequence[as.numeric(output.Table$LUTnr)]
 LUT.14aaG4S <- LUT.dna[substr(LUT.dna$Sequence,1,14) == "GAGGCGGAGGAAGT"]
 LUT.remaining <- LUT.dna[!(substr(LUT.dna$Sequence,1,14) == "GAGGCGGAGGAAGT")]
 LUT.14aaA5 <- LUT.remaining[substr(LUT.remaining$Sequence,1,14) == "CTGCTGCAGCAGCC"]
