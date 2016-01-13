@@ -122,7 +122,7 @@ barcodeTable <- data.table(ID=as.character(ShortRead::id(reads.BC)),
 out.name.BC.star <- tempfile(pattern = "BCsc_", tmpdir = tempdir(), fileext = ".txt")
 
 system(paste("gunzip -c ",out.name.BC," | starcode -t ",detectCores()-1," --print-clusters -d",
-             2," -r5 -q -o ", out.name.BC.star, " 2>&1", sep = ""), 
+             1," -r5 -q -o ", out.name.BC.star, " 2>&1", sep = ""), 
        intern = TRUE, ignore.stdout = FALSE)
 
 table.BC.sc <- data.table(read.table(out.name.BC.star, header = FALSE, row.names = 1, skip = 0, sep="\t",

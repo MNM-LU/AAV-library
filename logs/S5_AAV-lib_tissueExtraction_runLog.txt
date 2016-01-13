@@ -1,14 +1,22 @@
 
 
 processing file: S5_AAV-lib_tissueExtraction.spin.Rmd
-  |                                                                         |                                                                 |   0%  |                                                                         |......................                                           |  33%
+  |                                                                         |                                                                 |   0%  |                                                                         |.............                                                    |  20%
   ordinary text without R code
 
-  |                                                                         |...........................................                      |  67%
+  |                                                                         |..........................                                       |  40%
 label: unnamed-chunk-1
-Quitting from lines 12-197 (S5_AAV-lib_tissueExtraction.spin.Rmd) 
-Error in .Method(..., deparse.level = deparse.level) : 
-  number of columns for arg 2 do not match those of first arg
-Calls: <Anonymous> ... withVisible -> eval -> eval -> do.call -> do.call -> <Anonymous>
+  |                                                                         |.......................................                          |  60%
+  ordinary text without R code
 
-Execution halted
+  |                                                                         |....................................................             |  80%
+label: unnamed-chunk-2
+  |                                                                         |.................................................................| 100%
+  ordinary text without R code
+
+
+output file: S5_AAV-lib_tissueExtraction.knit.md
+
+/usr/bin/pandoc +RTS -K512m -RTS S5_AAV-lib_tissueExtraction.utf8.md --to latex --from markdown+autolink_bare_uris+ascii_identifiers+tex_math_single_backslash-implicit_figures --output S5_AAV-lib_tissueExtraction.pdf --template /home/lcadmin/R/x86_64-pc-linux-gnu-library/3.2/rmarkdown/rmd/latex/default.tex --highlight-style tango --latex-engine pdflatex 
+
+Output created: S5_AAV-lib_tissueExtraction.pdf

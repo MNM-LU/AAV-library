@@ -85,7 +85,7 @@ sys.out <-  system(paste("export SHELL=/bin/sh; cat ",fragments.unique.fa," | pa
                    intern = TRUE, ignore.stdout = FALSE) # -word_size 7
 
 table.blastn <- data.table(read.table(blast.out, header = FALSE, skip = 0, sep=";",
-                                      stringsAsFactors = FALSE, fill=FALSE),keep.rownames=FALSE)
+                                      stringsAsFactors = FALSE, fill=FALSE) , keep.rownames=FALSE, key="V1")
 
 system(paste("mv", blast.out, "./data/blastOutput.csv", sep=" "))
 
@@ -93,7 +93,6 @@ if (length(grep("Warning",table.blastn$V1)) != 0) {
   warnings.out <- unique(table.blastn[grep("Warning",table.blastn$V1),])
   table.blastn <- table.blastn[-grep("Warning",table.blastn$V1),]
   setnames(warnings.out,"V1", c("blastn Warnings"))
-  invisible(warnings.out[" "] <- " ")
   knitr::kable(warnings.out[1:(nrow(warnings.out)),], format = "markdown")
 }
 
@@ -130,7 +129,7 @@ print(paste("Alignment percentage:", percent(nrow(full.table)/all.reads)))
 out.name.BC.star <- tempfile(pattern = "BCsc_", tmpdir = tempdir(), fileext = ".txt")
 
 system(paste("gunzip -c ",barcodes.file," | starcode -t ",detectCores()-1," --print-clusters -d",
-             2," -r5 -q -o ", out.name.BC.star, " 2>&1", sep = ""), 
+             1," -r5 -q -o ", out.name.BC.star, " 2>&1", sep = ""), 
        intern = TRUE, ignore.stdout = FALSE)
 
 table.BC.sc <- data.table(read.table(out.name.BC.star, header = FALSE, row.names = 1, skip = 0, sep="\t",
