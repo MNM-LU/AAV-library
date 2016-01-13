@@ -42,12 +42,12 @@ plotPair <- function(topSample,bottomSample,filterBC=FALSE,filterAnimal=FALSE,
 # Select samples
 #===================
 
-  topSample <- "CNS100x_Ctx"
-  bottomSample <- "CNS100x_Str"
-  filterBC <- FALSE
-  filterAnimal <- FALSE
-  AnimaladjustPlot <- FALSE
-  NormalizePlot <- TRUE
+#   topSample <- "CNS100x_Ctx"
+#   bottomSample <- "CNS100x_Str"
+#   filterBC <- FALSE
+#   filterAnimal <- FALSE
+#   AnimaladjustPlot <- FALSE
+#   NormalizePlot <- TRUE
   
 fill.values <- eval(parse(text=paste("c(", topSample,"= rgb(38,64,135, maxColorValue = 255), ",
                                      bottomSample,"= rgb(157,190,217, maxColorValue = 255))",sep="")))
