@@ -190,9 +190,6 @@ all.logs <- lapply(1:nrow(load.list), analyzeTissue)
 all.logs <- rbindlist(all.logs, use.names=FALSE )
 knitr::kable(all.logs, format = "markdown")
 
-
-knitr::kable(all.logs, format = "markdown")
-
 unlink(paste(tempdir(), "/*", sep = ""), recursive = FALSE, force = FALSE) #Cleanup of temp files
 
 print("Total execution time:")

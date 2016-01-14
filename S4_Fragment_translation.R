@@ -1,6 +1,6 @@
 
 #' ---
-#' title: "Barcoded plasmid library translation"
+#' title: "Barcoded extraction and reduction from RNA samples"
 #' author: "Tomas Bjorklund"
 #' output: 
 #'  pdf_document:
@@ -8,7 +8,7 @@
 #' geometry: margin=0.7in
 #' ---
 
-#' This workflow clusters every read from each unique barcode and determines the consensus fragmnt from the CustomArray and the barcode fidelity. i.e., if the barcode was monoclonal or not..  
+#' This workflow identifies correct amplicons from in vivo, in vitro samples and extracts the barcode. Barcodes are then reduced using the starcode algorithm.  
 
 
 suppressPackageStartupMessages(library(knitr))
@@ -79,7 +79,7 @@ knitr::kable(sys.out[1:(nrow(sys.out)),], format = "markdown")
 
 sys.out <-  system(paste("export SHELL=/bin/sh; cat ",fragments.unique.fa," | parallel --block ",
                          floor(length(unique.reads)/detectCores()),
-                         " --recstart '>' --pipe blastn -max_target_seqs 10 -word_size 7",
+                         " --recstart '>' --pipe blastn -max_target_seqs 25 -word_size 7",
                          " -num_threads 1 -outfmt 10 -db ", blast.db,
                          " -query - > ", blast.out, " 2>&1",  sep = ""),
                    intern = TRUE, ignore.stdout = FALSE) # -word_size 7

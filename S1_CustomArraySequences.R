@@ -8,7 +8,7 @@
 #' geometry: margin=0.7in
 #' ---
 
-#' This script generates all AA unique AA sequences for the CustomArray production  
+#' This script generates all unique AA sequences for the CustomArray production  
 suppressPackageStartupMessages(library(knitr))
 suppressPackageStartupMessages(library(ShortRead))
 suppressPackageStartupMessages(library(parallel))

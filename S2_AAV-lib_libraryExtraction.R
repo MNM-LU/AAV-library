@@ -8,7 +8,7 @@
 #' geometry: margin=0.7in
 #' ---
 
-#' This workflow brings together FastQ files containing barcodes and the gene fragments synthesized with the CustomArray. Requires bbmap2. The fragments are then suitable for alignment to reference sequences using Bowtie2.  
+#' This workflow brings together FastQ files containing barcodes and the gene fragments synthesized with the CustomArray. Requires bbmap2. The fragments are then suitable for alignment to reference sequences using blastn.  
 suppressPackageStartupMessages(library(knitr))
 suppressPackageStartupMessages(library(ShortRead))
 suppressPackageStartupMessages(library(parallel))
