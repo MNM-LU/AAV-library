@@ -87,6 +87,9 @@ sys.out <-  system(paste("export SHELL=/bin/sh; cat ",fragments.unique.fa," | pa
 table.blastn <- data.table(read.table(blast.out, header = FALSE, skip = 0, sep=";",
                                       stringsAsFactors = FALSE, fill=FALSE) , keep.rownames=FALSE, key="V1")
 
+# table.blastn <- data.table(read.table("./data/blastOutput.csv", header = FALSE, skip = 0, sep=";",
+#                                       stringsAsFactors = FALSE, fill=FALSE) , keep.rownames=FALSE, key="V1")
+
 system(paste("mv", blast.out, "./data/blastOutput.csv", sep=" "))
 
 if (length(grep("Warning",table.blastn$V1)) != 0) {
@@ -106,10 +109,10 @@ table.blastn[,c("V1","identity","alignmentLength","gapOpens", "q_start",
 table.blastn[,Reads:= as.character(sread(unique.reads)[as.integer(Reads)])]
 table.blastn[,bitScore:= as.numeric(bitScore)]
 table.blastn[,mismatches:= as.numeric(mismatches)]
+
 setkeyv(table.blastn,c("Reads","LUTnr"))
 setorder(table.blastn,Reads,LUTnr,-bitScore) #This makes sure that a fragment is only aligned once to the reference in the top ten matches
-table.blastn <- unique(table.blastn)
-
+table.blastn <- unique(table.blastn, by=c("Reads","LUTnr"))
 
 table.blastn.topHit <- table.blastn[table.blastn[, .I[which.max(bitScore)], by="Reads"]$V1] # Select only rows with the highest bitScore
 
