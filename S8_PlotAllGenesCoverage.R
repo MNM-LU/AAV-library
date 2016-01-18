@@ -246,6 +246,17 @@ plotPair("CNS1000x_Th","CNS100x_Th")$plot
 plotPair("CNS1000x_Ctx","CNS100x_Ctx")$plot
 plotPair("CNS1000x_SN","CNS100x_SN")$plot
 
+plotPair("CNS100x_Ctx_4wks","CNS100x_Ctx")$plot
+plotPair("CNS100x_SN_4wks","CNS100x_SN")$plot
+plotPair("CNS100x_Str_4wks","CNS100x_Str")$plot
+plotPair("CNS100x_Th_4wks","CNS100x_Th")$plot
+plotPair("PerN100x_SC_4wks","PerN100x_Mu_4wks")$plot
+
+# plotPair("CNS1000x_Ctx_4wks","CNS1000x_Ctx")$plot
+# plotPair("CNS1000x_SN_4wks","CNS1000x_SN")$plot
+# plotPair("CNS1000x_Str_4wks","CNS1000x_Str")$plot
+# plotPair("CNS1000x_Th_4wks","CNS1000x_Th")$plot
+
 out.plot.list <- plotPair("PrimN_1000x","PrimN_100x")
 out.plot.list$plot
 knitr::kable(out.plot.list$top, format = "markdown")
