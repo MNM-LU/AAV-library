@@ -50,7 +50,7 @@ all.samples[,AA:=(start+2+(width/2))/3]
 all.samples[,seqlength:=seqlength/3]
 all.samples[,AAproc:=AA/seqlength*100]
 
-saveRDS(all.samples,file="data/allSamplesDataTable.RDS")
+#saveRDS(all.samples,file="data/allSamplesDataTable.RDS")
 
 all.samples$Group[all.samples$Group== "293T_1000x"] <- "H293T_1000x"
 all.samples$Group[all.samples$Group== "293T_100x"] <- "H293T_100x"
@@ -63,9 +63,9 @@ plotPair <- function(topSample,bottomSample,filterBC=FALSE,filterAnimal=FALSE,
                      AnimaladjustPlot=FALSE,NormalizePlot=TRUE) {
 # Select samples
 #===================
-
-#   topSample <- "CNS1000x_Ctx"
-#   bottomSample <- "CNS1000x_Str"
+# 
+#   topSample <- "CNS1000x_SN"
+#   bottomSample <- "CNS100x_SN"
 #   filterBC <- FALSE
 #   filterAnimal <- FALSE
 #   AnimaladjustPlot <- FALSE
@@ -84,14 +84,14 @@ select.samples <- all.samples[J(names(fill.values))] #Select the two compared gr
 size.bin <- 2
 FullLength <- 100
 position <- seq(0,FullLength,size.bin)
-plot.data.dt <- select.samples
+plot.data.dt <- copy(select.samples) #the copy function ensures the select.sample to stay intact
 plot.data.dt[,bin:=findInterval(AAproc, position)]
 plot.data.bin <- plot.data.dt[, list(.N,seqlength=min(seqlength),
                                         AAproc = position[findInterval(min(AAproc),position)],
                                         BCmean=unlist(lapply(strsplit(paste(BC, collapse=","), ","),function(x) length(unique(x)))),
                                         AnimalCount = length(table(strsplit(paste(t(Animals), collapse=","), ","))),
                                         NormCount = log2((sum(RNAcount)/seqlength*FullLength)+1)
-                                        ), by=c("bin","GeneName","Group")]
+                                        ), by=c("Group","GeneName","bin")]
 #===================
 #Filtration parameters
 #===================
@@ -253,6 +253,7 @@ out.plot.list <- plotPair("CNS1000x_Str","CNS100x_Str",
                           AnimaladjustPlot=FALSE,
                           NormalizePlot=TRUE)
 out.plot.list$plot
+
 out.plot.list <- plotPair("CNS1000x_Th","CNS100x_Th",
                           filterBC=FALSE,
                           filterAnimal=FALSE,
@@ -265,6 +266,7 @@ out.plot.list <- plotPair("CNS1000x_Ctx","CNS100x_Ctx",
                           AnimaladjustPlot=TRUE,
                           NormalizePlot=TRUE)
 out.plot.list$plot
+
 out.plot.list <- plotPair("CNS1000x_SN","CNS100x_SN",
                           filterBC=FALSE,
                           filterAnimal=FALSE,
