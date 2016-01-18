@@ -263,7 +263,7 @@ out.plot.list$plot
 out.plot.list <- plotPair("CNS1000x_Ctx","CNS100x_Ctx",
                           filterBC=FALSE,
                           filterAnimal=FALSE,
-                          AnimaladjustPlot=TRUE,
+                          AnimaladjustPlot=FALSE,
                           NormalizePlot=TRUE)
 out.plot.list$plot
 
