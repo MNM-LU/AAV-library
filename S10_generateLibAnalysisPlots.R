@@ -1,23 +1,30 @@
 
 #' ---
-#' title: "Generate library analysis plots"
+#' title: "Pairwise sample analysis output"
 #' author: "Tomas Bjorklund"
 #' output: 
 #'  pdf_document:
 #'    highlight: tango
 #' geometry: margin=0.7in
+#' fontsize: 10pt
 #' ---
 
-#' This script visualizes components of the library 
+#' This is the final script presenting top candidates and overview plots.  
 suppressPackageStartupMessages(library(knitr))
+#+ setup, include=FALSE
+
+opts_chunk$set(fig.width = 5, fig.height = 5) #Full height 11
+opts_chunk$set(comment = NA)
+
 suppressPackageStartupMessages(library(GenomicAlignments))
 suppressPackageStartupMessages(library(ggplot2))
-suppressPackageStartupMessages(library(DESeq2))
 suppressPackageStartupMessages(library(VennDiagram))
 suppressPackageStartupMessages(library(data.table))
 suppressPackageStartupMessages(library(beanplot))
 suppressPackageStartupMessages(library(scales))
 
+#'Generation plots for library purity
+#'===================
 complete.ranges <- readRDS("output/completeLibraryRanges.rds")
 purity.table <- data.table(mcols(complete.ranges)$mCount/mcols(complete.ranges)$tCount)
 purity.table$BCwidth <- width(mcols(complete.ranges)$BC)
@@ -37,22 +44,19 @@ ggplot(purity.table,aes(x = BCwidth, fill = as.character(BCwidth)))+geom_histogr
   scale_fill_manual(name = "Width", values = fill.values) +
   scale_x_continuous(limit=c(17,23), breaks=c(seq(18,22,1)), expand =c(0,0))
 
-#Plot Venn diagrams of fragments
+
+#'Plot Venn diagrams of fragments
+#'===================
+opts_chunk$set(fig.width = 8, fig.height = 8)
 load("data/LUTdna.rda")
-
-total.library <- readRDS("output/total.infectiveLib.rds")
-total.str <- GAlignmentsList(readRDS("output/found.RatNr15_1000x_Str-15_RatNr19_1000x_Str-22_RatNr20_1000x_Str-24_RatNr21_1000x_Str-19.rds"),readRDS("output/found.RatNr1_100x_Str-7_RatNr7_100x_Str-3_RatNr8_100x_Str-11.rds"))
-total.str <- cbind(unlist(total.str))[[1]]
-total.SNctx <- GAlignmentsList(readRDS("output/found.RatNr1_100x_Ctx-6_RatNr7_100x_Ctx-2_RatNr8_100x_Ctx-10.rds"),readRDS("output/found.RatNr1_100x_SN-5_RatNr7_100x_SN-1_RatNr8_100x_SN-9.rds"),readRDS("output/found.RatNr15_1000x_Ctx-14_RatNr19_1000x_Ctx-21_RatNr21_1000x_Ctx-18.rds"),readRDS("output/found.RatNr15_1000x_SN-13_RatNr21_1000x_SN-17.rds"))
-total.SNctx <- cbind(unlist(total.SNctx))[[1]]
-
-
-
+complete.library <- readRDS("data/allSamplesDataTable.RDS")
+setkey(complete.library,Group)
+complete.library <- complete.library[-grep("4wk",Group)]
 seq.arry <- LUT.dna$Sequence
-seq.lib <- unique(names(complete.ranges))
-seq.AAV <- unique(names(total.library))
-seq.str <- unique(names(total.str))
-seq.SNCtx <- unique(names(total.SNctx))
+seq.lib <- unique(complete.library[J("totalLib")]$Sequence)
+seq.AAV <- unique(complete.library[J("infectiveLib")]$Sequence)
+seq.str <- unique(complete.library[grep("Str",Group)]$Sequence)
+seq.SNCtx <- unique(complete.library[grep("SN|Ctx|Th",Group)]$Sequence)
 
 venn.area1 <- length(seq.arry)
 venn.area2 <- length(seq.lib)
@@ -114,48 +118,17 @@ ggplot(output.table) +
   coord_polar(theta="y") 
 
 
+#'Barcode Venn diagrams for 100x and 1000x libraries
+#'===================
+opts_chunk$set(fig.width = 5, fig.height = 5)
+total.100x <- unique(complete.library[grep("100x",Group)]$BC)
+total.1000x <- unique(complete.library[grep("1000x",Group)]$BC)
 
 
+venn.area1 <- length(total.100x)
+venn.area2 <- length(total.1000x)
 
-total.100x <- GAlignmentsList(readRDS("output/found.Cells293Nr3_100x_cDNA-27.rds"),
-                             readRDS("output/found.primNeuronsNr7_100x_cDNA-29.rds"),
-                             readRDS("output/found.RatNr1_100x_Ctx-6.rds"),
-                             readRDS("output/found.RatNr1_100x_SN-5.rds"),
-                             readRDS("output/found.RatNr1_100x_Str-7.rds"),
-                             readRDS("output/found.RatNr1_100x_Th-8.rds"),
-                             readRDS("output/found.RatNr7_100x_Ctx-2.rds"),
-                             readRDS("output/found.RatNr7_100x_SN-1.rds"),
-                             readRDS("output/found.RatNr7_100x_Str-3.rds"),
-                             readRDS("output/found.RatNr7_100x_Th-4.rds"),
-                             readRDS("output/found.RatNr8_100x_Ctx-10.rds"),
-                             readRDS("output/found.RatNr8_100x_SN-9.rds"),
-                             readRDS("output/found.RatNr8_100x_Str-11.rds"),
-                             readRDS("output/found.RatNr8_100x_Th-12.rds"))
-total.100x <- cbind(unlist(total.100x))[[1]]
-
-total.1000x <- GAlignmentsList(readRDS("output/found.Cells293Nr2_1000x_cDNA-26.rds"),
-                              readRDS("output/found.primNeuronsNr6_1000x_cDNA-28.rds"),
-                              readRDS("output/found.RatNr15_1000x_Ctx-14.rds"),
-                              readRDS("output/found.RatNr15_1000x_SN-13.rds"),
-                              readRDS("output/found.RatNr15_1000x_Str-15.rds"),
-                              readRDS("output/found.RatNr15_1000x_Th-16.rds"),
-                              readRDS("output/found.RatNr19_1000x_Ctx-21.rds"),
-                              readRDS("output/found.RatNr19_1000x_Str-22.rds"),
-                              readRDS("output/found.RatNr19_1000x_Th-23.rds"),
-                              readRDS("output/found.RatNr20_1000x_Str-24.rds"),
-                              readRDS("output/found.RatNr20_1000x_Th-25.rds"),
-                              readRDS("output/found.RatNr21_1000x_Ctx-18.rds"),
-                              readRDS("output/found.RatNr21_1000x_SN-17.rds"),
-                              readRDS("output/found.RatNr21_1000x_Str-19.rds"),
-                              readRDS("output/found.RatNr21_1000x_Th-20.rds"))
-
-total.1000x <- cbind(unlist(total.1000x))[[1]]
-
-
-venn.area1 <- length(unique(mcols(total.100x)$BC))
-venn.area2 <- length(unique(mcols(total.1000x)$BC))
-
-venn.n12 <- length(intersect(unique(mcols(total.100x)$BC),unique(mcols(total.1000x)$BC)))
+venn.n12 <- length(intersect(total.100x,total.1000x))
 
 venn.colors <- c("cornflower blue", "red") 
 grid.newpage()
@@ -172,11 +145,16 @@ venn.plot <- draw.pairwise.venn(area1    = venn.area1,
                               category = c("100x", "1000x"))
 grid.draw(venn.plot)
 
+#'Fragment Venn diagrams for 100x and 1000x libraries
+#'===================
+total.100x <- unique(complete.library[grep("100x",Group)]$Sequence)
+total.1000x <- unique(complete.library[grep("1000x",Group)]$Sequence)
 
-venn.area1 <- length(unique(names(total.100x)))
-venn.area2 <- length(unique(names(total.1000x)))
 
-venn.n12 <- length(intersect(unique(names(total.100x)),unique(names(total.1000x))))
+venn.area1 <- length(total.100x)
+venn.area2 <- length(total.1000x)
+
+venn.n12 <- length(intersect(total.100x,total.1000x))
 
 
 grid.newpage()
@@ -192,25 +170,3 @@ venn.plot <- draw.pairwise.venn(area1    = venn.area1,
                                 cat.col  = venn.colors,
                                 category = c("100x", "1000x"))
 grid.draw(venn.plot)
-
-lib.BC.counts <- data.table(mcols(complete.ranges)$tCount,mcols(complete.ranges)$BC)
-lib.BC.counts <- lib.BC.counts[match(unique(lib.BC.counts$V2),lib.BC.counts$V2),]
-setorder(lib.BC.counts, V1)
-lib.BC.counts$V3 <- 1:nrow(lib.BC.counts)
-setkey(lib.BC.counts, V1)    
-table.analysis.bin <- lib.BC.counts[,list(ReadCount=sum(V1), BCcount=sum(V1), ReadNorm=sum(V3)), by=lib.BC.counts$V1] 
-lib.BC.counts.low <- lib.BC.counts[,list(ReadCount=min(V1),Position=min(V3)), by=lib.BC.counts$V1] 
-lib.BC.counts.high <- lib.BC.counts[,list(ReadCount=min(V1),Position=max(V3)), by=lib.BC.counts$V1] 
-lib.BC.counts <- rbind(lib.BC.counts.low, lib.BC.counts.high)
-setorder(lib.BC.counts, ReadCount)
-lib.BC.counts$logCounts <- lib.BC.counts$ReadCount+1
-countPlot <- ggplot(lib.BC.counts,aes(x=Position, y=logCounts)) + geom_area() + 
-  scale_y_continuous(trans='log2')
-
-  geom_histogram(bin=1, stat="identity")
-, aes(fill = Library,y=ReadCount)
-
-+theme_bw()+
-  scale_fill_manual(name = "Library", values = fill.values) +
-  scale_colour_manual(name = "Library", values = fill.values) +
-  facet_grid(GeneName~., scales = "free_x", space = "free_x") 

@@ -12,7 +12,7 @@
 #' This is the final script presenting top 10 candidates as heatmap plots.  
 suppressPackageStartupMessages(library(knitr))
 #+ setup, include=FALSE
-opts_chunk$set(fig.width = 8, fig.height = 11)
+opts_chunk$set(fig.width = 8, fig.height = 10.2)
 opts_chunk$set(comment = NA)
 
 suppressPackageStartupMessages(library(ggplot2))
@@ -29,39 +29,24 @@ suppressPackageStartupMessages(library(grid))
 suppressPackageStartupMessages(library(reshape2))
 suppressPackageStartupMessages(library(devtools))
 
-#'Setup parameters
-#'===================
-select.samples <- readRDS("data/normalizedSampleRangesDefined.RDS")
-mcols(select.samples)$Sequence <- names(select.samples)
-names(select.samples) <- make.names(names(select.samples), unique=TRUE)
-length.Table <- data.table(seqnames=names(seqlengths(select.samples)),
-                           seqlength=seqlengths(select.samples), key="seqnames")
-select.samples <- data.table(as.data.frame(select.samples), key="seqnames")
-select.samples[,c("strand","qwidth","cigar","njunc","end"):=NULL]
-select.samples <- select.samples[length.Table] #A data.table merge to match seqlengths to their respective seqnames
-
 #'Selection of relevant samples
 #'===================
-select.samples <- select.samples[-grep("4wks|PrimN_1000x_RNA",select.samples$Group),]
-select.samples[, c("Category", "Protein", "Origin", "Extra", "Number","GeneName") := tstrsplit(seqnames, ",", fixed=TRUE)]
-select.samples[,c("seqnames","Extra"):=NULL]
+select.samples <- readRDS("data/allSamplesDataTable.RDS")
 
-select.samples.binCat <<- select.samples
+select.samples <- select.samples[-grep("4wks|PrimN_1000x_RNA",select.samples$Group),]
+
+select.samples.binCat <- copy(select.samples)
 setkeyv(select.samples.binCat,c("Group","Category"))
 select.samples.binCat[,c("BCcount","NormCount"):=list(unlist(lapply(strsplit(paste(BC, collapse=","), ","),function(x) length(unique(x)))),
                                                       mean(NormCount)), by=key(select.samples.binCat)]
-select.samples.binCat <- unique(select.samples.binCat)
+select.samples.binCat <- unique(select.samples.binCat, by=c("Group","Category"))
 select.samples.binCat <- select.samples.binCat[,c("Group","Category",
                                                   "BCcount","NormCount"), with = FALSE]
 select.samples.binCat[,totBC:=sum(BCcount), by="Group"]
 max.count <- max(select.samples.binCat$totBC)
 select.samples.binCat[,BCcountN:=BCcount/totBC*max.count]
-
-length.Table[, c("Category", "Protein", "Origin", "Extra", "Number","GeneName") := tstrsplit(seqnames, ",", fixed=TRUE)]
+length.Table <- select.samples[,list(seqlength=sum(seqlength)), by="Category"]
 setkey(length.Table,"Category")
-length.Table[,seqlength:=sum(seqlength), by="Category"]
-length.Table <- length.Table[,c("Category","seqlength"), with = FALSE]
-length.Table <- unique(length.Table)
 setkey(select.samples.binCat,"Category")
 select.samples.binCat <- select.samples.binCat[length.Table,nomatch=0]
 select.samples.binCat[,Category:=gsub("/|_|’","-",Category)]
@@ -69,11 +54,11 @@ select.samples.binCat[,BCcountNseq:=BCcountN/seqlength]
 select.samples.binCat[,NormCountBC:=BCcountNseq*NormCount]
 
 
-select.samples.binGene <<- select.samples
+select.samples.binGene <- copy(select.samples)
 setkeyv(select.samples.binGene,c("Group","Category","GeneName"))
 select.samples.binGene[,c("BCcount","NormCount"):=list(unlist(lapply(strsplit(paste(BC, collapse=","), ","),function(x) length(unique(x)))),
                                                        mean(NormCount)), by=key(select.samples.binGene)]
-select.samples.binGene <- unique(select.samples.binGene)
+select.samples.binGene <- unique(select.samples.binGene, by=c("Group","Category","GeneName"))
 select.samples.binGene <- select.samples.binGene[,c("Group","GeneName","Category","BCcount","seqlength","NormCount"), with = FALSE]
 select.samples.binGene[,GeneName:=gsub("/|_|’","-",GeneName)]
 select.samples.binGene[,totBC:=sum(BCcount), by="Group"]
@@ -82,12 +67,11 @@ select.samples.binGene[,BCcountN:=BCcount/totBC*max.count]
 select.samples.binGene[,BCcountNseq:=BCcountN/seqlength]
 select.samples.binGene[,NormCountBC:=BCcountNseq*NormCount]
 
-select.samples.binPos <<- select.samples
+select.samples.binPos <- copy(select.samples)
 setkeyv(select.samples.binPos,c("Group","structure","Sequence"))
-select.samples.binPos <- unique(select.samples.binPos) 
+select.samples.binPos <- unique(select.samples.binPos, by=c("Group","structure","Sequence")) 
 #Due to key, this removes replicates if identical sequence mapped to multiple genes
 
-select.samples.binPos[,AA:=((start+2)/3)+floor((width/3)/2)]
 setkeyv(select.samples.binPos,c("Group","Category","GeneName","AA"))
 select.samples.binPos[,c("BCcount","NormCount","AnimalCount","mainStruct","mismatches"):=
                         list(unlist(lapply(strsplit(paste(BC, collapse=","), ","),function(x) length(unique(x)))),
@@ -96,7 +80,7 @@ select.samples.binPos[,c("BCcount","NormCount","AnimalCount","mainStruct","misma
                              paste(unique(structure), collapse=","),
                              median(mismatches)), by=key(select.samples.binPos)]
 
-select.samples.binPos <- unique(select.samples.binPos)
+select.samples.binPos <- unique(select.samples.binPos, by=c("Group","Category","GeneName","AA"))
 select.samples.binPos <- select.samples.binPos[,c("Group","GeneName","AA","NormCount",
                                                   "BCcount","AnimalCount","mainStruct",
                                                   "mismatches","seqlength"), with = FALSE]
@@ -106,7 +90,7 @@ select.samples.binPos[,BCcountN:=BCcount/totBC*max.count]
 select.samples.binPos[,BCcountNanim:=BCcountN*AnimalCount]
 select.samples.binPos[,BCcountNseq:=BCcountN/seqlength]
 select.samples.binPos[,NormCountBC:=BCcountNanim*NormCount]
-select.samples.binPos[,GeneAA:=paste(GeneName," [",AA,"]",sep="")]
+select.samples.binPos[,GeneAA:=paste(GeneName," [",AA,"] - ", mainStruct, sep="")]
 
 
 
@@ -144,7 +128,7 @@ select.samples.matrix <- acast(select.samples.select, GeneName~Group, value.var=
 
 select.samples.matrix[is.na(select.samples.matrix)] <- 0
 select.samples.matrix <- select.samples.matrix[,sample.select]
-return(pheatmap(select.samples.matrix, cluster_rows=TRUE, show_rownames=TRUE, cluster_cols=FALSE))
+return(pheatmap(select.samples.matrix, fontsize_row=5.8, cluster_rows=TRUE, show_rownames=TRUE, cluster_cols=FALSE))
 }
 
 plotGene(select.samples.binGene,"BCcountNseq",c("totalLib","CNS100x_Str","CNS100x_Th","CNS100x_Ctx","CNS100x_SN"))
@@ -155,27 +139,45 @@ plotGene(select.samples.binGene,"BCcountNseq",c("PrimN_100x","PrimN_1000x","293T
 #'Selection of top ten fragments per sample
 #'===================
 
+setkeyv(select.samples.binPos,c("Group","BCcountNanim","AnimalCount","NormCount"))
+setorder(select.samples.binPos,Group,-BCcountNanim,-AnimalCount,-NormCount)
+setkey(select.samples.binPos,Group)
+
+select.samples.topTwenty <- select.samples.binPos[, head(.SD, 20), by=Group]
+select.samples.topTwenty[,c("totBC","seqlength","BCcountN","GeneAA","BCcountNseq"):=NULL]
+
+for (thisGroup in unique(select.samples.topTwenty$Group)){
+  out <- select.samples.topTwenty[J(thisGroup)]
+  out[,Group:=NULL]
+  out[,NormCount:=round(NormCount,digits = 0)]
+  setnames(out,c("GeneName","AnimalCount","mismatches","BCcount","NormCount","BCcountNanim"), c(thisGroup,"Animal","missM","BCs","nCount","BCsNan"))
+  
+  print(knitr::kable(out, format = "markdown"))
+}
 
 plotPos <- function(select.samples.table,plot.col,sample.select){
 setkeyv(select.samples.table,"Group")
-select.samples.select <- select.samples.table[sample.select]
-eval(parse(text=paste("setorder(select.samples.select,Group, -", plot.col,")", sep="")))
+select.samples.select <- select.samples.table[J(sample.select)]
+eval(parse(text=paste("setorder(select.samples.select,Group, -", plot.col,",-AnimalCount,-NormCount)", sep="")))
 select.samples.topTen <- select.samples.select[, head(.SD, 10), by=Group] 
 select.samples.out <- select.samples.select[select.samples.select$GeneAA %in% select.samples.topTen$GeneAA]
 select.samples.out <- acast(select.samples.out, GeneAA~Group, value.var=plot.col) #Utilizes reshape 2 to make matrix for heatmap
 select.samples.out[is.na(select.samples.out)] <- 0
 select.samples.out <- select.samples.out[,sample.select]
-pheatmap(select.samples.out, cluster_rows=TRUE, show_rownames=TRUE, cluster_cols=FALSE)
-select.samples.topTen[,c("totBC","seqlength","BCcountN","GeneAA","BCcountNseq"):=NULL]
-return(knitr::kable(select.samples.topTen, format = "markdown"))
+return(pheatmap(select.samples.out, cluster_rows=TRUE, show_rownames=TRUE, cluster_cols=FALSE))
 }
 
-plotPos(select.samples.binPos,"BCcountN",c("PrimN_100x","PrimN_1000x","293T_100x","293T_1000x"))
-plotPos(select.samples.binPos,"BCcountN",c("totalLib","CNS100x_Str","CNS100x_Th","CNS100x_Ctx","CNS100x_SN"))
-plotPos(select.samples.binPos,"BCcountNanim",c("totalLib","CNS100x_Str","CNS100x_Th","CNS100x_Ctx","CNS100x_SN"))
-plotPos(select.samples.binPos,"BCcountN",c("CNS1000x_Str","CNS1000x_Th","CNS1000x_Ctx","CNS1000x_SN"))
+plotPos(select.samples.binPos,"BCcountNanim",c("PrimN_100x","PrimN_1000x","293T_100x","293T_1000x"))
+plotPos(select.samples.binPos,"BCcountNanim",c("CNS100x_Str","CNS100x_Th","CNS100x_Ctx","CNS100x_SN"))
 plotPos(select.samples.binPos,"BCcountNanim",c("CNS1000x_Str","CNS1000x_Th","CNS1000x_Ctx","CNS1000x_SN"))
 
+plotPos(select.samples.binPos,"NormCountBC",c("PrimN_100x","PrimN_1000x","293T_100x","293T_1000x"))
+plotPos(select.samples.binPos,"NormCountBC",c("CNS100x_Str","CNS100x_Th","CNS100x_Ctx","CNS100x_SN"))
+plotPos(select.samples.binPos,"NormCountBC",c("CNS1000x_Str","CNS1000x_Th","CNS1000x_Ctx","CNS1000x_SN"))
+
+plotPos(select.samples.binPos,"NormCount",c("PrimN_100x","PrimN_1000x","293T_100x","293T_1000x"))
+plotPos(select.samples.binPos,"NormCount",c("CNS100x_Str","CNS100x_Th","CNS100x_Ctx","CNS100x_SN"))
+plotPos(select.samples.binPos,"NormCount",c("CNS1000x_Str","CNS1000x_Th","CNS1000x_Ctx","CNS1000x_SN"))
 
 devtools::session_info()
 

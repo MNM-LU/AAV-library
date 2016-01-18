@@ -46,52 +46,82 @@ all.samples[, c("Category", "Protein", "Origin",
 all.samples[, c("seqnames","Protein", "Origin", 
                 "Extra", "Number") := NULL]
 all.samples[, GeneName := gsub("/|_","-",GeneName)]
-all.samples[,AA:=(start+2+(width/2))/3]
+all.samples[,start:=(start+2)/3]
+all.samples[,width:=(width)/3]
 all.samples[,seqlength:=seqlength/3]
+all.samples[,AA:=start+(width/2)]
 all.samples[,AAproc:=AA/seqlength*100]
 
-#saveRDS(all.samples,file="data/allSamplesDataTable.RDS")
+saveRDS(all.samples,file="data/allSamplesDataTable.RDS")
 
 all.samples$Group[all.samples$Group== "293T_1000x"] <- "H293T_1000x"
 all.samples$Group[all.samples$Group== "293T_100x"] <- "H293T_100x"
 
-
 #'Plotting function
 #'===================
 
-plotPair <- function(topSample,bottomSample,filterBC=FALSE,filterAnimal=FALSE,
-                     AnimaladjustPlot=FALSE,NormalizePlot=TRUE) {
+plotPair <- function(topSample,bottomSample,size.bin=2,winWidth=1,NormalizePlot=TRUE) {
 # Select samples
 #===================
-# 
+
 #   topSample <- "CNS1000x_SN"
 #   bottomSample <- "CNS100x_SN"
 #   filterBC <- FALSE
 #   filterAnimal <- FALSE
 #   AnimaladjustPlot <- FALSE
 #   NormalizePlot <- TRUE
+#   size.bin <- 1
+#   winWidth=5
   
 fill.values <- eval(parse(text=paste("c(", topSample,"= rgb(38,64,135, maxColorValue = 255), ",
                                      bottomSample,"= rgb(157,190,217, maxColorValue = 255))",sep="")))
 setkey(all.samples,Group)
 select.samples <- all.samples[J(names(fill.values))] #Select the two compared groups
 
+if (winWidth > 1) {
+  setorder(select.samples,Group,GeneName,start,width)
+  
+  windowTable <- select.samples[,c("GeneName","start","width"), with = FALSE]
+  windowTable <- unique(windowTable, by=c("GeneName","start","width"))
+  windowTable <- windowTable[,(seq(width-winWidth)+start-1),by=c("GeneName","start","width")]
+  setnames(windowTable,"V1","winStart")
+  windowTable[,winEnd:=winStart+winWidth]
+  setkeyv(windowTable,c("GeneName","start","width"))
+  setkeyv(select.samples,c("GeneName","start","width"))
+  select.samples.windowBin <- select.samples[windowTable, allow.cartesian=TRUE]
+  select.samples.windowBin[,AAproc:=winStart/seqlength*100]
+  
+setkey(select.samples.windowBin,Group)
+select.samples.windowBin <- select.samples.windowBin[J(names(fill.values))] #Select the two compared groups
+setkeyv(select.samples.windowBin,c("Group","GeneName","winStart","winEnd"))
+select.samples.windowBin <- select.samples.windowBin[, list(Overlaps=.N,
+                                        seqlength=min(seqlength),
+                                        AAproc = min(AAproc),
+                                        BC = paste(t(BC), collapse=","),
+                                        Animals = paste(t(Animals), collapse=","),
+                                        RNAcount = sum(RNAcount)
+), by=c("Group","GeneName","winStart","winEnd")]
+
+plot.data.dt <- unique(select.samples.windowBin)
+
+} else {
+  plot.data.dt <- copy(select.samples)
+}
 
 #===================
 #Binning of data
 #===================
-
-size.bin <- 2
 FullLength <- 100
 position <- seq(0,FullLength,size.bin)
-plot.data.dt <- copy(select.samples) #the copy function ensures the select.sample to stay intact
 plot.data.dt[,bin:=findInterval(AAproc, position)]
 plot.data.bin <- plot.data.dt[, list(.N,seqlength=min(seqlength),
-                                        AAproc = position[findInterval(min(AAproc),position)],
-                                        BCmean=unlist(lapply(strsplit(paste(BC, collapse=","), ","),function(x) length(unique(x)))),
-                                        AnimalCount = length(table(strsplit(paste(t(Animals), collapse=","), ","))),
-                                        NormCount = log2((sum(RNAcount)/seqlength*FullLength)+1)
-                                        ), by=c("Group","GeneName","bin")]
+                                     AAproc = position[findInterval(min(AAproc),position)],
+                                     BCmean=unlist(lapply(strsplit(paste(BC, collapse=","), ","),function(x) length(unique(x)))),
+                                     AnimalCount = length(table(strsplit(paste(t(Animals), collapse=","), ","))),
+                                     NormCount = log2((sum(RNAcount)/seqlength*FullLength)+1)
+), by=c("Group","GeneName","bin")]
+plot.data.bin <- unique(plot.data.bin, by=c("Group","GeneName","bin"))
+
 #===================
 #Filtration parameters
 #===================
@@ -99,19 +129,6 @@ plot.data.bin <- plot.data.dt[, list(.N,seqlength=min(seqlength),
 if (NormalizePlot) {
   plot.data.bin[plot.data.bin$Group == names(fill.values)[1]]$NormCount <- plot.data.bin[plot.data.bin$Group == names(fill.values)[1]]$NormCount / max(plot.data.bin[plot.data.bin$Group == names(fill.values)[1]]$NormCount)
   plot.data.bin[plot.data.bin$Group == names(fill.values)[2]]$NormCount <- plot.data.bin[plot.data.bin$Group == names(fill.values)[2]]$NormCount / max(plot.data.bin[plot.data.bin$Group == names(fill.values)[2]]$NormCount)
-}
-
-if (filterBC) {
-  plot.data.bin <- plot.data.bin[plot.data.bin$BCmean > 1,]
-  select.samples <- select.samples[mcols(select.samples)$BC>1]
-}
-
-if (filterAnimal) {
-  plot.data.bin <- plot.data.bin[plot.data.bin$AnimalCount > 1,]
-}
-
-if (AnimaladjustPlot) {
-  plot.data.bin$NormCount <- plot.data.bin$NormCount*plot.data.bin$AnimalCount/plot.data.bin$seqlength*FullLength
 }
 
 plot.data.bin[plot.data.bin$Group == names(fill.values)[2]]$NormCount <- plot.data.bin[plot.data.bin$Group == names(fill.values)[2]]$NormCount*-1 #This line flips the values for the second group
@@ -185,110 +202,72 @@ return(out.list)
 #'Analyze samples
 #'===================
 
-out.plot.list <- plotPair("totalLib","infectiveLib",
-                          filterBC=FALSE,
-                          filterAnimal=FALSE,
-                          AnimaladjustPlot=FALSE,
-                          NormalizePlot=TRUE)
+plotPair("totalLib","infectiveLib")$plot
+
+plotPair("CNS100x_Str","totalLib")$plot
+
+out.plot.list <- plotPair("CNS100x_Th","CNS100x_Str")
 out.plot.list$plot
 knitr::kable(out.plot.list$top, format = "markdown")
 knitr::kable(out.plot.list$bottom, format = "markdown")
 
-out.plot.list <- plotPair("CNS100x_Th","CNS100x_Str",
-                          filterBC=FALSE,
-                          filterAnimal=FALSE,
-                          AnimaladjustPlot=FALSE,
-                          NormalizePlot=TRUE)
+out.plot.list <- plotPair("CNS100x_Ctx","CNS100x_Str")
 out.plot.list$plot
-
-knitr::kable(out.plot.list$top, format = "markdown")
-knitr::kable(out.plot.list$bottom, format = "markdown")
-
-out.plot.list <- plotPair("CNS100x_Ctx","CNS100x_Str",
-                          filterBC=FALSE,
-                          filterAnimal=FALSE,
-                          AnimaladjustPlot=FALSE,
-                          NormalizePlot=TRUE)
-out.plot.list$plot
-
 knitr::kable(out.plot.list$top, format = "markdown")
 
-out.plot.list <- plotPair("CNS100x_SN","CNS100x_Str",
-                          filterBC=FALSE,
-                          filterAnimal=FALSE,
-                          AnimaladjustPlot=FALSE,
-                          NormalizePlot=TRUE)
+out.plot.list <- plotPair("CNS100x_SN","CNS100x_Str")
 out.plot.list$plot
-
 knitr::kable(out.plot.list$top, format = "markdown")
 
-out.plot.list <- plotPair("CNS1000x_Th","CNS1000x_Str",
-                          filterBC=FALSE,
-                          filterAnimal=FALSE,
-                          AnimaladjustPlot=FALSE,
-                          NormalizePlot=TRUE)
+plotPair("CNS100x_SN","CNS100x_Th")$plot
+
+plotPair("CNS100x_Ctx","CNS100x_Th")$plot
+
+plotPair("CNS100x_SN","CNS100x_Ctx")$plot
+
+out.plot.list <- plotPair("CNS1000x_Th","CNS1000x_Str")
 out.plot.list$plot
 knitr::kable(out.plot.list$top, format = "markdown")
 knitr::kable(out.plot.list$bottom, format = "markdown")
 
-out.plot.list <- plotPair("CNS1000x_Ctx","CNS1000x_Str",
-                          filterBC=FALSE,
-                          filterAnimal=FALSE,
-                          AnimaladjustPlot=FALSE,
-                          NormalizePlot=TRUE)
+out.plot.list <- plotPair("CNS1000x_Ctx","CNS1000x_Str")
 out.plot.list$plot
 knitr::kable(out.plot.list$top, format = "markdown")
 
-out.plot.list <- plotPair("CNS1000x_SN","CNS1000x_Str",
-                          filterBC=FALSE,
-                          filterAnimal=FALSE,
-                          AnimaladjustPlot=FALSE,
-                          NormalizePlot=TRUE)
+out.plot.list <- plotPair("CNS1000x_SN","CNS1000x_Str")
 out.plot.list$plot
 knitr::kable(out.plot.list$top, format = "markdown")
 
-out.plot.list <- plotPair("CNS1000x_Str","CNS100x_Str",
-                          filterBC=FALSE,
-                          filterAnimal=FALSE,
-                          AnimaladjustPlot=FALSE,
-                          NormalizePlot=TRUE)
-out.plot.list$plot
+plotPair("CNS1000x_SN","CNS1000x_Th")$plot
+plotPair("CNS1000x_Ctx","CNS1000x_Th")$plot
+plotPair("CNS1000x_SN","CNS1000x_Ctx")$plot
+plotPair("CNS1000x_Str","CNS100x_Str")$plot
+plotPair("CNS1000x_Th","CNS100x_Th")$plot
+plotPair("CNS1000x_Ctx","CNS100x_Ctx")$plot
+plotPair("CNS1000x_SN","CNS100x_SN")$plot
 
-out.plot.list <- plotPair("CNS1000x_Th","CNS100x_Th",
-                          filterBC=FALSE,
-                          filterAnimal=FALSE,
-                          AnimaladjustPlot=FALSE,
-                          NormalizePlot=TRUE)
-out.plot.list$plot
-out.plot.list <- plotPair("CNS1000x_Ctx","CNS100x_Ctx",
-                          filterBC=FALSE,
-                          filterAnimal=FALSE,
-                          AnimaladjustPlot=FALSE,
-                          NormalizePlot=TRUE)
-out.plot.list$plot
-
-out.plot.list <- plotPair("CNS1000x_SN","CNS100x_SN",
-                          filterBC=FALSE,
-                          filterAnimal=FALSE,
-                          AnimaladjustPlot=FALSE,
-                          NormalizePlot=TRUE)
-out.plot.list$plot
-out.plot.list <- plotPair("PrimN_1000x","PrimN_100x",
-                          filterBC=FALSE,
-                          filterAnimal=FALSE,
-                          AnimaladjustPlot=FALSE,
-                          NormalizePlot=TRUE)
+out.plot.list <- plotPair("PrimN_1000x","PrimN_100x")
 out.plot.list$plot
 knitr::kable(out.plot.list$top, format = "markdown")
 knitr::kable(out.plot.list$bottom, format = "markdown")
 
-out.plot.list <- plotPair("H293T_1000x","H293T_100x",
-                          filterBC=FALSE,
-                          filterAnimal=FALSE,
-                          AnimaladjustPlot=FALSE,
-                          NormalizePlot=TRUE)
+out.plot.list <- plotPair("H293T_1000x","H293T_100x")
 out.plot.list$plot
 knitr::kable(out.plot.list$top, format = "markdown")
 knitr::kable(out.plot.list$bottom, format = "markdown")
+
+plotPair("CNS100x_Str","totalLib",size.bin=1,winWidth=4)$plot
+plotPair("CNS1000x_Str","CNS100x_Str",size.bin=1,winWidth=4)$plot
+plotPair("CNS1000x_Th","CNS100x_Th",size.bin=1,winWidth=4)$plot
+plotPair("CNS1000x_Ctx","CNS100x_Ctx",size.bin=1,winWidth=4)$plot
+plotPair("CNS1000x_SN","CNS100x_SN",size.bin=1,winWidth=4)$plot
+plotPair("CNS1000x_SN","CNS1000x_Ctx",size.bin=1,winWidth=4)$plot
+plotPair("CNS100x_SN","CNS100x_Ctx",size.bin=1,winWidth=4)$plot
+plotPair("CNS1000x_Ctx","CNS1000x_Th",size.bin=1,winWidth=4)$plot
+plotPair("CNS100x_Ctx","CNS100x_Th",size.bin=1,winWidth=4)$plot
+plotPair("CNS1000x_Th","CNS1000x_Str",size.bin=1,winWidth=4)$plot
+plotPair("CNS100x_Th","CNS100x_Str",size.bin=1,winWidth=4)$plot
+plotPair("PrimN_1000x","PrimN_100x",size.bin=1,winWidth=4)$plot
+plotPair("H293T_1000x","H293T_100x",size.bin=1,winWidth=4)$plot
 
 devtools::session_info()
