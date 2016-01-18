@@ -84,13 +84,13 @@ sys.out <-  system(paste("export SHELL=/bin/sh; cat ",fragments.unique.fa," | pa
                          " -query - > ", blast.out, " 2>&1",  sep = ""),
                    intern = TRUE, ignore.stdout = FALSE) # -word_size 7
 
-table.blastn <- data.table(read.table(blast.out, header = FALSE, skip = 0, sep=";",
-                                      stringsAsFactors = FALSE, fill=FALSE) , keep.rownames=FALSE, key="V1")
-
-# table.blastn <- data.table(read.table("./data/blastOutput.csv", header = FALSE, skip = 0, sep=";",
+# table.blastn <- data.table(read.table(blast.out, header = FALSE, skip = 0, sep=";",
 #                                       stringsAsFactors = FALSE, fill=FALSE) , keep.rownames=FALSE, key="V1")
 
-system(paste("mv", blast.out, "./data/blastOutput.csv", sep=" "))
+system(paste("gzip -c ", blast.out, " > ./data/blastOutput.csv.gz", sep=" "))
+
+table.blastn <- data.table(scan(file="./data/blastOutput.csv.gz", what="character", sep=";") , keep.rownames=FALSE, key="V1")
+
 
 if (length(grep("Warning",table.blastn$V1)) != 0) {
   warnings.out <- unique(table.blastn[grep("Warning",table.blastn$V1),])
