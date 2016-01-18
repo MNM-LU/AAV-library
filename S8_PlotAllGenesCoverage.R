@@ -34,6 +34,28 @@ total.AAV.samples <- total.AAV.samples[-grep("4wks",mcols(total.AAV.samples)$Gro
 mcols(total.AAV.samples)$Group <- "infectiveLib"
 all.samples <- append(all.samples,total.AAV.samples)
 
+mcols(all.samples)$Sequence <- names(all.samples)
+names(all.samples) <- make.names(names(all.samples), unique=TRUE)
+length.Table <- data.table(seqnames=names(seqlengths(all.samples)),
+                           seqlength=seqlengths(all.samples), key="seqnames")
+all.samples <- data.table(as.data.frame(all.samples), key="seqnames")
+all.samples[,c("strand","qwidth","cigar","njunc","end"):=NULL]
+all.samples <- all.samples[length.Table] #A data.table merge to match seqlengths to their respective seqnames
+all.samples[, c("Category", "Protein", "Origin", 
+               "Extra", "Number","GeneName") := tstrsplit(seqnames, ",", fixed=TRUE)]
+all.samples[, c("seqnames","Protein", "Origin", 
+                "Extra", "Number") := NULL]
+all.samples[, GeneName := gsub("/|_","-",GeneName)]
+all.samples[,AA:=(start+2+(width/2))/3]
+all.samples[,seqlength:=seqlength/3]
+all.samples[,AAproc:=AA/seqlength*100]
+
+saveRDS(all.samples,file="data/allSamplesDataTable.RDS")
+
+all.samples$Group[all.samples$Group== "293T_1000x"] <- "H293T_1000x"
+all.samples$Group[all.samples$Group== "293T_100x"] <- "H293T_100x"
+
+
 #'Plotting function
 #'===================
 
@@ -42,8 +64,8 @@ plotPair <- function(topSample,bottomSample,filterBC=FALSE,filterAnimal=FALSE,
 # Select samples
 #===================
 
-#   topSample <- "CNS100x_Ctx"
-#   bottomSample <- "CNS100x_Str"
+#   topSample <- "CNS1000x_Ctx"
+#   bottomSample <- "CNS1000x_Str"
 #   filterBC <- FALSE
 #   filterAnimal <- FALSE
 #   AnimaladjustPlot <- FALSE
@@ -51,28 +73,9 @@ plotPair <- function(topSample,bottomSample,filterBC=FALSE,filterAnimal=FALSE,
   
 fill.values <- eval(parse(text=paste("c(", topSample,"= rgb(38,64,135, maxColorValue = 255), ",
                                      bottomSample,"= rgb(157,190,217, maxColorValue = 255))",sep="")))
+setkey(all.samples,Group)
+select.samples <- all.samples[J(names(fill.values))] #Select the two compared groups
 
-select.samples <- all.samples[mcols(all.samples)$Group %in% names(fill.values)]
-trim.names <- data.table(GeneName=levels(seqnames(select.samples)))
-trim.names[, c("Category", "Protein", "Origin", 
-               "Extra", "Number","GeneName") := tstrsplit(GeneName, ",", fixed=TRUE)]
-trim.names$GeneName <- gsub("/|_","-",trim.names$GeneName)
-levels(seqnames(select.samples)) <- trim.names$GeneName
-
-geneTable <- data.frame(seqlengths(select.samples))
-colnames(geneTable) <- "SeqLength"
-geneTable$GeneName <- row.names(geneTable)
-
-plot.data <- data.frame(GeneName=seqnames(select.samples),
-                        Group=factor(mcols(select.samples)$Group, levels = names(fill.values)),
-                        AApos=start(select.samples)+(width(select.samples)/2),
-                        Animals=mcols(select.samples)$Animals,
-                        BC=mcols(select.samples)$BC,
-                        RNAcount=mcols(select.samples)$RNAcount,
-                        NormCount=mcols(select.samples)$NormCount,
-                        stringsAsFactors = FALSE)
-plot.data <- merge(plot.data,geneTable)
-plot.data$AAproc <- (plot.data$AApos/plot.data$SeqLength)*100
 
 #===================
 #Binning of data
@@ -81,13 +84,13 @@ plot.data$AAproc <- (plot.data$AApos/plot.data$SeqLength)*100
 size.bin <- 2
 FullLength <- 100
 position <- seq(0,FullLength,size.bin)
-plot.data.dt <- data.table(plot.data)
+plot.data.dt <- select.samples
 plot.data.dt[,bin:=findInterval(AAproc, position)]
-plot.data.bin <- plot.data.dt[, list(.N,SeqLength=min(SeqLength),
+plot.data.bin <- plot.data.dt[, list(.N,seqlength=min(seqlength),
                                         AAproc = position[findInterval(min(AAproc),position)],
                                         BCmean=unlist(lapply(strsplit(paste(BC, collapse=","), ","),function(x) length(unique(x)))),
                                         AnimalCount = length(table(strsplit(paste(t(Animals), collapse=","), ","))),
-                                        NormCount = log2((sum(RNAcount)/SeqLength*FullLength)+1)
+                                        NormCount = log2((sum(RNAcount)/seqlength*FullLength)+1)
                                         ), by=c("bin","GeneName","Group")]
 #===================
 #Filtration parameters
@@ -108,56 +111,10 @@ if (filterAnimal) {
 }
 
 if (AnimaladjustPlot) {
-  plot.data.bin$NormCount <- plot.data.bin$NormCount*plot.data.bin$AnimalCount/plot.data.bin$SeqLength*FullLength
+  plot.data.bin$NormCount <- plot.data.bin$NormCount*plot.data.bin$AnimalCount/plot.data.bin$seqlength*FullLength
 }
 
-plot.data.bin[plot.data.bin$Group == names(fill.values)[2]]$NormCount <- plot.data.bin[plot.data.bin$Group == names(fill.values)[2]]$NormCount*-1
-
-
-#===================
-# Sort and select top samples
-#===================
-
-
-select.samples.gr <- granges(select.samples)
-
-mcols(select.samples.gr) <- cbind(mcols(select.samples)[,c(1,2,4,5,6,7,10)],
-                                  DataFrame(Animals=unlist(lapply(strsplit(mcols(select.samples)$Animals, ","),function(x)length(table(x))))))
-
-o = order(-mcols(select.samples.gr)$NormCount)
-select.samples.gr <- select.samples.gr[o]
-top.sample <- select.samples.gr[mcols(select.samples.gr)$Group %in% names(fill.values)[1]]
-bottom.sample <- select.samples.gr[mcols(select.samples.gr)$Group %in% names(fill.values)[2]]
-
-if (length(top.sample) >=1){
-  out <- top.sample
-  out.2 <- data.table(Fragment=names(out),
-                      SeqCount=0,
-                      Gene=as.character(seqnames(out)),
-                      startAA=(start(out)+2)/3)
-  out.2 <- data.frame(out.2,as.data.frame(mcols(out)))
-  out.2$BC <- unlist(lapply(strsplit(out.2$BC, ","),function(x) length(unique(x))))
-  out.2[match(names(table(out.2$Fragment)),out.2$Fragment),"SeqCount"] <- as.integer(table(out.2$Fragment))
-  out.2 <- out.2[out.2$SeqCount>=1,]
-  setnames(out.2, "Fragment", paste(topSample,"- Fragment"))
-  top.sample.out.1 <- out.2[1:min(15,nrow(out.2)),c(1,3)]
-  top.sample.out.2 <- out.2[1:min(15,nrow(out.2)),c(-1,-2,-6)]
-} else {top.sample.out.1 <- top.sample.out.2 <- NA}
-
-if (length(bottom.sample) >=1) {
-  out <- bottom.sample
-  out.2 <- data.table(Fragment=names(out),
-                      SeqCount=0,
-                      Gene=as.character(seqnames(out)),
-                      startAA=(start(out)+2)/3)
-  out.2 <- data.frame(out.2,as.data.frame(mcols(out)))
-  out.2$BC <- unlist(lapply(strsplit(out.2$BC, ","),function(x) length(unique(x))))
-  out.2[match(names(table(out.2$Fragment)),out.2$Fragment),"SeqCount"] <- as.integer(table(out.2$Fragment))
-  out.2 <- out.2[out.2$SeqCount>=1,]
-  setnames(out.2, "Fragment", paste(bottomSample,"- Fragment"))
-  bottom.sample.out.1 <- out.2[1:min(15,nrow(out.2)),c(1,3,6)]
-  bottom.sample.out.2 <-out.2[1:min(15,nrow(out.2)),c(-1,-2,-6)]
-} else {bottom.sample.out.1 <- bottom.sample.out.2 <- NA}
+plot.data.bin[plot.data.bin$Group == names(fill.values)[2]]$NormCount <- plot.data.bin[plot.data.bin$Group == names(fill.values)[2]]$NormCount*-1 #This line flips the values for the second group
 
 #===================
 #Output plot
@@ -184,12 +141,42 @@ plot.out <- ggplot(plot.data.bin,aes(x=AAproc,y=NormCount, fill = Group)) +
         panel.margin.y = unit(-0.15, "cm"),
         panel.margin.x = unit(0, "cm"))
 
+
+#===================
+# Sort and select top samples
+#===================
+
+select.samples.binPos <<- select.samples
+setkeyv(select.samples.binPos,c("Group","structure","Sequence"))
+setorder(select.samples.binPos,Group,structure,Sequence,GeneName)
+select.samples.binPos <- unique(select.samples.binPos) 
+#Due to key, this removes replicates if identical sequence mapped to multiple genes
+
+setkeyv(select.samples.binPos,c("Group","Category","GeneName","AA"))
+select.samples.binPos[,c("BCcount","NormCount","AnimalCount","mainStruct","mismatches"):=
+                        list(unlist(lapply(strsplit(paste(BC, collapse=","), ","),function(x) length(unique(x)))),
+                             sum(NormCount),
+                             unlist(lapply(strsplit(paste(Animals, collapse=","), ","),function(x) length(unique(x)))),
+                             paste(unique(structure), collapse=","),
+                             median(mismatches)), by=key(select.samples.binPos)]
+
+select.samples.binPos <- unique(select.samples.binPos)
+select.samples.binPos <- select.samples.binPos[,c("Group","GeneName","AA","NormCount",
+                                                  "BCcount","AnimalCount","mainStruct",
+                                                  "mismatches"), with = FALSE]
+
+setorder(select.samples.binPos,Group,-NormCount,BCcount,AnimalCount)
+setkey(select.samples.binPos,Group)
+select.samples.top <- select.samples.binPos[, head(.SD, 20), by=Group]
+top.sample <- select.samples.top[J(names(fill.values)[1])]
+bottom.sample <- select.samples.top[J(names(fill.values)[2])]
+top.sample[,c("Group"):=NULL]
+bottom.sample[,c("Group"):=NULL]
+
 out.list <- list(plot=plot.out,
                  plotBin=plot.data.bin,
-                 top1=top.sample.out.1,
-                 top2=top.sample.out.2,
-                 bottom1=bottom.sample.out.1,
-                 bottom2=bottom.sample.out.2)
+                 top=top.sample,
+                 bottom=bottom.sample)
 
 return(out.list)
 }
@@ -204,8 +191,8 @@ out.plot.list <- plotPair("totalLib","infectiveLib",
                           AnimaladjustPlot=FALSE,
                           NormalizePlot=TRUE)
 out.plot.list$plot
-knitr::kable(out.plot.list$top2, format = "markdown")
-knitr::kable(out.plot.list$bottom2, format = "markdown")
+knitr::kable(out.plot.list$top, format = "markdown")
+knitr::kable(out.plot.list$bottom, format = "markdown")
 
 out.plot.list <- plotPair("CNS100x_Th","CNS100x_Str",
                           filterBC=FALSE,
@@ -214,15 +201,8 @@ out.plot.list <- plotPair("CNS100x_Th","CNS100x_Str",
                           NormalizePlot=TRUE)
 out.plot.list$plot
 
-out.plot.list <- plotPair("CNS100x_Th","CNS100x_Str",
-                          filterBC=FALSE,
-                          filterAnimal=FALSE,
-                          AnimaladjustPlot=TRUE,
-                          NormalizePlot=TRUE)
-out.plot.list$plot
-knitr::kable(out.plot.list$plotBin[1:10,], format = "markdown")
-knitr::kable(out.plot.list$top2, format = "markdown")
-knitr::kable(out.plot.list$bottom2, format = "markdown")
+knitr::kable(out.plot.list$top, format = "markdown")
+knitr::kable(out.plot.list$bottom, format = "markdown")
 
 out.plot.list <- plotPair("CNS100x_Ctx","CNS100x_Str",
                           filterBC=FALSE,
@@ -230,13 +210,8 @@ out.plot.list <- plotPair("CNS100x_Ctx","CNS100x_Str",
                           AnimaladjustPlot=FALSE,
                           NormalizePlot=TRUE)
 out.plot.list$plot
-out.plot.list <- plotPair("CNS100x_Ctx","CNS100x_Str",
-                          filterBC=FALSE,
-                          filterAnimal=FALSE,
-                          AnimaladjustPlot=TRUE,
-                          NormalizePlot=TRUE)
-out.plot.list$plot
-knitr::kable(out.plot.list$top2, format = "markdown")
+
+knitr::kable(out.plot.list$top, format = "markdown")
 
 out.plot.list <- plotPair("CNS100x_SN","CNS100x_Str",
                           filterBC=FALSE,
@@ -245,13 +220,7 @@ out.plot.list <- plotPair("CNS100x_SN","CNS100x_Str",
                           NormalizePlot=TRUE)
 out.plot.list$plot
 
-out.plot.list <- plotPair("CNS100x_SN","CNS100x_Str",
-                          filterBC=FALSE,
-                          filterAnimal=FALSE,
-                          AnimaladjustPlot=TRUE,
-                          NormalizePlot=TRUE)
-out.plot.list$plot
-knitr::kable(out.plot.list$top2, format = "markdown")
+knitr::kable(out.plot.list$top, format = "markdown")
 
 out.plot.list <- plotPair("CNS1000x_Th","CNS1000x_Str",
                           filterBC=FALSE,
@@ -259,8 +228,8 @@ out.plot.list <- plotPair("CNS1000x_Th","CNS1000x_Str",
                           AnimaladjustPlot=FALSE,
                           NormalizePlot=TRUE)
 out.plot.list$plot
-knitr::kable(out.plot.list$top2, format = "markdown")
-knitr::kable(out.plot.list$bottom2, format = "markdown")
+knitr::kable(out.plot.list$top, format = "markdown")
+knitr::kable(out.plot.list$bottom, format = "markdown")
 
 out.plot.list <- plotPair("CNS1000x_Ctx","CNS1000x_Str",
                           filterBC=FALSE,
@@ -268,7 +237,7 @@ out.plot.list <- plotPair("CNS1000x_Ctx","CNS1000x_Str",
                           AnimaladjustPlot=FALSE,
                           NormalizePlot=TRUE)
 out.plot.list$plot
-knitr::kable(out.plot.list$top2, format = "markdown")
+knitr::kable(out.plot.list$top, format = "markdown")
 
 out.plot.list <- plotPair("CNS1000x_SN","CNS1000x_Str",
                           filterBC=FALSE,
@@ -276,45 +245,40 @@ out.plot.list <- plotPair("CNS1000x_SN","CNS1000x_Str",
                           AnimaladjustPlot=FALSE,
                           NormalizePlot=TRUE)
 out.plot.list$plot
-knitr::kable(out.plot.list$top2, format = "markdown")
+knitr::kable(out.plot.list$top, format = "markdown")
 
 out.plot.list <- plotPair("CNS1000x_Str","CNS100x_Str",
                           filterBC=FALSE,
                           filterAnimal=FALSE,
                           AnimaladjustPlot=FALSE,
                           NormalizePlot=TRUE)
-
+out.plot.list$plot
 out.plot.list <- plotPair("CNS1000x_Th","CNS100x_Th",
                           filterBC=FALSE,
                           filterAnimal=FALSE,
                           AnimaladjustPlot=FALSE,
                           NormalizePlot=TRUE)
-
+out.plot.list$plot
 out.plot.list <- plotPair("CNS1000x_Ctx","CNS100x_Ctx",
                           filterBC=FALSE,
                           filterAnimal=FALSE,
                           AnimaladjustPlot=TRUE,
                           NormalizePlot=TRUE)
-
+out.plot.list$plot
 out.plot.list <- plotPair("CNS1000x_SN","CNS100x_SN",
                           filterBC=FALSE,
                           filterAnimal=FALSE,
                           AnimaladjustPlot=FALSE,
                           NormalizePlot=TRUE)
-
+out.plot.list$plot
 out.plot.list <- plotPair("PrimN_1000x","PrimN_100x",
                           filterBC=FALSE,
                           filterAnimal=FALSE,
                           AnimaladjustPlot=FALSE,
                           NormalizePlot=TRUE)
 out.plot.list$plot
-knitr::kable(out.plot.list$top2, format = "markdown")
-knitr::kable(out.plot.list$bottom2, format = "markdown")
-
-
-
-mcols(all.samples)$Group[mcols(all.samples)$Group== "293T_1000x"] <- "H293T_1000x"
-mcols(all.samples)$Group[mcols(all.samples)$Group== "293T_100x"] <- "H293T_100x"
+knitr::kable(out.plot.list$top, format = "markdown")
+knitr::kable(out.plot.list$bottom, format = "markdown")
 
 out.plot.list <- plotPair("H293T_1000x","H293T_100x",
                           filterBC=FALSE,
@@ -322,7 +286,7 @@ out.plot.list <- plotPair("H293T_1000x","H293T_100x",
                           AnimaladjustPlot=FALSE,
                           NormalizePlot=TRUE)
 out.plot.list$plot
-knitr::kable(out.plot.list$top2, format = "markdown")
-knitr::kable(out.plot.list$bottom2, format = "markdown")
+knitr::kable(out.plot.list$top, format = "markdown")
+knitr::kable(out.plot.list$bottom, format = "markdown")
 
 devtools::session_info()

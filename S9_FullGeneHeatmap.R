@@ -38,7 +38,7 @@ length.Table <- data.table(seqnames=names(seqlengths(select.samples)),
                            seqlength=seqlengths(select.samples), key="seqnames")
 select.samples <- data.table(as.data.frame(select.samples), key="seqnames")
 select.samples[,c("strand","qwidth","cigar","njunc","end"):=NULL]
-select.samples <- select.samples[length.Table] #A data.table berge to match seglengths to their respective seqnames
+select.samples <- select.samples[length.Table] #A data.table merge to match seqlengths to their respective seqnames
 
 #'Selection of relevant samples
 #'===================
