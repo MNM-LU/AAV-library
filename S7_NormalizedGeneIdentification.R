@@ -30,7 +30,7 @@ load.list <- read.table("input/loadlist.txt", header = FALSE, skip = 0, sep="\t"
                         stringsAsFactors = FALSE, fill=TRUE)
 colnames(load.list) <- c("Name", "BaseName","GroupName")
 load.list <- rbind(load.list,c("completeLibraryRanges","","totalLib"))
-load.list <- load.list[-grep("Untreat",load.list$Name),]
+load.list <- load.list[!grepl("Untreat",load.list$Name),]
 
 select.Cases <- c(unlist(sapply(load.list$Name, function(x) grep(x,in.names.all), simplify = TRUE)))
 
@@ -50,18 +50,10 @@ loadRDS <- function(in.name) {
   this.sample <- readRDS(in.name)
   this.name <- gsub("-","_",gsub("found.|(output/)|(.rds)", "", in.name))
   this.group <- grouping[match(this.name,grouping$Sample),"Group"]
-  
-  if (this.name == "completeLibraryRanges"){
-    mcols(this.sample) <- cbind(mcols(this.sample),
-                                data.frame(RNAcount=mcols(this.sample)$tCount, 
-                                           Sample = this.name, Group=this.group,
-                                           stringsAsFactors = FALSE))
-    #This is required, as the total library alignment does not have any RNA counts
-  } else {
     mcols(this.sample) <- cbind(mcols(this.sample),
                                 data.frame(Sample = this.name, Group=this.group,
                                            stringsAsFactors = FALSE))
-  }
+
   return(this.sample)
 }
 
@@ -113,6 +105,7 @@ mcols(outRanges) <- data.frame(structure=mcols(inRanges)$structure[1],
                                tCount=sum(mcols(inRanges)$tCount),
                                BC=paste(unique(mcols(inRanges)$BC), collapse = ","),
                                Animals=paste(unique(mcols(inRanges)$Sample), collapse = ","),
+                               LUTnrs=paste(unique(mcols(inRanges)$LUTnr), collapse = ","),
                                RNAcount=sum(mcols(inRanges)$RNAcount),
                                NormCount=log2(sum(mcols(inRanges)$RNAcount)+1)*length(inRanges),
                                stringsAsFactors=FALSE)

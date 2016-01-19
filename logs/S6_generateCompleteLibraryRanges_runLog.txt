@@ -1,1 +1,17 @@
-./commandLineFullRun.sh: 5: ./commandLineFullRun.sh: pt: not found
+
+
+processing file: S6_generateCompleteLibraryRanges.spin.Rmd
+  |                                                                         |                                                                 |   0%  |                                                                         |......................                                           |  33%
+  ordinary text without R code
+
+  |                                                                         |...........................................                      |  67%
+label: unnamed-chunk-1
+  |                                                                         |.................................................................| 100%
+  ordinary text without R code
+
+
+output file: S6_generateCompleteLibraryRanges.knit.md
+
+/usr/bin/pandoc +RTS -K512m -RTS S6_generateCompleteLibraryRanges.utf8.md --to latex --from markdown+autolink_bare_uris+ascii_identifiers+tex_math_single_backslash-implicit_figures --output S6_generateCompleteLibraryRanges.pdf --template /home/lcadmin/R/x86_64-pc-linux-gnu-library/3.2/rmarkdown/rmd/latex/default.tex --highlight-style tango --latex-engine pdflatex 
+
+Output created: S6_generateCompleteLibraryRanges.pdf

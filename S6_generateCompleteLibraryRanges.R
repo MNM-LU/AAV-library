@@ -30,6 +30,8 @@ output.Table <- output.Table[range.idx, nomatch=0, allow.cartesian=TRUE]
 
 foundFragments.ranges <- allFragments.ranges[output.Table$idxFrag]
 output.Table[,c("Reads","fragment","idxFrag"):=NULL]
+output.Table[,RNAcount:=tCount]
+
 mcols(foundFragments.ranges) <- c(mcols(foundFragments.ranges), output.Table)
   
 saveRDS(foundFragments.ranges, file="output/completeLibraryRanges.rds")

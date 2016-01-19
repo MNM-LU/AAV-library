@@ -16,8 +16,136 @@ List of 1
 
   |                                                                         |................................                                 |  50%
 label: unnamed-chunk-2
-Quitting from lines 34-77 (S8_PlotAllGenesCoverage.spin.Rmd) 
-Error in eval(expr, envir, enclos) : object 'table.BC.sc' not found
-Calls: <Anonymous> ... handle -> withCallingHandlers -> withVisible -> eval -> eval
+  |                                                                         |.......................................                          |  60%
+  ordinary text without R code
 
-Execution halted
+  |                                                                         |..............................................                   |  70%
+label: unnamed-chunk-3
+  |                                                                         |....................................................             |  80%
+  ordinary text without R code
+
+  |                                                                         |..........................................................       |  90%
+label: unnamed-chunk-4
+cropping S8_PlotAllGenesCoverage_files/figure-latex/unnamed-chunk-4-1.pdf
+PDFCROP 1.38, 2012/11/02 - Copyright (c) 2002-2012 by Heiko Oberdiek.
+==> 1 page written on `S8_PlotAllGenesCoverage_files/figure-latex/unnamed-chunk-4-1.pdf'.
+cropping S8_PlotAllGenesCoverage_files/figure-latex/unnamed-chunk-4-2.pdf
+PDFCROP 1.38, 2012/11/02 - Copyright (c) 2002-2012 by Heiko Oberdiek.
+==> 1 page written on `S8_PlotAllGenesCoverage_files/figure-latex/unnamed-chunk-4-2.pdf'.
+cropping S8_PlotAllGenesCoverage_files/figure-latex/unnamed-chunk-4-3.pdf
+PDFCROP 1.38, 2012/11/02 - Copyright (c) 2002-2012 by Heiko Oberdiek.
+==> 1 page written on `S8_PlotAllGenesCoverage_files/figure-latex/unnamed-chunk-4-3.pdf'.
+cropping S8_PlotAllGenesCoverage_files/figure-latex/unnamed-chunk-4-4.pdf
+PDFCROP 1.38, 2012/11/02 - Copyright (c) 2002-2012 by Heiko Oberdiek.
+==> 1 page written on `S8_PlotAllGenesCoverage_files/figure-latex/unnamed-chunk-4-4.pdf'.
+cropping S8_PlotAllGenesCoverage_files/figure-latex/unnamed-chunk-4-5.pdf
+PDFCROP 1.38, 2012/11/02 - Copyright (c) 2002-2012 by Heiko Oberdiek.
+==> 1 page written on `S8_PlotAllGenesCoverage_files/figure-latex/unnamed-chunk-4-5.pdf'.
+cropping S8_PlotAllGenesCoverage_files/figure-latex/unnamed-chunk-4-6.pdf
+PDFCROP 1.38, 2012/11/02 - Copyright (c) 2002-2012 by Heiko Oberdiek.
+==> 1 page written on `S8_PlotAllGenesCoverage_files/figure-latex/unnamed-chunk-4-6.pdf'.
+cropping S8_PlotAllGenesCoverage_files/figure-latex/unnamed-chunk-4-7.pdf
+PDFCROP 1.38, 2012/11/02 - Copyright (c) 2002-2012 by Heiko Oberdiek.
+==> 1 page written on `S8_PlotAllGenesCoverage_files/figure-latex/unnamed-chunk-4-7.pdf'.
+cropping S8_PlotAllGenesCoverage_files/figure-latex/unnamed-chunk-4-8.pdf
+PDFCROP 1.38, 2012/11/02 - Copyright (c) 2002-2012 by Heiko Oberdiek.
+==> 1 page written on `S8_PlotAllGenesCoverage_files/figure-latex/unnamed-chunk-4-8.pdf'.
+cropping S8_PlotAllGenesCoverage_files/figure-latex/unnamed-chunk-4-9.pdf
+PDFCROP 1.38, 2012/11/02 - Copyright (c) 2002-2012 by Heiko Oberdiek.
+==> 1 page written on `S8_PlotAllGenesCoverage_files/figure-latex/unnamed-chunk-4-9.pdf'.
+cropping S8_PlotAllGenesCoverage_files/figure-latex/unnamed-chunk-4-10.pdf
+PDFCROP 1.38, 2012/11/02 - Copyright (c) 2002-2012 by Heiko Oberdiek.
+==> 1 page written on `S8_PlotAllGenesCoverage_files/figure-latex/unnamed-chunk-4-10.pdf'.
+cropping S8_PlotAllGenesCoverage_files/figure-latex/unnamed-chunk-4-11.pdf
+PDFCROP 1.38, 2012/11/02 - Copyright (c) 2002-2012 by Heiko Oberdiek.
+==> 1 page written on `S8_PlotAllGenesCoverage_files/figure-latex/unnamed-chunk-4-11.pdf'.
+cropping S8_PlotAllGenesCoverage_files/figure-latex/unnamed-chunk-4-12.pdf
+PDFCROP 1.38, 2012/11/02 - Copyright (c) 2002-2012 by Heiko Oberdiek.
+==> 1 page written on `S8_PlotAllGenesCoverage_files/figure-latex/unnamed-chunk-4-12.pdf'.
+cropping S8_PlotAllGenesCoverage_files/figure-latex/unnamed-chunk-4-13.pdf
+PDFCROP 1.38, 2012/11/02 - Copyright (c) 2002-2012 by Heiko Oberdiek.
+==> 1 page written on `S8_PlotAllGenesCoverage_files/figure-latex/unnamed-chunk-4-13.pdf'.
+cropping S8_PlotAllGenesCoverage_files/figure-latex/unnamed-chunk-4-14.pdf
+PDFCROP 1.38, 2012/11/02 - Copyright (c) 2002-2012 by Heiko Oberdiek.
+==> 1 page written on `S8_PlotAllGenesCoverage_files/figure-latex/unnamed-chunk-4-14.pdf'.
+cropping S8_PlotAllGenesCoverage_files/figure-latex/unnamed-chunk-4-15.pdf
+PDFCROP 1.38, 2012/11/02 - Copyright (c) 2002-2012 by Heiko Oberdiek.
+==> 1 page written on `S8_PlotAllGenesCoverage_files/figure-latex/unnamed-chunk-4-15.pdf'.
+cropping S8_PlotAllGenesCoverage_files/figure-latex/unnamed-chunk-4-16.pdf
+PDFCROP 1.38, 2012/11/02 - Copyright (c) 2002-2012 by Heiko Oberdiek.
+==> 1 page written on `S8_PlotAllGenesCoverage_files/figure-latex/unnamed-chunk-4-16.pdf'.
+cropping S8_PlotAllGenesCoverage_files/figure-latex/unnamed-chunk-4-17.pdf
+PDFCROP 1.38, 2012/11/02 - Copyright (c) 2002-2012 by Heiko Oberdiek.
+==> 1 page written on `S8_PlotAllGenesCoverage_files/figure-latex/unnamed-chunk-4-17.pdf'.
+cropping S8_PlotAllGenesCoverage_files/figure-latex/unnamed-chunk-4-18.pdf
+PDFCROP 1.38, 2012/11/02 - Copyright (c) 2002-2012 by Heiko Oberdiek.
+==> 1 page written on `S8_PlotAllGenesCoverage_files/figure-latex/unnamed-chunk-4-18.pdf'.
+cropping S8_PlotAllGenesCoverage_files/figure-latex/unnamed-chunk-4-19.pdf
+PDFCROP 1.38, 2012/11/02 - Copyright (c) 2002-2012 by Heiko Oberdiek.
+==> 1 page written on `S8_PlotAllGenesCoverage_files/figure-latex/unnamed-chunk-4-19.pdf'.
+cropping S8_PlotAllGenesCoverage_files/figure-latex/unnamed-chunk-4-20.pdf
+PDFCROP 1.38, 2012/11/02 - Copyright (c) 2002-2012 by Heiko Oberdiek.
+==> 1 page written on `S8_PlotAllGenesCoverage_files/figure-latex/unnamed-chunk-4-20.pdf'.
+cropping S8_PlotAllGenesCoverage_files/figure-latex/unnamed-chunk-4-21.pdf
+PDFCROP 1.38, 2012/11/02 - Copyright (c) 2002-2012 by Heiko Oberdiek.
+==> 1 page written on `S8_PlotAllGenesCoverage_files/figure-latex/unnamed-chunk-4-21.pdf'.
+cropping S8_PlotAllGenesCoverage_files/figure-latex/unnamed-chunk-4-22.pdf
+PDFCROP 1.38, 2012/11/02 - Copyright (c) 2002-2012 by Heiko Oberdiek.
+==> 1 page written on `S8_PlotAllGenesCoverage_files/figure-latex/unnamed-chunk-4-22.pdf'.
+cropping S8_PlotAllGenesCoverage_files/figure-latex/unnamed-chunk-4-23.pdf
+PDFCROP 1.38, 2012/11/02 - Copyright (c) 2002-2012 by Heiko Oberdiek.
+==> 1 page written on `S8_PlotAllGenesCoverage_files/figure-latex/unnamed-chunk-4-23.pdf'.
+cropping S8_PlotAllGenesCoverage_files/figure-latex/unnamed-chunk-4-24.pdf
+PDFCROP 1.38, 2012/11/02 - Copyright (c) 2002-2012 by Heiko Oberdiek.
+==> 1 page written on `S8_PlotAllGenesCoverage_files/figure-latex/unnamed-chunk-4-24.pdf'.
+cropping S8_PlotAllGenesCoverage_files/figure-latex/unnamed-chunk-4-25.pdf
+PDFCROP 1.38, 2012/11/02 - Copyright (c) 2002-2012 by Heiko Oberdiek.
+==> 1 page written on `S8_PlotAllGenesCoverage_files/figure-latex/unnamed-chunk-4-25.pdf'.
+cropping S8_PlotAllGenesCoverage_files/figure-latex/unnamed-chunk-4-26.pdf
+PDFCROP 1.38, 2012/11/02 - Copyright (c) 2002-2012 by Heiko Oberdiek.
+==> 1 page written on `S8_PlotAllGenesCoverage_files/figure-latex/unnamed-chunk-4-26.pdf'.
+cropping S8_PlotAllGenesCoverage_files/figure-latex/unnamed-chunk-4-27.pdf
+PDFCROP 1.38, 2012/11/02 - Copyright (c) 2002-2012 by Heiko Oberdiek.
+==> 1 page written on `S8_PlotAllGenesCoverage_files/figure-latex/unnamed-chunk-4-27.pdf'.
+cropping S8_PlotAllGenesCoverage_files/figure-latex/unnamed-chunk-4-28.pdf
+PDFCROP 1.38, 2012/11/02 - Copyright (c) 2002-2012 by Heiko Oberdiek.
+==> 1 page written on `S8_PlotAllGenesCoverage_files/figure-latex/unnamed-chunk-4-28.pdf'.
+cropping S8_PlotAllGenesCoverage_files/figure-latex/unnamed-chunk-4-29.pdf
+PDFCROP 1.38, 2012/11/02 - Copyright (c) 2002-2012 by Heiko Oberdiek.
+==> 1 page written on `S8_PlotAllGenesCoverage_files/figure-latex/unnamed-chunk-4-29.pdf'.
+cropping S8_PlotAllGenesCoverage_files/figure-latex/unnamed-chunk-4-30.pdf
+PDFCROP 1.38, 2012/11/02 - Copyright (c) 2002-2012 by Heiko Oberdiek.
+==> 1 page written on `S8_PlotAllGenesCoverage_files/figure-latex/unnamed-chunk-4-30.pdf'.
+cropping S8_PlotAllGenesCoverage_files/figure-latex/unnamed-chunk-4-31.pdf
+PDFCROP 1.38, 2012/11/02 - Copyright (c) 2002-2012 by Heiko Oberdiek.
+==> 1 page written on `S8_PlotAllGenesCoverage_files/figure-latex/unnamed-chunk-4-31.pdf'.
+cropping S8_PlotAllGenesCoverage_files/figure-latex/unnamed-chunk-4-32.pdf
+PDFCROP 1.38, 2012/11/02 - Copyright (c) 2002-2012 by Heiko Oberdiek.
+==> 1 page written on `S8_PlotAllGenesCoverage_files/figure-latex/unnamed-chunk-4-32.pdf'.
+cropping S8_PlotAllGenesCoverage_files/figure-latex/unnamed-chunk-4-33.pdf
+PDFCROP 1.38, 2012/11/02 - Copyright (c) 2002-2012 by Heiko Oberdiek.
+==> 1 page written on `S8_PlotAllGenesCoverage_files/figure-latex/unnamed-chunk-4-33.pdf'.
+cropping S8_PlotAllGenesCoverage_files/figure-latex/unnamed-chunk-4-34.pdf
+PDFCROP 1.38, 2012/11/02 - Copyright (c) 2002-2012 by Heiko Oberdiek.
+==> 1 page written on `S8_PlotAllGenesCoverage_files/figure-latex/unnamed-chunk-4-34.pdf'.
+cropping S8_PlotAllGenesCoverage_files/figure-latex/unnamed-chunk-4-35.pdf
+PDFCROP 1.38, 2012/11/02 - Copyright (c) 2002-2012 by Heiko Oberdiek.
+==> 1 page written on `S8_PlotAllGenesCoverage_files/figure-latex/unnamed-chunk-4-35.pdf'.
+cropping S8_PlotAllGenesCoverage_files/figure-latex/unnamed-chunk-4-36.pdf
+PDFCROP 1.38, 2012/11/02 - Copyright (c) 2002-2012 by Heiko Oberdiek.
+==> 1 page written on `S8_PlotAllGenesCoverage_files/figure-latex/unnamed-chunk-4-36.pdf'.
+cropping S8_PlotAllGenesCoverage_files/figure-latex/unnamed-chunk-4-37.pdf
+PDFCROP 1.38, 2012/11/02 - Copyright (c) 2002-2012 by Heiko Oberdiek.
+==> 1 page written on `S8_PlotAllGenesCoverage_files/figure-latex/unnamed-chunk-4-37.pdf'.
+cropping S8_PlotAllGenesCoverage_files/figure-latex/unnamed-chunk-4-38.pdf
+PDFCROP 1.38, 2012/11/02 - Copyright (c) 2002-2012 by Heiko Oberdiek.
+==> 1 page written on `S8_PlotAllGenesCoverage_files/figure-latex/unnamed-chunk-4-38.pdf'.
+  |                                                                         |.................................................................| 100%
+  ordinary text without R code
+
+
+output file: S8_PlotAllGenesCoverage.knit.md
+
+/usr/bin/pandoc +RTS -K512m -RTS S8_PlotAllGenesCoverage.utf8.md --to latex --from markdown+autolink_bare_uris+ascii_identifiers+tex_math_single_backslash-implicit_figures --output S8_PlotAllGenesCoverage.pdf --template /home/lcadmin/R/x86_64-pc-linux-gnu-library/3.2/rmarkdown/rmd/latex/default.tex --highlight-style tango --latex-engine pdflatex 
+
+Output created: S8_PlotAllGenesCoverage.pdf

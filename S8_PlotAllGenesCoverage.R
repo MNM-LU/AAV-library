@@ -31,8 +31,16 @@ suppressPackageStartupMessages(library(devtools))
 all.samples <- readRDS("data/normalizedSampleRangesDefined.RDS")
 total.AAV.samples <- all.samples[!(mcols(all.samples)$Group %in% "totalLib")]
 total.AAV.samples <- total.AAV.samples[-grep("4wks",mcols(total.AAV.samples)$Group)]
+transported.AAV.samples.100x <- total.AAV.samples[grepl("100x_SN|100x_Th|100x_Ctx",mcols(total.AAV.samples)$Group)]
+transported.AAV.samples.1000x <- total.AAV.samples[grepl("1000x_SN|100x_Th|1000x_Ctx",mcols(total.AAV.samples)$Group)]
 mcols(total.AAV.samples)$Group <- "infectiveLib"
+mcols(transported.AAV.samples.100x)$Group <- "CNS100x_Trsp"
+mcols(transported.AAV.samples.1000x)$Group <- "CNS1000x_Trsp"
+
 all.samples <- append(all.samples,total.AAV.samples)
+all.samples <- append(all.samples,transported.AAV.samples.100x)
+all.samples <- append(all.samples,transported.AAV.samples.1000x)
+rm(total.AAV.samples,transported.AAV.samples.100x,transported.AAV.samples.1000x)
 
 mcols(all.samples)$Sequence <- names(all.samples)
 names(all.samples) <- make.names(names(all.samples), unique=TRUE)
@@ -60,7 +68,7 @@ all.samples$Group[all.samples$Group== "293T_100x"] <- "H293T_100x"
 #'Plotting function
 #'===================
 
-plotPair <- function(topSample,bottomSample,size.bin=2,winWidth=1,NormalizePlot=TRUE) {
+plotPair <- function(topSample,bottomSample,size.bin=2,winWidth=0,NormalizePlot=TRUE) {
 # Select samples
 #===================
 
@@ -78,12 +86,12 @@ fill.values <- eval(parse(text=paste("c(", topSample,"= rgb(38,64,135, maxColorV
 setkey(all.samples,Group)
 select.samples <- all.samples[J(names(fill.values))] #Select the two compared groups
 
-if (winWidth > 1) {
+if (winWidth > 0) {
   setorder(select.samples,Group,GeneName,start,width)
   
   windowTable <- select.samples[,c("GeneName","start","width"), with = FALSE]
   windowTable <- unique(windowTable, by=c("GeneName","start","width"))
-  windowTable <- windowTable[,(seq(width-winWidth)+start-1),by=c("GeneName","start","width")]
+  windowTable <- windowTable[,(seq(width-winWidth+1)+start-1),by=c("GeneName","start","width")]
   setnames(windowTable,"V1","winStart")
   windowTable[,winEnd:=winStart+winWidth]
   setkeyv(windowTable,c("GeneName","start","width"))
@@ -99,13 +107,14 @@ select.samples.windowBin <- select.samples.windowBin[, list(Overlaps=.N,
                                         AAproc = min(AAproc),
                                         BC = paste(t(BC), collapse=","),
                                         Animals = paste(t(Animals), collapse=","),
+                                        LUTnrs = paste(t(LUTnrs), collapse=","),
                                         RNAcount = sum(RNAcount)
 ), by=c("Group","GeneName","winStart","winEnd")]
 
 plot.data.dt <- unique(select.samples.windowBin)
 
 } else {
-  plot.data.dt <- copy(select.samples)
+  plot.data.dt <- data.table::copy(select.samples)
 }
 
 #===================
@@ -116,8 +125,9 @@ position <- seq(0,FullLength,size.bin)
 plot.data.dt[,bin:=findInterval(AAproc, position)]
 plot.data.bin <- plot.data.dt[, list(.N,seqlength=min(seqlength),
                                      AAproc = position[findInterval(min(AAproc),position)],
-                                     BCmean=unlist(lapply(strsplit(paste(BC, collapse=","), ","),function(x) length(unique(x)))),
+                                     BCmean=length(table(strsplit(paste(t(BC), collapse=","), ","))),
                                      AnimalCount = length(table(strsplit(paste(t(Animals), collapse=","), ","))),
+                                     LUTnrs = paste(unique(names(table(strsplit(paste(t(LUTnrs), collapse=","), ",")))), collapse=","),
                                      NormCount = log2((sum(RNAcount)/seqlength*FullLength)+1)
 ), by=c("Group","GeneName","bin")]
 plot.data.bin <- unique(plot.data.bin, by=c("Group","GeneName","bin"))
@@ -170,16 +180,17 @@ select.samples.binPos <- unique(select.samples.binPos)
 #Due to key, this removes replicates if identical sequence mapped to multiple genes
 
 setkeyv(select.samples.binPos,c("Group","Category","GeneName","AA"))
-select.samples.binPos[,c("BCcount","NormCount","AnimalCount","mainStruct","mismatches"):=
+select.samples.binPos[,c("BCcount","NormCount","AnimalCount","LUTnrs","mainStruct","mismatches"):=
                         list(unlist(lapply(strsplit(paste(BC, collapse=","), ","),function(x) length(unique(x)))),
                              sum(NormCount),
                              unlist(lapply(strsplit(paste(Animals, collapse=","), ","),function(x) length(unique(x)))),
+                             paste(unique(names(table(strsplit(paste(t(LUTnrs), collapse=","), ",")))), collapse=","),
                              paste(unique(structure), collapse=","),
                              median(mismatches)), by=key(select.samples.binPos)]
 
 select.samples.binPos <- unique(select.samples.binPos)
 select.samples.binPos <- select.samples.binPos[,c("Group","GeneName","AA","NormCount",
-                                                  "BCcount","AnimalCount","mainStruct",
+                                                  "BCcount","AnimalCount","LUTnrs","mainStruct",
                                                   "mismatches"), with = FALSE]
 
 setorder(select.samples.binPos,Group,-NormCount,BCcount,AnimalCount)
@@ -219,6 +230,10 @@ out.plot.list <- plotPair("CNS100x_SN","CNS100x_Str")
 out.plot.list$plot
 knitr::kable(out.plot.list$top, format = "markdown")
 
+out.plot.list <- plotPair("CNS100x_Trsp","CNS100x_Str")
+out.plot.list$plot
+knitr::kable(out.plot.list$top, format = "markdown")
+
 plotPair("CNS100x_SN","CNS100x_Th")$plot
 
 plotPair("CNS100x_Ctx","CNS100x_Th")$plot
@@ -235,6 +250,10 @@ out.plot.list$plot
 knitr::kable(out.plot.list$top, format = "markdown")
 
 out.plot.list <- plotPair("CNS1000x_SN","CNS1000x_Str")
+out.plot.list$plot
+knitr::kable(out.plot.list$top, format = "markdown")
+
+out.plot.list <- plotPair("CNS1000x_Trsp","CNS1000x_Str")
 out.plot.list$plot
 knitr::kable(out.plot.list$top, format = "markdown")
 
@@ -267,18 +286,21 @@ out.plot.list$plot
 knitr::kable(out.plot.list$top, format = "markdown")
 knitr::kable(out.plot.list$bottom, format = "markdown")
 
-plotPair("CNS100x_Str","totalLib",size.bin=1,winWidth=4)$plot
-plotPair("CNS1000x_Str","CNS100x_Str",size.bin=1,winWidth=4)$plot
-plotPair("CNS1000x_Th","CNS100x_Th",size.bin=1,winWidth=4)$plot
-plotPair("CNS1000x_Ctx","CNS100x_Ctx",size.bin=1,winWidth=4)$plot
-plotPair("CNS1000x_SN","CNS100x_SN",size.bin=1,winWidth=4)$plot
-plotPair("CNS1000x_SN","CNS1000x_Ctx",size.bin=1,winWidth=4)$plot
-plotPair("CNS100x_SN","CNS100x_Ctx",size.bin=1,winWidth=4)$plot
-plotPair("CNS1000x_Ctx","CNS1000x_Th",size.bin=1,winWidth=4)$plot
-plotPair("CNS100x_Ctx","CNS100x_Th",size.bin=1,winWidth=4)$plot
-plotPair("CNS1000x_Th","CNS1000x_Str",size.bin=1,winWidth=4)$plot
-plotPair("CNS100x_Th","CNS100x_Str",size.bin=1,winWidth=4)$plot
-plotPair("PrimN_1000x","PrimN_100x",size.bin=1,winWidth=4)$plot
-plotPair("H293T_1000x","H293T_100x",size.bin=1,winWidth=4)$plot
+plotPair("CNS100x_Str","totalLib",size.bin=1,winWidth=1)$plot
+plotPair("CNS1000x_Str","CNS100x_Str",size.bin=1,winWidth=1)$plot
+plotPair("CNS1000x_Th","CNS100x_Th",size.bin=1,winWidth=1)$plot
+plotPair("CNS1000x_Ctx","CNS100x_Ctx",size.bin=1,winWidth=1)$plot
+plotPair("CNS1000x_SN","CNS100x_SN",size.bin=1,winWidth=1)$plot
+plotPair("CNS1000x_SN","CNS1000x_Ctx",size.bin=1,winWidth=1)$plot
+plotPair("CNS100x_SN","CNS100x_Ctx",size.bin=1,winWidth=1)$plot
+plotPair("CNS1000x_Ctx","CNS1000x_Th",size.bin=1,winWidth=1)$plot
+plotPair("CNS100x_Ctx","CNS100x_Th",size.bin=1,winWidth=1)$plot
+plotPair("CNS1000x_Th","CNS1000x_Str",size.bin=1,winWidth=1)$plot
+plotPair("CNS100x_Th","CNS100x_Str",size.bin=1,winWidth=1)$plot
+plotPair("CNS100x_Trsp","CNS100x_Str",size.bin=1,winWidth=1)$plot
+plotPair("CNS1000x_Trsp","CNS1000x_Str",size.bin=1,winWidth=1)$plot
+plotPair("CNS1000x_Trsp","CNS100x_Trsp",size.bin=1,winWidth=1)$plot
+plotPair("PrimN_1000x","PrimN_100x",size.bin=1,winWidth=1)$plot
+plotPair("H293T_1000x","H293T_100x",size.bin=1,winWidth=1)$plot
 
 devtools::session_info()
