@@ -37,7 +37,7 @@ select.samples <- select.samples[-grep("4wks|PrimN_1000x_RNA",select.samples$Gro
 
 select.samples.binCat <- copy(select.samples)
 setkeyv(select.samples.binCat,c("Group","Category"))
-select.samples.binCat[,c("BCcount","NormCount"):=list(unlist(lapply(strsplit(paste(BC, collapse=","), ","),function(x) length(unique(x)))),
+select.samples.binCat[,c("BCcount","NormCount"):=list(length(table(strsplit(paste(t(BC), collapse=","), ","))),
                                                       mean(NormCount)), by=key(select.samples.binCat)]
 select.samples.binCat <- unique(select.samples.binCat, by=c("Group","Category"))
 select.samples.binCat <- select.samples.binCat[,c("Group","Category",
@@ -56,7 +56,7 @@ select.samples.binCat[,NormCountBC:=BCcountNseq*NormCount]
 
 select.samples.binGene <- copy(select.samples)
 setkeyv(select.samples.binGene,c("Group","Category","GeneName"))
-select.samples.binGene[,c("BCcount","NormCount"):=list(unlist(lapply(strsplit(paste(BC, collapse=","), ","),function(x) length(unique(x)))),
+select.samples.binGene[,c("BCcount","NormCount"):=list(length(table(strsplit(paste(t(BC), collapse=","), ","))),
                                                        mean(NormCount)), by=key(select.samples.binGene)]
 select.samples.binGene <- unique(select.samples.binGene, by=c("Group","Category","GeneName"))
 select.samples.binGene <- select.samples.binGene[,c("Group","GeneName","Category","BCcount","seqlength","NormCount"), with = FALSE]
@@ -73,16 +73,17 @@ select.samples.binPos <- unique(select.samples.binPos, by=c("Group","structure",
 #Due to key, this removes replicates if identical sequence mapped to multiple genes
 
 setkeyv(select.samples.binPos,c("Group","Category","GeneName","AA"))
-select.samples.binPos[,c("BCcount","NormCount","AnimalCount","mainStruct","mismatches"):=
-                        list(unlist(lapply(strsplit(paste(BC, collapse=","), ","),function(x) length(unique(x)))),
+select.samples.binPos[,c("BCcount","NormCount","AnimalCount","LUTnrs","mainStruct","mismatches"):=
+                        list(length(table(strsplit(paste(t(BC), collapse=","), ","))),
                              mean(NormCount),
-                             unlist(lapply(strsplit(paste(Animals, collapse=","), ","),function(x) length(unique(x)))),
+                             length(table(strsplit(paste(t(Animals), collapse=","), ","))),
+                             paste(unique(names(table(strsplit(paste(t(LUTnrs), collapse=","), ",")))), collapse=","),
                              paste(unique(structure), collapse=","),
                              median(mismatches)), by=key(select.samples.binPos)]
 
 select.samples.binPos <- unique(select.samples.binPos, by=c("Group","Category","GeneName","AA"))
 select.samples.binPos <- select.samples.binPos[,c("Group","GeneName","AA","NormCount",
-                                                  "BCcount","AnimalCount","mainStruct",
+                                                  "BCcount","AnimalCount","LUTnrs","mainStruct",
                                                   "mismatches","seqlength"), with = FALSE]
 select.samples.binPos[,totBC:=sum(BCcount), by="Group"]
 max.count <- max(select.samples.binPos$totBC)
