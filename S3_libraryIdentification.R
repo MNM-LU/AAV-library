@@ -34,6 +34,9 @@ invisible(LUT.dna[,Sequence:=toupper(Sequence)])
 setkey(LUT.dna, "Sequence")
 LUT.dna <- unique(LUT.dna)
 LUT.dna$Names <- LUT.dna$Sequence
+LUT.dna$LUTnr <- make.names(seq(nrow(LUT.dna)), unique=TRUE)
+
+
 
 
 #'Split sequences based on linker and length 
@@ -69,19 +72,19 @@ LUT.22aa$Sequence <- substr(LUT.22aa$Sequence,3,68)
 #'===================
 
 LUT.14aa.fa <- tempfile(pattern = "LUT_14aa_", tmpdir = tempdir(), fileext = "fa")
-LUT.14aa.seq = ShortRead(DNAStringSet(LUT.14aa$Sequence), BStringSet(LUT.14aa$Names))
+LUT.14aa.seq = ShortRead(DNAStringSet(LUT.14aa$Sequence), BStringSet(LUT.14aa$LUTnr))
 writeFasta(LUT.14aa.seq,LUT.14aa.fa)
 
 LUT.14aaG4S.fa <- tempfile(pattern = "LUT_14aaG4s_", tmpdir = tempdir(), fileext = "fa")
-LUT.14aaG4S.seq = ShortRead(DNAStringSet(LUT.14aaG4S$Sequence), BStringSet(LUT.14aaG4S$Names))
+LUT.14aaG4S.seq = ShortRead(DNAStringSet(LUT.14aaG4S$Sequence), BStringSet(LUT.14aaG4S$LUTnr))
 writeFasta(LUT.14aaG4S.seq,LUT.14aaG4S.fa)
 
 LUT.14aaA5.fa <- tempfile(pattern = "LUT_14aaA5_", tmpdir = tempdir(), fileext = "fa")
-LUT.14aaA5.seq = ShortRead(DNAStringSet(LUT.14aaA5$Sequence), BStringSet(LUT.14aaA5$Names))
+LUT.14aaA5.seq = ShortRead(DNAStringSet(LUT.14aaA5$Sequence), BStringSet(LUT.14aaA5$LUTnr))
 writeFasta(LUT.14aaA5.seq,LUT.14aaA5.fa)
 
 LUT.22aa.fa <- tempfile(pattern = "LUT_14aaA5_", tmpdir = tempdir(), fileext = "fa")
-LUT.22aa.seq = ShortRead(DNAStringSet(LUT.22aa$Sequence), BStringSet(LUT.22aa$Names))
+LUT.22aa.seq = ShortRead(DNAStringSet(LUT.22aa$Sequence), BStringSet(LUT.22aa$LUTnr))
 writeFasta(LUT.22aa.seq,LUT.22aa.fa)
 
 
@@ -230,6 +233,11 @@ mcols(frag14aaG4S.ranges)$structure <- "14aaG4S"
 allFragments.ranges <- append(frag14aa.ranges,frag22aa.ranges)
 allFragments.ranges <- append(allFragments.ranges,frag14aaA5.ranges)
 allFragments.ranges <- append(allFragments.ranges,frag14aaG4S.ranges)
+
+
+mcols(allFragments.ranges)$LUTnr <- names(allFragments.ranges)
+setkey(LUT.dna,LUTnr)
+mcols(allFragments.ranges)$Sequence <- LUT.dna[mcols(allFragments.ranges)$LUTnr]$Sequence
 
 save(allFragments.ranges, file="data/alignedLibraries.rda")
 

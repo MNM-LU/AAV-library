@@ -44,8 +44,8 @@ reads.BC <- readFastq(barcodes.file)
 #' ============================
 #+ Making Bowtie index.......
 
-LUT.fa <- tempfile(pattern = "LUT_14aa_", tmpdir = tempdir(), fileext = ".fa")
-LUT.seq = ShortRead(DNAStringSet(LUT.dna$Sequence), BStringSet(1:length(LUT.dna$Names)))
+LUT.fa <- tempfile(pattern = "LUT_", tmpdir = tempdir(), fileext = ".fa")
+LUT.seq = ShortRead(DNAStringSet(LUT.dna$Sequence), BStringSet(1:length(LUT.dna$LUTnr)))
 writeFasta(LUT.seq,LUT.fa)
 
 #'Save unique fragments as fasta file
@@ -79,10 +79,10 @@ knitr::kable(sys.out[1:(nrow(sys.out)),], format = "markdown")
 
 sys.out <-  system(paste("export SHELL=/bin/sh; cat ",fragments.unique.fa," | parallel --block ",
                          floor(length(unique.reads)/detectCores()),
-                         " --recstart '>' --pipe blastn -max_target_seqs 25 -word_size 7",
-                         " -num_threads 1 -outfmt 10 -db ", blast.db,
-                         " -query - > ", blast.out, " 2>&1",  sep = ""),
-                   intern = TRUE, ignore.stdout = FALSE) # -word_size 7
+                         " --recstart '>' --pipe 'blastn -max_target_seqs 25 -word_size 7",
+                         " -num_threads 1 -outfmt ",shQuote("10",type=c("cmd"))," -db ", blast.db,
+                         " -query - '> ", blast.out, " 2>&1",  sep = ""),
+                   intern = TRUE, ignore.stdout = FALSE) #
 
 # table.blastn <- data.table(read.table(blast.out, header = FALSE, skip = 0, sep=";",
 #                                       stringsAsFactors = FALSE, fill=FALSE) , keep.rownames=FALSE, key="V1")
@@ -99,14 +99,20 @@ if (length(grep("Warning",table.blastn$V1)) != 0) {
   knitr::kable(warnings.out[1:(nrow(warnings.out)),], format = "markdown")
 }
 
-table.blastn[,c("Reads","LUTnr","identity","alignmentLength","mismatches",
+table.blastn[,c("Reads","Sequence","identity","alignmentLength","mismatches",
                 "gapOpens", "q_start", "q_end", "s_start", "s_end", 
                 "evalue","bitScore") := tstrsplit(V1,",",fixed=TRUE),]
 
-table.blastn[,c("V1","identity","alignmentLength","gapOpens", "q_start", 
-                "q_end", "s_start", "s_end", "evalue"):=NULL]
 
-table.blastn[,Reads:= as.character(sread(unique.reads)[as.integer(Reads)])]
+
+table.blastn[,Reads:= as.character(sread(unique.reads[as.integer(Reads)]))]
+table.blastn[,Sequence:= as.character(sread(LUT.seq[as.integer(Sequence)]))]
+setkey(table.blastn,Sequence)
+setkey(LUT.dna,Sequence)
+table.blastn<- table.blastn[LUT.dna, nomatch=0]
+table.blastn[,c("V1","identity","alignmentLength","gapOpens", "q_start", 
+                "q_end", "s_start", "s_end", "evalue","Sequence","Names"):=NULL]
+
 table.blastn[,bitScore:= as.numeric(bitScore)]
 table.blastn[,mismatches:= as.numeric(mismatches)]
 
@@ -234,7 +240,7 @@ temp.table.multi[, "mCount":=tCount]
 temp.table.multi[, "tCount":=sum(tCount), by="BC"]
 
 setkey(temp.table.multi,"Reads")
-temp.table.multi[,c("LUTnr","bitScore","mismatches"):=NULL]
+temp.table.multi[,c("LUTnr","bitScore","mismatches","Structure"):=NULL]
 setkey(table.blastn,"Reads")
 temp.table.multi <- temp.table.multi[table.blastn, nomatch=0, allow.cartesian=TRUE]
 

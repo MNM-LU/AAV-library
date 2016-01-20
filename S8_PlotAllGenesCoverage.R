@@ -28,39 +28,7 @@ suppressPackageStartupMessages(library(devtools))
 
 #'Generation of infective library
 #'===================
-all.samples <- readRDS("data/normalizedSampleRangesDefined.RDS")
-total.AAV.samples <- all.samples[!(mcols(all.samples)$Group %in% "totalLib")]
-total.AAV.samples <- total.AAV.samples[-grep("4wks",mcols(total.AAV.samples)$Group)]
-transported.AAV.samples.100x <- total.AAV.samples[grepl("100x_SN|100x_Th|100x_Ctx",mcols(total.AAV.samples)$Group)]
-transported.AAV.samples.1000x <- total.AAV.samples[grepl("1000x_SN|100x_Th|1000x_Ctx",mcols(total.AAV.samples)$Group)]
-mcols(total.AAV.samples)$Group <- "infectiveLib"
-mcols(transported.AAV.samples.100x)$Group <- "CNS100x_Trsp"
-mcols(transported.AAV.samples.1000x)$Group <- "CNS1000x_Trsp"
-
-all.samples <- append(all.samples,total.AAV.samples)
-all.samples <- append(all.samples,transported.AAV.samples.100x)
-all.samples <- append(all.samples,transported.AAV.samples.1000x)
-rm(total.AAV.samples,transported.AAV.samples.100x,transported.AAV.samples.1000x)
-
-mcols(all.samples)$Sequence <- names(all.samples)
-names(all.samples) <- make.names(names(all.samples), unique=TRUE)
-length.Table <- data.table(seqnames=names(seqlengths(all.samples)),
-                           seqlength=seqlengths(all.samples), key="seqnames")
-all.samples <- data.table(as.data.frame(all.samples), key="seqnames")
-all.samples[,c("strand","qwidth","cigar","njunc","end"):=NULL]
-all.samples <- all.samples[length.Table] #A data.table merge to match seqlengths to their respective seqnames
-all.samples[, c("Category", "Protein", "Origin", 
-               "Extra", "Number","GeneName") := tstrsplit(seqnames, ",", fixed=TRUE)]
-all.samples[, c("seqnames","Protein", "Origin", 
-                "Extra", "Number") := NULL]
-all.samples[, GeneName := gsub("/|_","-",GeneName)]
-all.samples[,start:=(start+2)/3]
-all.samples[,width:=(width)/3]
-all.samples[,seqlength:=seqlength/3]
-all.samples[,AA:=start+(width/2)]
-all.samples[,AAproc:=AA/seqlength*100]
-
-saveRDS(all.samples,file="data/allSamplesDataTable.RDS")
+all.samples <- readRDS("data/allSamplesDataTable.RDS")
 
 all.samples$Group[all.samples$Group== "293T_1000x"] <- "H293T_1000x"
 all.samples$Group[all.samples$Group== "293T_100x"] <- "H293T_100x"

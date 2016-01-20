@@ -50,72 +50,78 @@ loadRDS <- function(in.name) {
   this.sample <- readRDS(in.name)
   this.name <- gsub("-","_",gsub("found.|(output/)|(.rds)", "", in.name))
   this.group <- grouping[match(this.name,grouping$Sample),"Group"]
-    mcols(this.sample) <- cbind(mcols(this.sample),
-                                data.frame(Sample = this.name, Group=this.group,
-                                           stringsAsFactors = FALSE))
-
+  mcols(this.sample) <- cbind(mcols(this.sample),
+                              data.frame(Sample = this.name, Group=this.group,
+                                         stringsAsFactors = FALSE))
+  
   return(this.sample)
 }
 
-out.range <- lapply(in.names.all, loadRDS)
+all.samples <- lapply(in.names.all, loadRDS)
+
+all.samples <- do.call(GAlignmentsList,unlist(all.samples))
+all.samples <- cbind(unlist(all.samples))[[1]]
+
+mcols(all.samples)$Sequence <- names(all.samples)
+names(all.samples) <- make.names(names(all.samples), unique=TRUE)
+length.Table <- data.table(seqnames=names(seqlengths(all.samples)),
+                           seqlength=seqlengths(all.samples), key="seqnames")
+all.samples <- data.table(as.data.frame(all.samples), key="seqnames")
+all.samples[,c("strand","qwidth","cigar","njunc","end"):=NULL]
+all.samples <- all.samples[length.Table] #A data.table merge to match seqlengths to their respective seqnames
+all.samples[, c("Category", "Protein", "Origin", 
+                "Extra", "Number","GeneName") := tstrsplit(seqnames, ",", fixed=TRUE)]
+all.samples[, c("seqnames","Protein", "Origin", 
+                "Extra", "Number") := NULL]
+all.samples[, GeneName := gsub("/|_","-",GeneName)]
+
 
 #' Normalizing read counts to correct for variable read depth
 #' ============================
 #+ Normalizing RNA counts.......
+setkey(all.samples,Group)
+
+readCounts <- all.samples[,list(GroupCount=sum(RNAcount)), by="Group"]
+readCounts[,GroupCount:=GroupCount/max(GroupCount)]
+setkey(readCounts,Group)
+all.samples <- all.samples[readCounts] #Merge with normalizing factor
+all.samples[,RNAcount:=RNAcount/GroupCount]
+setkey(all.samples,Mode)
+all.samples.tmp <- all.samples["Def"]
+setkeyv(all.samples,c("Group","Category","GeneName","structure","start","width","Sequence","seqlength"))
+
+all.samples <- all.samples[,list(bitScore=sum(bitScore*tCount)/sum(tCount),
+                  mismatches=median(mismatches),
+                  mCount=sum(mCount),
+                  tCount=sum(tCount),
+                  BC=paste(unique(BC), collapse = ","),
+                  Animals=paste(unique(Sample), collapse = ","),
+                  LUTnrs=paste(unique(LUTnr), collapse = ","),
+                  RNAcount=sum(RNAcount),
+                  NormCount=log2(sum(RNAcount)+1)*.N),
+            by=c("Group","Category","GeneName","structure","start","width","Sequence","seqlength")]
+
+setkey(all.samples,Group)
+total.AAV.samples <- all.samples[!"totalLib"]
+total.AAV.samples <- total.AAV.samples[!grepl("4wks",total.AAV.samples$Group)]
+transported.AAV.samples.100x <- total.AAV.samples[grepl("100x_SN|100x_Th|100x_Ctx",total.AAV.samples$Group)]
+transported.AAV.samples.1000x <- total.AAV.samples[grepl("1000x_SN|100x_Th|1000x_Ctx",total.AAV.samples$Group)]
+total.AAV.samples[,Group := "infectiveLib"]
+transported.AAV.samples.100x[,Group := "CNS100x_Trsp"]
+transported.AAV.samples.1000x[,Group := "CNS1000x_Trsp"]
+
+all.samples <- append(all.samples,total.AAV.samples)
+all.samples <- append(all.samples,transported.AAV.samples.100x)
+all.samples <- append(all.samples,transported.AAV.samples.1000x)
+rm(total.AAV.samples,transported.AAV.samples.100x,transported.AAV.samples.1000x)
+
+all.samples[,start:=(start+2)/3]
+all.samples[,width:=(width)/3]
+all.samples[,seqlength:=seqlength/3]
+all.samples[,AA:=start+(width/2)]
+all.samples[,AAproc:=AA/seqlength*100]
 
 
-readCounts <- lapply(out.range, function(x) sum(mcols(x)$RNAcount))
-maxCount <- max(unlist(readCounts))
-readCounts <- lapply(readCounts, function(x) maxCount/x)
-
-makeNormCount <- function(inIndex){
-  #inIndex <- 38
-  thisRange <- out.range[[inIndex]]
-  mcols(thisRange)$RNAcount <- mcols(thisRange)$RNAcount*readCounts[[inIndex]]
-  return(thisRange)
-  }
-
-
-out.range <- lapply(1:length(readCounts), makeNormCount)
-
-#' Flatten into one GAlignments object
-#' ============================
-
-out.range <- do.call(GAlignmentsList,unlist(out.range))
-out.range <- cbind(unlist(out.range))[[1]]
-mcols(out.range)$NormCount <- 1
-#out.range <- out.range[mcols(out.range)$Mode == "Def"] #Selects only defined i.e., trusted reads
-
-#' Split the GAlignments into list based on group
-#' ============================
-#+ Splitting groups.......
-
-out.range.split <- split(out.range,c(mcols(out.range)$Group))
-out.range.split <- lapply(out.range.split, function(x) split(x,seqnames(x)))
-out.range.split <- mclapply(out.range.split, function(x) lapply(x, function(y) split(y,names(y))), 
-                            mc.preschedule = TRUE, mc.cores = detectCores())
-
-MergeCounts <- function(inRanges) {
-outRanges <- inRanges[1]
-mcols(outRanges) <- data.frame(structure=mcols(inRanges)$structure[1],
-                               Group=mcols(inRanges)$Group[1],
-                               bitScore=sum(mcols(inRanges)$bitScore*mcols(inRanges)$tCount)/sum(mcols(inRanges)$tCount),
-                               mismatches=median(mcols(inRanges)$mismatches),
-                               mCount=sum(mcols(inRanges)$mCount),
-                               tCount=sum(mcols(inRanges)$tCount),
-                               BC=paste(unique(mcols(inRanges)$BC), collapse = ","),
-                               Animals=paste(unique(mcols(inRanges)$Sample), collapse = ","),
-                               LUTnrs=paste(unique(mcols(inRanges)$LUTnr), collapse = ","),
-                               RNAcount=sum(mcols(inRanges)$RNAcount),
-                               NormCount=log2(sum(mcols(inRanges)$RNAcount)+1)*length(inRanges),
-                               stringsAsFactors=FALSE)
-return(outRanges)
-}
-
-out.range.split <- lapply(out.range.split, function(x) mclapply(x, function(y) lapply(y,MergeCounts), mc.preschedule = TRUE, mc.cores = detectCores())) 
-
-out.range.split <- mclapply(out.range.split,function(x) unlist(do.call(GAlignmentsList,unlist(x)), use.names=FALSE), mc.preschedule = TRUE, mc.cores = detectCores())
-out.range.split <- unlist(do.call(GAlignmentsList,unlist(out.range.split)), use.names=FALSE)
-saveRDS(out.range.split, file="data/normalizedSampleRangesDefined.RDS")
+saveRDS(all.samples, file="data/allSamplesDataTable.RDS")
 
 devtools::session_info()
