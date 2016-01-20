@@ -174,7 +174,7 @@ bottom.sample <- select.samples.top[J(names(fill.values)[2])]
 top.sample[,c("Group"):=NULL]
 setnames(top.sample, "GeneName", names(fill.values)[1])
 bottom.sample[,c("Group"):=NULL]
-setnames(bottom.sample, "GeneName", names(fill.values)[1])
+setnames(bottom.sample, "GeneName", names(fill.values)[2])
 
 out.list <- list(plot=plot.out,
                  plotBin=plot.data.bin,

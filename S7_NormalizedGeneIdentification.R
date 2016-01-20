@@ -46,7 +46,7 @@ grouping <- data.frame(Sample=gsub("-","_",gsub("found.|(output/)|(.rds)", "", i
 #+ Loading alignments.......
 
 loadRDS <- function(in.name) {
-  #in.name <- in.names.all[3]
+  #in.name <- in.names.all[42]
   this.sample <- readRDS(in.name)
   this.name <- gsub("-","_",gsub("found.|(output/)|(.rds)", "", in.name))
   this.group <- grouping[match(this.name,grouping$Sample),"Group"]
@@ -62,7 +62,6 @@ all.samples <- lapply(in.names.all, loadRDS)
 all.samples <- do.call(GAlignmentsList,unlist(all.samples))
 all.samples <- cbind(unlist(all.samples))[[1]]
 
-mcols(all.samples)$Sequence <- names(all.samples)
 names(all.samples) <- make.names(names(all.samples), unique=TRUE)
 length.Table <- data.table(seqnames=names(seqlengths(all.samples)),
                            seqlength=seqlengths(all.samples), key="seqnames")
@@ -87,10 +86,10 @@ setkey(readCounts,Group)
 all.samples <- all.samples[readCounts] #Merge with normalizing factor
 all.samples[,RNAcount:=RNAcount/GroupCount]
 setkey(all.samples,Mode)
-all.samples.tmp <- all.samples["Def"]
+all.samples <- all.samples["Def"]
 setkeyv(all.samples,c("Group","Category","GeneName","structure","start","width","Sequence","seqlength"))
 
-all.samples <- all.samples[,list(bitScore=sum(bitScore*tCount)/sum(tCount),
+all.samples <- all.samples[,j=list(bitScore=sum(bitScore*tCount)/sum(tCount),
                   mismatches=median(mismatches),
                   mCount=sum(mCount),
                   tCount=sum(tCount),
@@ -101,6 +100,7 @@ all.samples <- all.samples[,list(bitScore=sum(bitScore*tCount)/sum(tCount),
                   NormCount=log2(sum(RNAcount)+1)*.N),
             by=c("Group","Category","GeneName","structure","start","width","Sequence","seqlength")]
 
+
 setkey(all.samples,Group)
 total.AAV.samples <- all.samples[!"totalLib"]
 total.AAV.samples <- total.AAV.samples[!grepl("4wks",total.AAV.samples$Group)]
@@ -110,10 +110,11 @@ total.AAV.samples[,Group := "infectiveLib"]
 transported.AAV.samples.100x[,Group := "CNS100x_Trsp"]
 transported.AAV.samples.1000x[,Group := "CNS1000x_Trsp"]
 
-all.samples <- append(all.samples,total.AAV.samples)
-all.samples <- append(all.samples,transported.AAV.samples.100x)
-all.samples <- append(all.samples,transported.AAV.samples.1000x)
+all.samples <- rbind(all.samples,total.AAV.samples,transported.AAV.samples.100x,transported.AAV.samples.1000x)
+
 rm(total.AAV.samples,transported.AAV.samples.100x,transported.AAV.samples.1000x)
+
+
 
 all.samples[,start:=(start+2)/3]
 all.samples[,width:=(width)/3]

@@ -248,7 +248,7 @@ setkeyv(temp.table.multi,c("BC","LUTnr"))
 temp.table.multi[,c("bitScore","mismatches" ,"mCount"):= list(max(bitScore),
                                                               median(mismatches), 
                                                               sum(mCount)), by=key(temp.table.multi)]
-temp.table.multi <- unique(temp.table.multi)
+temp.table.multi <- unique(temp.table.multi, by=c("BC","LUTnr"))
 
 setkeyv(temp.table.multi,"BC")
 temp.table.multi <- temp.table.multi[temp.table.multi[, .I[mCount == max(mCount)], 

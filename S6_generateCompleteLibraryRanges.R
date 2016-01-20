@@ -21,15 +21,19 @@ suppressPackageStartupMessages(library(devtools))
 load("data/alignedLibraries.rda")
 load("data/LUTdna.rda")
 load("data/multipleContfragmentsComplete.rda")
-output.Table$fragment <- LUT.dna$Sequence[as.integer(output.Table$LUTnr)]
+setkey(output.Table,LUTnr)
+setkey(LUT.dna,LUTnr)
+output.Table <- output.Table[LUT.dna,nomatch=0]
+output.Table[,c("Names","i.Structure"):=NULL]
+setnames(output.Table,"Sequence","fragment")
 setkey(output.Table,fragment)
 
-range.idx <- data.table(fragment=names(allFragments.ranges), 
+range.idx <- data.table(fragment=mcols(allFragments.ranges)$Sequence, 
                         idxFrag=1:length(allFragments.ranges), key="fragment")
 output.Table <- output.Table[range.idx, nomatch=0, allow.cartesian=TRUE]
 
 foundFragments.ranges <- allFragments.ranges[output.Table$idxFrag]
-output.Table[,c("Reads","fragment","idxFrag"):=NULL]
+output.Table[,c("Reads","fragment","idxFrag","Structure","LUTnr"):=NULL]
 output.Table[,RNAcount:=tCount]
 
 mcols(foundFragments.ranges) <- c(mcols(foundFragments.ranges), output.Table)

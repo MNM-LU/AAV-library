@@ -44,28 +44,27 @@ ggplot(purity.table,aes(x = BCwidth, fill = as.character(BCwidth)))+geom_histogr
   scale_fill_manual(name = "Width", values = fill.values) +
   scale_x_continuous(limit=c(17,23), breaks=c(seq(18,22,1)), expand =c(0,0))
 
-
+opts_chunk$set(fig.width = 8, fig.height = 8)
 #'Plot Venn diagrams of fragments
 #'===================
-opts_chunk$set(fig.width = 8, fig.height = 8)
 load("data/LUTdna.rda")
 complete.library <- readRDS("data/allSamplesDataTable.RDS")
 setkey(complete.library,Group)
 complete.library <- complete.library[-grep("4wk",Group)]
-seq.arry <- LUT.dna$Sequence
-seq.lib <- unique(complete.library[J("totalLib")]$Sequence)
-seq.AAV <- unique(complete.library[J("infectiveLib")]$Sequence)
-seq.str <- unique(complete.library[grep("Str",Group)]$Sequence)
-seq.SNCtx <- unique(complete.library[grep("SN|Ctx|Th",Group)]$Sequence)
+seq.arry <- LUT.dna$LUTnr
+seq.lib <- unique(complete.library[J("totalLib")]$LUTnr)
+seq.AAV <- unique(complete.library[J("infectiveLib")]$LUTnr)
+seq.str <- unique(complete.library[grep("Str",Group)]$LUTnr)
+seq.Trsp <- unique(complete.library[grep("SN|Ctx|Th",Group)]$LUTnr)
 
 venn.area1 <- length(seq.arry)
 venn.area2 <- length(seq.lib)
 venn.area3 <- length(seq.AAV)
 venn.area3 <- length(seq.str)
-venn.area3 <- length(seq.SNCtx)
+venn.area3 <- length(seq.Trsp)
 
 
-isect.Str_SN <- length(intersect(seq.str, seq.SNCtx))
+isect.Str_Trsp <- length(intersect(seq.str, seq.Trsp))
 
 venn.n12 <- length(intersect(seq.arry,seq.lib))
 venn.n23 <- length(intersect(seq.lib,seq.AAV))
@@ -77,7 +76,7 @@ output.table <- data.frame(NameArray=character(),
                            NameLib=character(),
                            NameAAV=character(),
                            NameStr=character(),
-                           NameSN=character(),
+                           NameTrsp=character(),
                            ArrayStart=numeric(), 
                            ArrayEnd=numeric(), 
                            LibStart=numeric(), 
@@ -86,41 +85,40 @@ output.table <- data.frame(NameArray=character(),
                            AAVend=numeric(),
                            StrStart=numeric(),
                            StrEnd=numeric(),
-                           SNStart=numeric(),
-                           SNEnd=numeric(),
+                           TrspStart=numeric(),
+                           TrspEnd=numeric(),
                            stringsAsFactors=FALSE) 
 output.table[1:3,1] <- c("Array","None","None")
 output.table[1:3,2] <- c("Lib","None","None")
 output.table[1:3,3] <- c("AAV","None","None")
 output.table[1:3,4] <- c("Str","None","None")
-output.table[1:3,5] <- c("None","SN","None")
+output.table[1:3,5] <- c("None","Trsp","None")
 output.table[1:3,6:15] <- 0
-output.table$ArrayEnd[1] <- output.table$LibEnd[2] <- output.table$AAVend[2] <- output.table$StrEnd[2] <- output.table$SNEnd[3] <- length(seq.arry)
+output.table$ArrayEnd[1] <- output.table$LibEnd[2] <- output.table$AAVend[2] <- output.table$StrEnd[2] <- output.table$TrspEnd[3] <- length(seq.arry)
 output.table$LibStart[2] <- output.table$LibEnd[1] <- length(intersect(seq.arry,seq.lib))
 output.table$AAVStart[2] <- output.table$AAVend[1] <- length(intersect(seq.lib,seq.AAV))
 output.table$StrStart[2] <- output.table$StrEnd[1] <- length(intersect(seq.AAV, seq.str))
-output.table$SNStart[2] <- output.table$SNEnd[1] <- length(seq.str)-length(intersect(seq.str, seq.SNCtx))
-output.table$SNStart[3] <- output.table$SNEnd[2] <- output.table$SNStart[2] + length(seq.SNCtx)
+output.table$TrspStart[2] <- output.table$TrspEnd[1] <- length(seq.str)-length(intersect(seq.str, seq.Trsp))
+output.table$TrspStart[3] <- output.table$TrspEnd[2] <- output.table$TrspStart[2] + length(seq.Trsp)
 
 
-fill.values <- c("Array" = rgb(193,210,234, maxColorValue = 255), "Lib" = rgb(157,190,217, maxColorValue = 255), "AAV" = rgb(38,64,135, maxColorValue = 255), "Str" = rgb(157,190,217, maxColorValue = 255),"SN" = rgb(193,210,234, maxColorValue = 255), "None" = rgb(255,255,255, maxColorValue = 255, alpha = 0))
+fill.values <- c("Array" = rgb(193,210,234, maxColorValue = 255), "Lib" = rgb(157,190,217, maxColorValue = 255), "AAV" = rgb(38,64,135, maxColorValue = 255), "Str" = rgb(157,190,217, maxColorValue = 255),"Trsp" = rgb(193,210,234, maxColorValue = 255), "None" = rgb(255,255,255, maxColorValue = 255, alpha = 0))
 
 
 ggplot(output.table) + 
   scale_x_continuous(limit=c(0,10), breaks=c(seq(1,9,2)), expand =c(0,0)) + 
   scale_fill_manual(name = "Library", values = fill.values) +
   theme(aspect.ratio=1) + 
-  geom_rect(data=output.table, aes(fill=NameSN, ymax=SNEnd, ymin=SNStart, xmax=10, xmin=8)) +
+  geom_rect(data=output.table, aes(fill=NameTrsp, ymax=TrspEnd, ymin=TrspStart, xmax=10, xmin=8)) +
   geom_rect(data=output.table, aes(fill=NameStr, ymax=StrEnd, ymin=StrStart, xmax=8, xmin=6)) +
   geom_rect(data=output.table, aes(fill=NameAAV, ymax=AAVend, ymin=AAVStart, xmax=6, xmin=4)) +
   geom_rect(data=output.table, aes(fill=NameLib, ymax=LibEnd, ymin=LibStart, xmax=4, xmin=2)) +
   geom_rect(data=output.table, aes(fill=NameArray, ymax=ArrayEnd, ymin=ArrayStart, xmax=2, xmin=0)) +
   coord_polar(theta="y") 
 
-
+opts_chunk$set(fig.width = 5, fig.height = 5)
 #'Barcode Venn diagrams for 100x and 1000x libraries
 #'===================
-opts_chunk$set(fig.width = 5, fig.height = 5)
 total.100x <- unique(complete.library[grep("100x",Group)]$BC)
 total.1000x <- unique(complete.library[grep("1000x",Group)]$BC)
 

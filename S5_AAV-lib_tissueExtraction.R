@@ -154,16 +154,19 @@ log.table$scBCs <- length(unique(barcodeTable$BC))
 invisible(barcodeTable[,oldBC:=NULL])
 setkey(output.Table,"BC")
 
-BCcount <- rev(sort(table(barcodeTable$BC)))
-
-foundFrags <- output.Table[match(names(BCcount), output.Table$BC),]
-foundFrags$RNAcount <- as.integer(BCcount)
-foundFrags <- na.omit(foundFrags)
-foundFrags$fragment <- LUT.dna$Sequence[as.integer(foundFrags$LUTnr)]
+BCcount <- data.table(as.data.frame(rev(sort(table(barcodeTable$BC)))), keep.rownames = TRUE)
+setnames(BCcount,colnames(BCcount),c("BC","RNAcount"))
+setkey(BCcount,"BC")
+foundFrags <- output.Table[BCcount,nomatch=0]
+setkey(foundFrags,"LUTnr")
+setkey(LUT.dna,"LUTnr")
+foundFrags <- foundFrags[LUT.dna,nomatch=0]
+setnames(foundFrags,"Sequence","fragment")
+foundFrags[,c("Names","i.Structure"):=NULL]
 
 matchRange <- function(idxFrag) {
   #idxFrag <- 23
-  matchRanges <- which(names(allFragments.ranges) == foundFrags$fragment[idxFrag])
+  matchRanges <- which(mcols(allFragments.ranges)$Sequence == foundFrags$fragment[idxFrag])
   return(cbind(matchRanges,idxFrag))
 }
 match.ranges.list <- mclapply(1:nrow(foundFrags), matchRange, mc.preschedule = TRUE, 
@@ -172,9 +175,8 @@ match.ranges <- do.call(rbind, match.ranges.list)
 foundFragments.ranges <- allFragments.ranges[match.ranges[,1]]
 if (ncol(match.ranges) >= 2) {
 foundFrags <- foundFrags[match.ranges[,"idxFrag"],]
-foundFrags[,c("Reads","fragment"):=NULL]
-mcols(foundFragments.ranges) <- c(mcols(foundFragments.ranges), 
-                                  foundFrags[match.ranges[,"idxFrag"],])
+foundFrags[,c("Reads","fragment","Structure","LUTnr"):=NULL]
+mcols(foundFragments.ranges) <- c(mcols(foundFragments.ranges),foundFrags)
 o = order(-mcols(foundFragments.ranges)$RNAcount)
 foundFragments.ranges <- foundFragments.ranges[o]
 saveRDS(foundFragments.ranges, file=paste("output/","found.",name.out,".rds", sep=""), 
