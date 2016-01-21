@@ -38,7 +38,7 @@ select.samples <- select.samples[-grep("4wks|PrimN_1000x_RNA",select.samples$Gro
 select.samples.binCat <- copy(select.samples)
 setkeyv(select.samples.binCat,c("Group","Category"))
 select.samples.binCat[,c("BCcount","NormCount"):=list(length(table(strsplit(paste(t(BC), collapse=","), ","))),
-                                                      mean(NormCount)), by=key(select.samples.binCat)]
+                                                      mean(log2(RNAcount+1))), by=key(select.samples.binCat)]
 select.samples.binCat <- unique(select.samples.binCat, by=c("Group","Category"))
 select.samples.binCat <- select.samples.binCat[,c("Group","Category",
                                                   "BCcount","NormCount"), with = FALSE]
@@ -57,7 +57,7 @@ select.samples.binCat[,NormCountBC:=BCcountNseq*NormCount]
 select.samples.binGene <- copy(select.samples)
 setkeyv(select.samples.binGene,c("Group","Category","GeneName"))
 select.samples.binGene[,c("BCcount","NormCount"):=list(length(table(strsplit(paste(t(BC), collapse=","), ","))),
-                                                       mean(NormCount)), by=key(select.samples.binGene)]
+                                                       mean(log2(RNAcount+1))), by=key(select.samples.binGene)]
 select.samples.binGene <- unique(select.samples.binGene, by=c("Group","Category","GeneName"))
 select.samples.binGene <- select.samples.binGene[,c("Group","GeneName","Category","BCcount","seqlength","NormCount"), with = FALSE]
 select.samples.binGene[,GeneName:=gsub("/|_|’","-",GeneName)]
@@ -75,7 +75,7 @@ select.samples.binPos <- unique(select.samples.binPos, by=c("Group","structure",
 setkeyv(select.samples.binPos,c("Group","Category","GeneName","AA"))
 select.samples.binPos[,c("BCcount","NormCount","AnimalCount","LUTnrs","mainStruct","mismatches"):=
                         list(length(table(strsplit(paste(t(BC), collapse=","), ","))),
-                             mean(NormCount),
+                             mean(log2(RNAcount+1)),
                              length(table(strsplit(paste(t(Animals), collapse=","), ","))),
                              paste(unique(names(table(strsplit(paste(t(LUTnrs), collapse=","), ",")))), collapse=","),
                              paste(unique(structure), collapse=","),
