@@ -26,6 +26,7 @@ label: unnamed-chunk-3
 
   |                                                                         |...............................                                  |  48%
 label: unnamed-chunk-4
+Read 80776407 items
   |                                                                         |..................................                               |  52%
   ordinary text without R code
 

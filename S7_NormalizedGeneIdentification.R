@@ -79,7 +79,7 @@ all.samples[, GeneName := gsub("/|_","-",GeneName)]
 #' ============================
 #+ Normalizing RNA counts.......
 setkey(all.samples,Group)
-
+all.samples <- all.samples[RNAcount>1,] #Filters out single count reads
 readCounts <- all.samples[,list(GroupCount=sum(RNAcount)), by="Group"]
 readCounts[,GroupCount:=GroupCount/max(GroupCount)]
 setkey(readCounts,Group)
@@ -87,19 +87,6 @@ all.samples <- all.samples[readCounts] #Merge with normalizing factor
 all.samples[,RNAcount:=RNAcount/GroupCount]
 setkey(all.samples,Mode)
 all.samples <- all.samples["Def"]
-setkeyv(all.samples,c("Group","Category","GeneName","structure","start","width","Sequence","seqlength"))
-
-all.samples <- all.samples[,j=list(bitScore=sum(bitScore*tCount)/sum(tCount),
-                  mismatches=median(mismatches),
-                  mCount=sum(mCount),
-                  tCount=sum(tCount),
-                  BC=paste(unique(BC), collapse = ","),
-                  Animals=paste(unique(Sample), collapse = ","),
-                  LUTnrs=paste(unique(LUTnr), collapse = ","),
-                  RNAcount=sum(RNAcount),
-                  NormCount=log2(sum(RNAcount)+1)*.N),
-            by=c("Group","Category","GeneName","structure","start","width","Sequence","seqlength")]
-
 
 setkey(all.samples,Group)
 total.AAV.samples <- all.samples[!"totalLib"]
@@ -114,7 +101,18 @@ all.samples <- rbind(all.samples,total.AAV.samples,transported.AAV.samples.100x,
 
 rm(total.AAV.samples,transported.AAV.samples.100x,transported.AAV.samples.1000x)
 
+setkeyv(all.samples,c("Group","Category","GeneName","structure","start","width","Sequence","seqlength"))
 
+all.samples <- all.samples[,j=list(bitScore=sum(bitScore*tCount)/sum(tCount),
+                  mismatches=median(mismatches),
+                  mCount=sum(mCount),
+                  tCount=sum(tCount),
+                  BC=paste(unique(BC), collapse = ","),
+                  Animals=paste(unique(Sample), collapse = ","),
+                  LUTnrs=paste(unique(LUTnr), collapse = ","),
+                  RNAcount=sum(RNAcount),
+                  NormCount=log2(sum(RNAcount)+1)*.N),
+            by=c("Group","Category","GeneName","structure","start","width","Sequence","seqlength")]
 
 all.samples[,start:=(start+2)/3]
 all.samples[,width:=(width)/3]

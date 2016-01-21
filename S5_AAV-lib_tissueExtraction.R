@@ -1,6 +1,6 @@
 
 #' ---
-#' title: "Library analysis output"
+#' title: "Tissue RNA analysis"
 #' author: "Tomas Bjorklund"
 #' output:
 #'  pdf_document:
@@ -8,7 +8,7 @@
 #' geometry: margin=0.7in
 #' ---
 
-#' This workflow brings together FastQ files containing barcodes and 5'/3' ends of a suitable insert and alignmen them using Bowtie2. It also includes starcode based false barcode reduction and a MapReduce based hierarchical clustering  
+#' This workflow brings together FastQ files containing barcodes expresssed in vivo. It also includes starcode based false barcode reduction. 
 suppressPackageStartupMessages(library(knitr))
 suppressPackageStartupMessages(library(ShortRead))
 suppressPackageStartupMessages(library(ggplot2))
