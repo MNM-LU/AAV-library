@@ -50,7 +50,7 @@ opts_chunk$set(fig.width = 8, fig.height = 8)
 load("data/LUTdna.rda")
 complete.library <- readRDS("data/allSamplesDataTable.RDS")
 setkey(complete.library,Group)
-complete.library <- complete.library[-grep("4wk",Group)]
+#complete.library <- complete.library[-grep("4wk",Group)]
 seq.arry <- LUT.dna$LUTnr
 seq.lib <- unique(complete.library[J("totalLib")]$LUTnr)
 seq.AAV <- unique(complete.library[J("infectiveLib")]$LUTnr)
