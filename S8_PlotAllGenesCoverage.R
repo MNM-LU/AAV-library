@@ -74,7 +74,7 @@ if (winWidth > 0) {
   windowTable <- unique(windowTable, by=c("GeneName","start","width"))
   windowTable <- windowTable[,(seq(width-winWidth+1)+start-1),by=c("GeneName","start","width")]
   setnames(windowTable,"V1","winStart")
-  windowTable[,winEnd:=winStart+winWidth]
+  windowTable[,winEnd:=winStart+winWidth-1]
   setkeyv(windowTable,c("GeneName","start","width"))
   setkeyv(select.samples,c("GeneName","start","width"))
   select.samples.windowBin <- select.samples[windowTable, allow.cartesian=TRUE]

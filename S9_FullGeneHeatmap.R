@@ -32,65 +32,85 @@ suppressPackageStartupMessages(library(devtools))
 #'Selection of relevant samples
 #'===================
 select.samples <- readRDS("data/allSamplesDataTable.RDS")
-
+select.samples$Group[select.samples$Group== "293T_1000x"] <- "H293T_1000x"
+select.samples$Group[select.samples$Group== "293T_100x"] <- "H293T_100x"
 select.samples <- select.samples[-grep("4wks|PrimN_1000x_RNA",select.samples$Group),]
 
-select.samples.binCat <- copy(select.samples)
+select.samples.binCat <- data.table::copy(select.samples)
 setkeyv(select.samples.binCat,c("Group","Category"))
-select.samples.binCat[,c("BCcount","NormCount"):=list(length(table(strsplit(paste(t(BC), collapse=","), ","))),
-                                                      mean(log2(RNAcount+1))), by=key(select.samples.binCat)]
-select.samples.binCat <- unique(select.samples.binCat, by=c("Group","Category"))
-select.samples.binCat <- select.samples.binCat[,c("Group","Category",
-                                                  "BCcount","NormCount"), with = FALSE]
+select.samples.binCat <- select.samples.binCat[,list(BCcount=length(table(strsplit(paste(t(BC), collapse=","), ","))),
+                                                                 NormCount=mean(log2(RNAcount+1))
+                                                        ), by=key(select.samples.binCat)]
+setkey(select.samples.binCat,Group)
+ref.table <- select.samples.binCat["totalLib"]
+ref.table[,c("Group","NormCount"):=NULL]
+setnames(ref.table,"BCcount","libBC")
+setkey(ref.table,"Category")
 select.samples.binCat[,totBC:=sum(BCcount), by="Group"]
 max.count <- max(select.samples.binCat$totBC)
 select.samples.binCat[,BCcountN:=BCcount/totBC*max.count]
-length.Table <- select.samples[,list(seqlength=sum(seqlength)), by="Category"]
+length.Table <- unique(select.samples, by=c("Category","GeneName"))
+length.Table <- length.Table[,list(seqlength=sum(seqlength)), by="Category"]
 setkey(length.Table,"Category")
 setkey(select.samples.binCat,"Category")
 select.samples.binCat <- select.samples.binCat[length.Table,nomatch=0]
+select.samples.binCat <- select.samples.binCat[ref.table,nomatch=0]
+
 select.samples.binCat[,Category:=gsub("/|_|’","-",Category)]
 select.samples.binCat[,BCcountNseq:=BCcountN/seqlength]
-select.samples.binCat[,NormCountBC:=BCcountNseq*NormCount]
+select.samples.binCat[,refNormBC:=BCcountN/libBC]
 
 
-select.samples.binGene <- copy(select.samples)
-setkeyv(select.samples.binGene,c("Group","Category","GeneName"))
-select.samples.binGene[,c("BCcount","NormCount"):=list(length(table(strsplit(paste(t(BC), collapse=","), ","))),
-                                                       mean(log2(RNAcount+1))), by=key(select.samples.binGene)]
-select.samples.binGene <- unique(select.samples.binGene, by=c("Group","Category","GeneName"))
-select.samples.binGene <- select.samples.binGene[,c("Group","GeneName","Category","BCcount","seqlength","NormCount"), with = FALSE]
+select.samples.binGene <- data.table::copy(select.samples)
+setkeyv(select.samples.binGene,c("Group","Category","GeneName","seqlength"))
+select.samples.binGene <- select.samples.binGene[,list(BCcount=length(table(strsplit(paste(t(BC), collapse=","), ","))),
+                                                       NormCount=mean(log2(RNAcount+1))), by=key(select.samples.binGene)]
 select.samples.binGene[,GeneName:=gsub("/|_|’","-",GeneName)]
+setkey(select.samples.binGene,Group)
+ref.table <- select.samples.binGene["totalLib"]
+ref.table[,c("Group","Category","NormCount","seqlength"):=NULL]
+setnames(ref.table,"BCcount","libBC")
+setkey(ref.table,"GeneName")
+setkey(select.samples.binGene,"GeneName")
 select.samples.binGene[,totBC:=sum(BCcount), by="Group"]
+select.samples.binGene <- select.samples.binGene[ref.table,nomatch=0]
 max.count <- max(select.samples.binGene$totBC)
 select.samples.binGene[,BCcountN:=BCcount/totBC*max.count]
 select.samples.binGene[,BCcountNseq:=BCcountN/seqlength]
-select.samples.binGene[,NormCountBC:=BCcountNseq*NormCount]
+select.samples.binGene[,refNormBC:=BCcountN/libBC]
 
-select.samples.binPos <- copy(select.samples)
+select.samples.binPos <- data.table::copy(select.samples)
 setkeyv(select.samples.binPos,c("Group","structure","Sequence"))
 select.samples.binPos <- unique(select.samples.binPos, by=c("Group","structure","Sequence")) 
 #Due to key, this removes replicates if identical sequence mapped to multiple genes
 
-setkeyv(select.samples.binPos,c("Group","Category","GeneName","AA"))
-select.samples.binPos[,c("BCcount","NormCount","AnimalCount","LUTnrs","mainStruct","mismatches"):=
-                        list(length(table(strsplit(paste(t(BC), collapse=","), ","))),
-                             mean(log2(RNAcount+1)),
-                             length(table(strsplit(paste(t(Animals), collapse=","), ","))),
-                             paste(unique(names(table(strsplit(paste(t(LUTnrs), collapse=","), ",")))), collapse=","),
-                             paste(unique(structure), collapse=","),
-                             median(mismatches)), by=key(select.samples.binPos)]
-
-select.samples.binPos <- unique(select.samples.binPos, by=c("Group","Category","GeneName","AA"))
-select.samples.binPos <- select.samples.binPos[,c("Group","GeneName","AA","NormCount",
-                                                  "BCcount","AnimalCount","LUTnrs","mainStruct",
-                                                  "mismatches","seqlength"), with = FALSE]
+setkeyv(select.samples.binPos,c("Group","GeneName","AA","seqlength"))
+select.samples.binPos <- select.samples.binPos[,list(BCcount=length(table(strsplit(paste(t(BC), collapse=","), ","))),
+                             NormCount=mean(log2(RNAcount+1)),
+                             AnimalCount=length(table(strsplit(paste(t(Animals), collapse=","), ","))),
+                             LUTnrs=paste(unique(names(table(strsplit(paste(t(LUTnrs), collapse=","), ",")))), collapse=","),
+                             mainStruct=paste(unique(structure), collapse=","),
+                             mismatches=median(mismatches)), by=key(select.samples.binPos)]
+setkey(select.samples.binPos,Group)
+ref.table <- select.samples.binPos["totalLib"]
+ref.table[,c("Group","NormCount","AnimalCount","LUTnrs","mainStruct","mismatches","seqlength"):=NULL]
+setnames(ref.table,"BCcount","libBC")
+setkeyv(ref.table,c("GeneName","AA"))
+setkeyv(select.samples.binPos,c("GeneName","AA"))
+select.samples.binPos <- select.samples.binPos[ref.table,nomatch=0]
 select.samples.binPos[,totBC:=sum(BCcount), by="Group"]
 max.count <- max(select.samples.binPos$totBC)
 select.samples.binPos[,BCcountN:=BCcount/totBC*max.count]
-select.samples.binPos[,BCcountNanim:=BCcountN*AnimalCount]
+select.samples.binPos[,libNormBC:=BCcountN/libBC]
+select.samples.binPos[,BCcountNanim:=BCcountN+AnimalCount]
+select.samples.binPos[,BCcountanim:=BCcount+AnimalCount]
 select.samples.binPos[,BCcountNseq:=BCcountN/seqlength]
-select.samples.binPos[,NormCountBC:=BCcountNanim*NormCount]
+select.samples.binPos[,NormCountBC:=BCcountNseq*NormCount]
+# select.samples.binPos[,libNormBCNanim:=libNormBC*AnimalCount]
+# select.samples.binPos[,libNormBCNseq:=libNormBC/seqlength]
+# select.samples.binPos[,libNormBCNormCount:=libNormBC*NormCount]
+
+
 select.samples.binPos[,GeneAA:=paste(GeneName," [",AA,"] - ", mainStruct, sep="")]
 
 
@@ -112,9 +132,10 @@ return(pheatmap(select.samples.matrix, cluster_rows=TRUE, show_rownames=TRUE, cl
 
 plotCategory(select.samples.binCat,"BCcountNseq",c("totalLib","CNS100x_Str","CNS100x_Th","CNS100x_Ctx","CNS100x_SN"))
 plotCategory(select.samples.binCat,"BCcountNseq",c("CNS1000x_Str","CNS1000x_Th","CNS1000x_Ctx","CNS1000x_SN"))
-plotCategory(select.samples.binCat,"BCcountNseq",c("PrimN_100x","PrimN_1000x","293T_100x","293T_1000x"))
+plotCategory(select.samples.binCat,"BCcountNseq",c("PrimN_100x","PrimN_1000x","H293T_100x","H293T_1000x"))
 
-
+plotCategory(select.samples.binCat,"refNormBC",c("CNS100x_Str","CNS1000x_Str","CNS100x_Th","CNS1000x_Th","CNS100x_Ctx","CNS1000x_Ctx","CNS100x_SN","CNS1000x_SN"))
+plotCategory(select.samples.binCat,"refNormBC",c("PrimN_100x","PrimN_1000x","H293T_100x","H293T_1000x"))
 
 
 #'Plot Heatmaps split by GeneName
@@ -134,14 +155,19 @@ return(pheatmap(select.samples.matrix, fontsize_row=5.8, cluster_rows=TRUE, show
 
 plotGene(select.samples.binGene,"BCcountNseq",c("totalLib","CNS100x_Str","CNS100x_Th","CNS100x_Ctx","CNS100x_SN"))
 plotGene(select.samples.binGene,"BCcountNseq",c("CNS1000x_Str","CNS1000x_Th","CNS1000x_Ctx","CNS1000x_SN"))
-plotGene(select.samples.binGene,"BCcountNseq",c("PrimN_100x","PrimN_1000x","293T_100x","293T_1000x"))
+plotGene(select.samples.binGene,"BCcountNseq",c("PrimN_100x","PrimN_1000x","H293T_100x","H293T_1000x"))
 
+
+plotGene(select.samples.binGene,"refNormBC",c("CNS100x_Str","CNS100x_Th","CNS100x_Ctx","CNS100x_SN"))
+plotGene(select.samples.binGene,"refNormBC",c("CNS1000x_Str","CNS1000x_Th","CNS1000x_Ctx","CNS1000x_SN"))
+plotGene(select.samples.binGene,"refNormBC",c("CNS100x_Str","CNS1000x_Str","CNS100x_Th","CNS1000x_Th","CNS100x_Ctx","CNS1000x_Ctx","CNS100x_SN","CNS1000x_SN"))
+plotGene(select.samples.binGene,"refNormBC",c("PrimN_100x","PrimN_1000x","H293T_100x","H293T_1000x"))
 
 #'Selection of top ten fragments per sample
 #'===================
 
 setkeyv(select.samples.binPos,c("Group","BCcountNanim","AnimalCount","NormCount"))
-setorder(select.samples.binPos,Group,-BCcountNanim,-AnimalCount,-NormCount)
+setorder(select.samples.binPos,Group,-BCcountanim,-AnimalCount,-BCcount,-NormCount)
 setkey(select.samples.binPos,Group)
 
 select.samples.topTwenty <- select.samples.binPos[, head(.SD, 20), by=Group]
@@ -168,17 +194,18 @@ select.samples.out <- select.samples.out[,sample.select]
 return(pheatmap(select.samples.out, cluster_rows=TRUE, show_rownames=TRUE, cluster_cols=FALSE))
 }
 
-plotPos(select.samples.binPos,"BCcountNanim",c("PrimN_100x","PrimN_1000x","293T_100x","293T_1000x"))
-plotPos(select.samples.binPos,"BCcountNanim",c("CNS100x_Str","CNS100x_Th","CNS100x_Ctx","CNS100x_SN"))
-plotPos(select.samples.binPos,"BCcountNanim",c("CNS1000x_Str","CNS1000x_Th","CNS1000x_Ctx","CNS1000x_SN"))
+plotPos(select.samples.binPos,"NormCount",c("PrimN_100x","PrimN_1000x","H293T_100x","H293T_1000x"))
+plotPos(select.samples.binPos,"NormCount",c("CNS100x_Str","CNS100x_Th","CNS100x_Ctx","CNS100x_SN"))
+plotPos(select.samples.binPos,"NormCount",c("CNS1000x_Str","CNS1000x_Th","CNS1000x_Ctx","CNS1000x_SN"))
 
-plotPos(select.samples.binPos,"NormCountBC",c("PrimN_100x","PrimN_1000x","293T_100x","293T_1000x"))
+plotPos(select.samples.binPos,"BCcountNseq",c("PrimN_100x","PrimN_1000x","H293T_100x","H293T_1000x"))
+plotPos(select.samples.binPos,"BCcountNseq",c("CNS100x_Str","CNS100x_Th","CNS100x_Ctx","CNS100x_SN"))
+plotPos(select.samples.binPos,"BCcountNseq",c("CNS1000x_Str","CNS1000x_Th","CNS1000x_Ctx","CNS1000x_SN"))
+
+plotPos(select.samples.binPos,"NormCountBC",c("PrimN_100x","PrimN_1000x","H293T_100x","H293T_1000x"))
 plotPos(select.samples.binPos,"NormCountBC",c("CNS100x_Str","CNS100x_Th","CNS100x_Ctx","CNS100x_SN"))
 plotPos(select.samples.binPos,"NormCountBC",c("CNS1000x_Str","CNS1000x_Th","CNS1000x_Ctx","CNS1000x_SN"))
 
-plotPos(select.samples.binPos,"NormCount",c("PrimN_100x","PrimN_1000x","293T_100x","293T_1000x"))
-plotPos(select.samples.binPos,"NormCount",c("CNS100x_Str","CNS100x_Th","CNS100x_Ctx","CNS100x_SN"))
-plotPos(select.samples.binPos,"NormCount",c("CNS1000x_Str","CNS1000x_Th","CNS1000x_Ctx","CNS1000x_SN"))
 
 devtools::session_info()
 
