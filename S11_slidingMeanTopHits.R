@@ -28,6 +28,8 @@ suppressPackageStartupMessages(library(pheatmap))
 suppressPackageStartupMessages(library(grid))
 suppressPackageStartupMessages(library(reshape2))
 suppressPackageStartupMessages(library(devtools))
+suppressPackageStartupMessages(library(grid))
+suppressPackageStartupMessages(library(pastecs))
 
 
 #'Selection of relevant samples
@@ -83,64 +85,75 @@ windowTable <- windowTable[,seq(seqlength),by=c("Group","GeneName")]
 setnames(windowTable,"V1","winStart")
 setkeyv(windowTable,c("Group","GeneName","winStart"))
 setkeyv(select.samples.windowBin,c("Group","GeneName","winStart"))
-select.samples.windowBin.full <- data.table::copy(select.samples.windowBin)
+#select.samples.windowBin.full <- data.table::copy(select.samples.windowBin)
 select.samples.windowBin <- select.samples.windowBin[windowTable]
 select.samples.windowBin$Score[is.na(select.samples.windowBin$Score)] <- 0
 
 select.samples.windowBin$LUTnrs[is.na(select.samples.windowBin$LUTnrs)] <- seq(length(which(is.na(select.samples.windowBin$LUTnrs))))
 
-select.samples.windowBin.unique <- unique(select.samples.windowBin, by=c("Group","LUTnrs","Score"))
-
-setorder(select.samples.windowBin.unique, Group,GeneName,winStart)
+setorder(select.samples.windowBin, Group,GeneName,winStart)
 
 
-local_max <- function(x) {
-  which(diff(sign(diff(x)))==-2)+1}
+# local_max <- function(x) {
+#   which(diff(sign(diff(x)))==-2)+1}
 
-select.samples.windowBin.locMax <- select.samples.windowBin.unique[local_max(select.samples.windowBin.unique$Score),]
+
+
+select.samples.windowBin.locMax <- select.samples.windowBin[as.logical(extract(turnpoints(select.samples.windowBin$Score), 1000000, peak=1, pit=0)),]
 setorder(select.samples.windowBin.locMax, Group,-Score,GeneName,winStart)
 select.samples.windowBin.locMax <- unique(select.samples.windowBin.locMax, by=c("Group","LUTnrs"))
 
-#'Make bins
-#'===================
-
-
-#Connect highest scoring fragments
-
-setorder(select.samples.windowBin.locMax,Group,GeneName,winStart)
-winWidth=7
-windowTable <- select.samples.windowBin.locMax[,c("GeneName","winStart"), with = FALSE]
-windowTable <- unique(windowTable, by=c("GeneName","winStart"))
-windowTable <- windowTable[,seq((winStart-winWidth),(winStart+winWidth)),by=c("GeneName","winStart")]
-setnames(windowTable,"V1","binBaseStart")
-windowTable[,binBaseEnd:=binBaseStart+(2*winWidth)-1]
-scoreSelect <- select.samples.windowBin.locMax[,c("Group","GeneName","winStart","Score"), with = FALSE]
-setkeyv(windowTable,c("GeneName","winStart"))
-setkeyv(scoreSelect,c("GeneName","winStart"))
-scoreSelectBin <- scoreSelect[windowTable,allow.cartesian=TRUE]
-
-scoreSelectBin[,mCount:=.N,by=c("GeneName","binBaseStart")]
-scoreSelectBin[,oCount:=.N,by=c("GeneName","winStart","binBaseStart")]
-scoreSelectBin[,offset:=abs(binBaseStart+winWidth-winStart)]
-#scoreSelectBin <- scoreSelectBin[mCount>oCount,]
-setorder(scoreSelectBin,GeneName,winStart,-mCount,-offset)
-scoreSelectBinTop <- scoreSelectBin[, head(.SD, 1), by=c("GeneName","winStart")]
-scoreSelect <- scoreSelectBinTop[,c("GeneName","winStart","binBaseStart","binBaseEnd"), with = FALSE]
-setkeyv(scoreSelect,c("GeneName","winStart"))
-setkeyv(select.samples.windowBin.locMax,c("GeneName","winStart"))
-select.samples.windowBin.locMax.bin <- select.samples.windowBin.locMax[scoreSelect, allow.cartesian=TRUE]
-setorder(select.samples.windowBin.locMax.bin,GeneName,-binBaseStart,-Score,Group)
-select.samples.windowBin.locMerge <- select.samples.windowBin.locMax.bin[, head(.SD, 1), by=c("GeneName","binBaseStart","Group")]
-
+# #'Make bins
+# #'===================
+# 
+# 
+# #Connect highest scoring fragments
+# 
+# setorder(select.samples.windowBin.locMax,Group,-Score,-AnimalCount,-BCcount,-libCount,-NormCount,GeneName,winStart)
+# setkey(select.samples.windowBin.locMax,Group)
+# 
+# select.samples.topSelect <- select.samples.windowBin.locMax[, head(.SD, 30), by=Group]
+# 
+# setorder(select.samples.topSelect,Group,GeneName,winStart)
+# winWidth=13
+# windowTable <- select.samples.topSelect[,c("GeneName","winStart"), with = FALSE]
+# windowTable <- unique(windowTable, by=c("GeneName","winStart"))
+# windowTable <- windowTable[,seq((winStart-winWidth),(winStart+winWidth)),by=c("GeneName","winStart")]
+# setnames(windowTable,"V1","binBaseStart")
+# windowTable[,binBaseEnd:=binBaseStart+13]
+# scoreSelect <- select.samples.topSelect[,c("Group","GeneName","winStart","Score"), with = FALSE]
+# setkeyv(windowTable,c("GeneName","winStart"))
+# setkeyv(scoreSelect,c("GeneName","winStart"))
+# scoreSelect <- scoreSelect[windowTable,allow.cartesian=TRUE]
+# 
+# scoreSelect[,mCount:=length(unique(Group)),by=c("GeneName","binBaseStart")]
+# scoreSelect[,oCount:=.N,by=c("GeneName","binBaseStart")]
+# scoreSelect[,offset:=abs(binBaseStart+6-winStart)]
+# #scoreSelect <- scoreSelect[mCount>oCount,]
+# setorder(scoreSelect,GeneName,winStart,-mCount,-oCount,offset)
+# scoreSelect <- scoreSelect[, head(.SD, 1), by=c("GeneName","winStart")]
+# scoreSelect <- scoreSelect[,c("GeneName","winStart","binBaseStart","binBaseEnd"), with = FALSE]
+# setkeyv(scoreSelect,c("GeneName","winStart"))
+# setkeyv(select.samples.windowBin.locMax,c("GeneName","winStart"))
+# 
+# 
+# select.samples.windowBin.locMax.bin <- scoreSelect[select.samples.windowBin.locMax,nomatch=NA]
+# select.samples.windowBin.locMax.bin$binBaseStart[is.na(select.samples.windowBin.locMax.bin$binBaseStart)] <- select.samples.windowBin.locMax.bin$winStart[is.na(select.samples.windowBin.locMax.bin$binBaseStart)]
+# select.samples.windowBin.locMax.bin$binBaseEnd[is.na(select.samples.windowBin.locMax.bin$binBaseEnd)] <- select.samples.windowBin.locMax.bin$winStart[is.na(select.samples.windowBin.locMax.bin$binBaseEnd)]
+# 
+# setorder(select.samples.windowBin.locMax.bin,GeneName,-binBaseStart,-Score,Group)
+# 
+# select.samples.windowBin.locMerge <- select.samples.windowBin.locMax.bin[, head(.SD, 1), by=c("GeneName","binBaseStart","binBaseEnd","Group")]
+# select.samples.windowBin.locMerge <- unique(select.samples.windowBin.locMerge, by=c("Group","GeneName","LUTnrs"))
 
 #'Selection of top twenty fragments per sample
 #'===================
 
 
-setorder(select.samples.windowBin.locMax,Group,-Score,-AnimalCount,-BCcount,-libCount,-NormCount,GeneName,winStart)
-setkey(select.samples.windowBin.locMax,Group)
+setorder(select.samples.windowBin.locMerge,Group,-Score,-AnimalCount,-BCcount,-libCount,-NormCount,GeneName,winStart)
+setkey(select.samples.windowBin.locMerge,Group)
 
-select.samples.topTwenty <- select.samples.windowBin.locMax[, head(.SD, 10), by=Group]
+select.samples.topTwenty <- select.samples.windowBin.locMerge[, head(.SD, 20), by=Group]
 #'Selectonly the active samples
 # setkey(select.samples.topTwenty,Group)
 # select.samples.topTwenty <- select.samples.topTwenty[c("CNS_Th","CNS_Ctx","CNS_SN")]
@@ -150,22 +163,21 @@ select.samples.topTwenty <- unique(select.samples.topTwenty, by=c("GeneName","wi
 
 
 setkeyv(select.samples.topTwenty,c("GeneName","winStart"))
-setkeyv(select.samples.windowBin.full,c("GeneName","winStart"))
-select.samples.windowBin.allTop <- select.samples.windowBin.full[select.samples.topTwenty, nomatch=0]
-select.samples.windowBin.allTop <- unique(select.samples.windowBin.allTop, by=c("Group","LUTnrs","Score"))
+setkeyv(select.samples.windowBin.locMerge,c("GeneName","winStart"))
+select.samples.windowBin.allTop <- select.samples.windowBin.locMerge[select.samples.topTwenty, nomatch=0]
+#select.samples.windowBin.allTop <- unique(select.samples.windowBin.allTop, by=c("Group","LUTnrs","Score"))
 
-select.samples.windowBin.allTop[,GeneAA:=paste(GeneName," [",winStart,"]", sep="")]
+select.samples.windowBin.allTop[,GeneAA:=paste(GeneName," [",winStart,"-",winStart,"]", sep="")]
 setorder(select.samples.windowBin.allTop,Group,-Score)
 
 #'Plotting ranked order
 #'===================
 
-make_bipartite_graph(select.samples.windowBin.allTop$Group, edges, directed = FALSE)
 setkey(select.samples.windowBin.allTop,Group)
 
 v1 <- select.samples.windowBin.allTop["CNS_Str"]$GeneAA
-v2 <- select.samples.windowBin.allTop["CNS_Th"]$GeneAA
-v3 <- select.samples.windowBin.allTop["CNS_Ctx"]$GeneAA
+v2 <- select.samples.windowBin.allTop["CNS_Ctx"]$GeneAA
+v3 <- select.samples.windowBin.allTop["CNS_Th"]$GeneAA
 v4 <- select.samples.windowBin.allTop["CNS_SN"]$GeneAA
 
 
@@ -179,8 +191,7 @@ allMax <- max(DF$y)
 DF[,y:=y-groupMax+allMax]
 
 
-library(ggplot2)
-library(grid)
+
 ggplot(DF, aes(x=x, y=y, group=g, label=g)) +
   geom_path(aes(x=x1), 
             size=0.5, color="blue") +
