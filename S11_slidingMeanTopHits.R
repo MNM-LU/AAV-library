@@ -54,17 +54,16 @@ setorder(select.samples.merge.binPos,Group,GeneName,start,width)
 winWidth=1
 windowTable <- select.samples.merge.binPos[,c("GeneName","start","width"), with = FALSE]
 windowTable <- unique(windowTable, by=c("GeneName","start","width"))
-windowTable <- windowTable[,(seq(width-winWidth+1)+start-1),by=c("GeneName","start","width")]
+windowTable <- windowTable[,seq(start,(start+width-winWidth)),by=c("GeneName","start","width")]
 setnames(windowTable,"V1","winStart")
 windowTable[,winEnd:=winStart+winWidth-1]
 setkeyv(windowTable,c("GeneName","start","width"))
 setkeyv(select.samples.merge.binPos,c("GeneName","start","width"))
-select.samples.windowBin <- select.samples.merge.binPos[windowTable, allow.cartesian=TRUE]
+select.samples.windowBin <- select.samples.merge.binPos[windowTable, nomatch=0, allow.cartesian=TRUE]
 
 setkeyv(select.samples.windowBin,c("Group","GeneName","winStart","winEnd"))
-
+# select.samples.windowBin.in <- data.table::copy(select.samples.windowBin)
 select.samples.windowBin <- select.samples.windowBin[, list(Overlaps=.N,
-                                                            seqlength=min(seqlength),
                                                             BCcount=length(table(strsplit(paste(t(BC), collapse=","), ","))),
                                                             NormCount=mean(log2(RNAcount+1)),
                                                             AnimalCount=length(table(strsplit(paste(t(Animals), collapse=","), ","))),
@@ -73,14 +72,17 @@ select.samples.windowBin <- select.samples.windowBin[, list(Overlaps=.N,
                                                             mainLibs=paste(unique(Lib), collapse=","),
                                                             libCount=length(unique(Lib)),
                                                             mismatches=median(mismatches)
-), by=c("Group","GeneName","winStart","winEnd")]
+), by=c("Group","GeneName","winStart","winEnd","seqlength")]
 
+# select.samples.windowBin.out <- data.table::copy(select.samples.windowBin)
+# select.samples.windowBin <- data.table::copy(select.samples.windowBin.out)
 select.samples.windowBin[,Score:=BCcount+AnimalCount+libCount]
 setorder(select.samples.windowBin, Group,GeneName,winStart,-Score)
 
 
 
 windowTable <- select.samples.windowBin[,c("Group","GeneName","seqlength"), with = FALSE]
+windowTable <- unique(windowTable, by=c("Group","GeneName","seqlength"))
 windowTable <- windowTable[,seq(seqlength),by=c("Group","GeneName")]
 setnames(windowTable,"V1","winStart")
 setkeyv(windowTable,c("Group","GeneName","winStart"))
@@ -91,15 +93,13 @@ select.samples.windowBin$Score[is.na(select.samples.windowBin$Score)] <- 0
 
 select.samples.windowBin$LUTnrs[is.na(select.samples.windowBin$LUTnrs)] <- seq(length(which(is.na(select.samples.windowBin$LUTnrs))))
 
-setorder(select.samples.windowBin, Group,GeneName,winStart)
+setorder(select.samples.windowBin,Group,GeneName,-winStart)
+select.samples.windowBin.locMax <- data.table::copy(select.samples.windowBin)
+select.samples.windowBin.locMax[,Peak:=as.logical(extract(turnpoints(Score), peak=1, pit=0)),by=c("Group","GeneName")] #,proba=0.0001
 
-
-# local_max <- function(x) {
-#   which(diff(sign(diff(x)))==-2)+1}
-
-
-
-select.samples.windowBin.locMax <- select.samples.windowBin[as.logical(extract(turnpoints(select.samples.windowBin$Score), 1000000, peak=1, pit=0)),]
+setorder(select.samples.windowBin.locMax,Group,GeneName,winStart)
+select.samples.windowBin.locMax <- select.samples.windowBin.locMax[select.samples.windowBin.locMax$Peak,]
+select.samples.windowBin.locMax[,Peak:=NULL]
 setorder(select.samples.windowBin.locMax, Group,-Score,GeneName,winStart)
 select.samples.windowBin.locMax <- unique(select.samples.windowBin.locMax, by=c("Group","LUTnrs"))
 
@@ -146,14 +146,29 @@ select.samples.windowBin.locMax <- unique(select.samples.windowBin.locMax, by=c(
 # select.samples.windowBin.locMerge <- select.samples.windowBin.locMax.bin[, head(.SD, 1), by=c("GeneName","binBaseStart","binBaseEnd","Group")]
 # select.samples.windowBin.locMerge <- unique(select.samples.windowBin.locMerge, by=c("Group","GeneName","LUTnrs"))
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 #'Selection of top twenty fragments per sample
 #'===================
 
 
-setorder(select.samples.windowBin.locMerge,Group,-Score,-AnimalCount,-BCcount,-libCount,-NormCount,GeneName,winStart)
-setkey(select.samples.windowBin.locMerge,Group)
+setorder(select.samples.windowBin.locMax,Group,-Score,-AnimalCount,-BCcount,-libCount,-NormCount,GeneName,winStart)
+setkey(select.samples.windowBin.locMax,Group)
 
-select.samples.topTwenty <- select.samples.windowBin.locMerge[, head(.SD, 20), by=Group]
+select.samples.topTwenty <- select.samples.windowBin.locMax[, head(.SD, 20), by=Group]
 #'Selectonly the active samples
 # setkey(select.samples.topTwenty,Group)
 # select.samples.topTwenty <- select.samples.topTwenty[c("CNS_Th","CNS_Ctx","CNS_SN")]
@@ -162,13 +177,18 @@ select.samples.topTwenty <- select.samples.topTwenty[,c("GeneName","winStart"),w
 select.samples.topTwenty <- unique(select.samples.topTwenty, by=c("GeneName","winStart"))
 
 
+
+setorder(select.samples.windowBin,Group,-Score,-AnimalCount,-BCcount,-libCount,-NormCount,GeneName,winStart)
+select.samples.windowBin[,Rank:=seq(.N), by=c("Group")]
 setkeyv(select.samples.topTwenty,c("GeneName","winStart"))
-setkeyv(select.samples.windowBin.locMerge,c("GeneName","winStart"))
-select.samples.windowBin.allTop <- select.samples.windowBin.locMerge[select.samples.topTwenty, nomatch=0]
+setkeyv(select.samples.windowBin,c("GeneName","winStart"))
+select.samples.windowBin.allTop <- select.samples.windowBin[select.samples.topTwenty, nomatch=0]
+
+
 #select.samples.windowBin.allTop <- unique(select.samples.windowBin.allTop, by=c("Group","LUTnrs","Score"))
 
-select.samples.windowBin.allTop[,GeneAA:=paste(GeneName," [",winStart,"-",winStart,"]", sep="")]
-setorder(select.samples.windowBin.allTop,Group,-Score)
+select.samples.windowBin.allTop[,GeneAA:=paste(GeneName," [",winStart,"]", sep=""), by=Group]
+setorder(select.samples.windowBin.allTop,Group,Rank)
 
 #'Plotting ranked order
 #'===================
