@@ -8,3 +8,4 @@ wait; Rscript -e "setwd('~/Dropbox/R-projects/AAV-library')" -e "rmarkdown::rend
 wait; Rscript -e "setwd('~/Dropbox/R-projects/AAV-library')" -e "rmarkdown::render('S8_PlotAllGenesCoverage.R')" 2>&1 | tee logs/S8_PlotAllGenesCoverage_runLog.txt &
 wait; Rscript -e "setwd('~/Dropbox/R-projects/AAV-library')" -e "rmarkdown::render('S9_FullGeneHeatmap.R')" 2>&1 | tee logs/S9_FullGeneHeatmap_runLog.txt &
 wait; Rscript -e "setwd('~/Dropbox/R-projects/AAV-library')" -e "rmarkdown::render('S10_generateLibAnalysisPlots.R')" 2>&1 | tee logs/S10_generateLibAnalysisPlots_runLog.txt &
+wait; Rscript -e "setwd('~/Dropbox/R-projects/AAV-library')" -e "rmarkdown::render('S11_slidingMeanTopHits.R')" 2>&1 | tee logs/S11_slidingMeanTopHits_runLog.txt &
