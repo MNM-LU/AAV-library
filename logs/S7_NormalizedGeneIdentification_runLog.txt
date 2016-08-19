@@ -1,25 +1,30 @@
 
 
 processing file: S7_NormalizedGeneIdentification.spin.Rmd
-  |                                                                         |                                                                 |   0%  |                                                                         |.......                                                          |  11%
+  |                                                                         |                                                                 |   0%  |                                                                         |......                                                           |  10%
   ordinary text without R code
 
-  |                                                                         |..............                                                   |  22%
+  |                                                                         |.............                                                    |  20%
 label: unnamed-chunk-1
-  |                                                                         |......................                                           |  33%
+  |                                                                         |....................                                             |  30%
+label: setup (with options) 
+List of 1
+ $ include: logi FALSE
+
+  |                                                                         |..........................                                       |  40%
   ordinary text without R code
 
-  |                                                                         |.............................                                    |  44%
+  |                                                                         |................................                                 |  50%
 label: Generating load list.......
-  |                                                                         |....................................                             |  56%
+  |                                                                         |.......................................                          |  60%
   ordinary text without R code
 
-  |                                                                         |...........................................                      |  67%
+  |                                                                         |..............................................                   |  70%
 label: Loading alignments.......
-  |                                                                         |...................................................              |  78%
+  |                                                                         |....................................................             |  80%
   ordinary text without R code
 
-  |                                                                         |..........................................................       |  89%
+  |                                                                         |..........................................................       |  90%
 label: Normalizing RNA counts.......
   |                                                                         |.................................................................| 100%
   ordinary text without R code
@@ -27,6 +32,6 @@ label: Normalizing RNA counts.......
 
 output file: S7_NormalizedGeneIdentification.knit.md
 
-/usr/bin/pandoc +RTS -K512m -RTS S7_NormalizedGeneIdentification.utf8.md --to latex --from markdown+autolink_bare_uris+ascii_identifiers+tex_math_single_backslash-implicit_figures --output S7_NormalizedGeneIdentification.pdf --template /home/lcadmin/R/x86_64-pc-linux-gnu-library/3.2/rmarkdown/rmd/latex/default.tex --highlight-style tango --latex-engine pdflatex 
+/usr/bin/pandoc +RTS -K512m -RTS S7_NormalizedGeneIdentification.utf8.md --to latex --from markdown+autolink_bare_uris+ascii_identifiers+tex_math_single_backslash --output S7_NormalizedGeneIdentification.pdf --template '/home/lcadmin/Dropbox (Bjorklund Lab)/R-projects/AAV-library/packrat/lib/x86_64-pc-linux-gnu/3.3.1/rmarkdown/rmd/latex/default-1.15.2.tex' --highlight-style tango --latex-engine pdflatex --variable graphics=yes 
 
 Output created: S7_NormalizedGeneIdentification.pdf

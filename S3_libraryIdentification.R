@@ -16,8 +16,14 @@ suppressPackageStartupMessages(library(Hmisc))
 suppressPackageStartupMessages(library(GeneGA))
 suppressPackageStartupMessages(library(devtools))
 
+source(file.path("functions", "GeneCodon.R"))
+#Override the GeneCodon function with local version containing human codons
+unlockBinding("GeneCodon", as.environment("package:GeneGA"))
+assign("GeneCodon", GeneCodon, as.environment("package:GeneGA"))
+
 
 opts_chunk$set(fig.width = 7.5, fig.height = 8)
+opts_chunk$set(tidy=TRUE)
 opts_chunk$set(comment = NA)
 
 #'Load sequences

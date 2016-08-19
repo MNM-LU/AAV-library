@@ -5,17 +5,17 @@
 #' output: 
 #'  pdf_document:
 #'    highlight: tango
-#' geometry: margin=0.7in
-#' fontsize: 10pt
+#' geometry: margin=0.6in
+#' fontsize: 9.5pt
 #' ---
 
 #' This is the final script presenting top candidates and overview plots.  
 suppressPackageStartupMessages(library(knitr))
-#+ setup, include=FALSE
 
-opts_chunk$set(fig.width = 8, fig.height = 10.2) #Full height 11
+opts_chunk$set(fig.width = 7.3, fig.height = 10.1) #Full height 11
+opts_chunk$set(tidy=TRUE)
 opts_chunk$set(comment = NA)
-
+#+ setup, include=FALSE
 suppressPackageStartupMessages(library(ggplot2))
 suppressPackageStartupMessages(library(ggbio))
 suppressPackageStartupMessages(library(data.table))
@@ -151,9 +151,9 @@ plot.out <- plot.out +
   scale_colour_manual(name = "Library", values = fill.values) +
   scale_x_continuous(limit=c(0,100), breaks=c(seq(0,100,20)), expand =c(0,0)) +
   facet_wrap(~ GeneName, ncol=5)+   
-  theme(plot.margin=unit(x=c(0,0,0,0),units="mm"),
+  theme(plot.margin=unit(x=c(0,0,20,0),units="mm"),
         legend.position="bottom",
-        legend.margin=unit(-0.5,"cm"),
+        legend.margin=unit(0,"cm"),
         legend.key.height=unit(0, "cm"),
         plot.background=element_rect(fill="white"),
         axis.text = element_text(size = rel(0.45)),
@@ -213,7 +213,6 @@ out.list <- list(plot=plot.out,
 
 return(out.list)
 }
-
 
 #'Analyze samples
 #'===================
@@ -396,5 +395,6 @@ plotPair("CNS1000x_Trsp","CNS100x_Trsp",size.bin=2,winWidth=0,PlotBC=FALSE)$plot
 
 plotPair("PrimN_1000x","PrimN_100x",size.bin=2,winWidth=0,PlotBC=FALSE)$plot
 plotPair("H293T_1000x","H293T_100x",size.bin=2,winWidth=0,PlotBC=FALSE)$plot
+
 
 devtools::session_info()

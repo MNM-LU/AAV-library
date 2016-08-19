@@ -12,12 +12,19 @@
 
 
 suppressPackageStartupMessages(library(knitr))
+
+opts_chunk$set(tidy=TRUE)
+opts_chunk$set(comment = NA)
+#+ setup, include=FALSE
 suppressPackageStartupMessages(library(ShortRead))
 suppressPackageStartupMessages(library(parallel))
 suppressPackageStartupMessages(library(doParallel))
 suppressPackageStartupMessages(library(data.table))
 suppressPackageStartupMessages(library(devtools))
 
+#' Generate library rage object
+#' ============================
+#+ Generating library rages.......
 load("data/alignedLibraries.rda")
 load("data/LUTdna.rda")
 load("data/multipleContfragmentsComplete.rda")

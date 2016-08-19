@@ -11,10 +11,10 @@
 
 #' This is the final script presenting top 23 candidates as connectivity graph.  
 suppressPackageStartupMessages(library(knitr))
-#+ setup, include=FALSE
 opts_chunk$set(fig.width = 8, fig.height = 6.5)
+opts_chunk$set(tidy=TRUE)
 opts_chunk$set(comment = NA)
-
+#+ setup, include=FALSE
 suppressPackageStartupMessages(library(ggplot2))
 suppressPackageStartupMessages(library(ggbio))
 suppressPackageStartupMessages(library(data.table))
@@ -77,7 +77,10 @@ select.samples.windowBin.out <- select.samples.windowBin[, list(Overlaps=.N,
 
 select.samples.windowBin <- data.table::copy(select.samples.windowBin.out)
 select.samples.windowBin[,Score:=BCcount+AnimalCount+libCount]
+setorder(select.samples.windowBin,Group,-Score,-AnimalCount,-BCcount,-libCount,-NormCount,GeneName,winStart)
+select.samples.windowBin[,Rank:=seq(.N), by=c("Group")]
 setorder(select.samples.windowBin, Group,GeneName,winStart,-Score)
+
 
 windowTable <- select.samples.windowBin[,c("Group","GeneName","seqlength"), with = FALSE]
 windowTable <- unique(windowTable, by=c("Group","GeneName","seqlength"))
@@ -97,7 +100,8 @@ select.samples.windowBin.locMax[,Peak:=as.logical(extract(turnpoints(Score), pea
 setorder(select.samples.windowBin.locMax,Group,GeneName,winStart)
 select.samples.windowBin.locMax <- select.samples.windowBin.locMax[select.samples.windowBin.locMax$Peak,]
 select.samples.windowBin.locMax[,Peak:=NULL]
-setorder(select.samples.windowBin.locMax, Group,-Score,GeneName,winStart)
+
+setorder(select.samples.windowBin.locMax, Group,Rank,-Score,GeneName,winStart)
 select.samples.windowBin.locMax <- unique(select.samples.windowBin.locMax, by=c("Group","LUTnrs"))
 
 #'Make binning for 22aa fragment length
@@ -107,9 +111,10 @@ select.samples.windowBin.locMax <- unique(select.samples.windowBin.locMax, by=c(
 
 setorder(select.samples.windowBin.locMax,Group,-Score,-AnimalCount,-BCcount,-libCount,-NormCount,GeneName,winStart)
 setkey(select.samples.windowBin.locMax,Group)
-select.samples.windowBin.locMax[,Rank:=seq(.N), by=c("Group")]
+select.samples.windowBin.locMax[,Rank2:=seq(.N), by=c("Group")]
 
-select.samples.topSelect <- select.samples.windowBin.locMax[, head(.SD, 30), by=Group]
+
+select.samples.topSelect <- select.samples.windowBin.locMax[, head(.SD, 35), by=Group]
 
 
 setorder(select.samples.topSelect,Group,GeneName,winStart)
@@ -118,6 +123,7 @@ windowTable <- select.samples.topSelect[,c("GeneName","winStart"), with = FALSE]
 windowTable <- unique(windowTable, by=c("GeneName","winStart"))
 windowTable <- windowTable[,seq((winStart-winWidth),(winStart)),by=c("GeneName","winStart")]
 setnames(windowTable,"V1","binBaseStart")
+windowTable <- windowTable[binBaseStart>0,]
 windowTable[,binBaseEnd:=binBaseStart+winWidth]
 scoreSelect <- select.samples.topSelect[,c("Group","GeneName","winStart","Score"), with = FALSE]
 setkeyv(windowTable,c("GeneName","winStart"))
@@ -151,7 +157,7 @@ select.samples.windowBin.locMerge <- unique(select.samples.windowBin.locMerge, b
 setorder(select.samples.windowBin.locMerge,Group,-Score,-AnimalCount,-BCcount,-libCount,-NormCount,GeneName,binBaseStart)
 setkey(select.samples.windowBin.locMerge,Group)
 
-select.samples.topTwenty <- select.samples.windowBin.locMerge[, head(.SD, 23), by=Group]
+select.samples.topTwenty <- select.samples.windowBin.locMerge[, head(.SD, 25), by=Group]
 select.samples.topTwenty <- select.samples.topTwenty[,c("GeneName","binBaseStart","binBaseEnd"),with=FALSE]
 select.samples.topTwenty <- unique(select.samples.topTwenty, by=c("GeneName","binBaseStart"))
 
@@ -167,6 +173,7 @@ select.samples.windowBin.Bin <- unique(select.samples.windowBin, by=c("Group","G
 setkeyv(select.samples.topTwenty,c("GeneName","binBaseStart"))
 setkeyv(select.samples.windowBin,c("GeneName","binBaseStart"))
 select.samples.windowBin.allTop <- select.samples.windowBin[select.samples.topTwenty, nomatch=0]
+select.samples.windowBin.allTop <- unique(select.samples.windowBin.allTop, by=c("Group","LUTnrs"))
 setorder(select.samples.windowBin.allTop,Group,GeneName,binBaseStart,-Score)
 select.samples.windowBin.allTop <- unique(select.samples.windowBin.allTop, by=c("Group","GeneName","binBaseStart"))
 

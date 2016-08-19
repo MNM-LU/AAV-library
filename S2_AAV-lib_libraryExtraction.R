@@ -18,6 +18,7 @@ suppressPackageStartupMessages(library(devtools))
 suppressPackageStartupMessages(library(Hmisc))
 
 opts_chunk$set(fig.width = 7.5, fig.height = 8)
+opts_chunk$set(tidy=TRUE)
 opts_chunk$set(comment = NA)
 
 config <- read.table("input/config.txt", header = FALSE, skip = 0, sep="\t",

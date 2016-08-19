@@ -10,6 +10,10 @@
 
 #' This workflow brings together FastQ files containing barcodes expresssed in vivo. It also includes starcode based false barcode reduction. 
 suppressPackageStartupMessages(library(knitr))
+
+opts_chunk$set(tidy=TRUE)
+opts_chunk$set(comment = NA)
+#+ setup, include=FALSE
 suppressPackageStartupMessages(library(ShortRead))
 suppressPackageStartupMessages(library(ggplot2))
 suppressPackageStartupMessages(library(ggbio))
@@ -29,6 +33,10 @@ suppressPackageStartupMessages(library(biovizBase))
 suppressPackageStartupMessages(library(Gviz))
 suppressPackageStartupMessages(library(plyr))
 suppressPackageStartupMessages(library(devtools))
+
+#' Analyze tissue RNA
+#' ============================
+#+ Analyzing RNA.......
 strt <- Sys.time()
 load("data/multipleContfragmentsComplete.rda")
 load("data/alignedLibraries.rda")
@@ -154,7 +162,8 @@ log.table$scBCs <- length(unique(barcodeTable$BC))
 invisible(barcodeTable[,oldBC:=NULL])
 setkey(output.Table,"BC")
 
-BCcount <- data.table(as.data.frame(rev(sort(table(barcodeTable$BC)))), keep.rownames = TRUE)
+BCcount <- data.table(as.data.frame(rev(sort(table(barcodeTable$BC))), row.names = "Var1"), keep.rownames = TRUE)
+#In R versions below 3.3 remove, row.names = "Var1" to make this compatible
 setnames(BCcount,colnames(BCcount),c("BC","RNAcount"))
 setkey(BCcount,"BC")
 foundFrags <- output.Table[BCcount,nomatch=0]

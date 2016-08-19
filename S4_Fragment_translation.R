@@ -12,6 +12,10 @@
 
 
 suppressPackageStartupMessages(library(knitr))
+
+opts_chunk$set(tidy=TRUE)
+opts_chunk$set(comment = NA)
+#+ setup, include=FALSE
 suppressPackageStartupMessages(library(ShortRead))
 suppressPackageStartupMessages(library(parallel))
 suppressPackageStartupMessages(library(doParallel))
@@ -28,8 +32,12 @@ suppressPackageStartupMessages(library(Hmisc))
 suppressPackageStartupMessages(library(matrixStats))
 suppressPackageStartupMessages(library(stringdist))
 suppressPackageStartupMessages(library(scales))
-
+opts_chunk$set(tidy=TRUE)
 strt1<-Sys.time()
+
+#' Load the trimmed reads
+#' ============================
+#+ Loading reads.......
 
 load("data/LUTdna.rda")
 
@@ -175,11 +183,13 @@ print(paste("Original unique barcodes:", RetainedBC))
 print(paste("SC reduced unique barcodes:", scBC))
 
 
-table.frag <- data.table(as.data.frame((rev(sort(table(full.table$oldBC))))[1:10]), keep.rownames=TRUE)
+table.frag <- data.table(as.data.frame((rev(sort(table(full.table$oldBC))))[1:10], row.names = "Var1"), keep.rownames=TRUE)
+#In R versions below 3.3 remove, row.names = "Var1" to make this compatible
 setnames(table.frag, colnames(table.frag), c("Original BC", "Count"))
 knitr::kable(table.frag, format = "markdown")
 
-table.frag <- data.table(as.data.frame((rev(sort(table(full.table$BC))))[1:10]), keep.rownames=TRUE)
+table.frag <- data.table(as.data.frame((rev(sort(table(full.table$BC))))[1:10], row.names = "Var1"), keep.rownames=TRUE)
+#In R versions below 3.3 remove, row.names = "Var1" to make this compatible
 setnames(table.frag, colnames(table.frag), c("SC reduced BC", "Count"))
 knitr::kable(table.frag, format = "markdown")
 

@@ -12,6 +12,10 @@
 
 
 suppressPackageStartupMessages(library(knitr))
+
+opts_chunk$set(tidy=TRUE)
+opts_chunk$set(comment = NA)
+#+ setup, include=FALSE
 suppressPackageStartupMessages(library(GenomicAlignments))
 suppressPackageStartupMessages(library(data.table))
 suppressPackageStartupMessages(library(scales))

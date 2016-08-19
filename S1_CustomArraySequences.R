@@ -15,10 +15,16 @@ suppressPackageStartupMessages(library(parallel))
 suppressPackageStartupMessages(library(GeneGA))
 suppressPackageStartupMessages(library(devtools))
 suppressPackageStartupMessages(library(Hmisc))
+opts_chunk$set(tidy=TRUE)
+
 
 #'Loading source files
 #'===================
 source(file.path("functions", "AAtoDNA.R"))
+source(file.path("functions", "GeneCodon.R"))
+#Override the GeneCodon function with local version containing human codons
+unlockBinding("GeneCodon", as.environment("package:GeneGA"))
+assign("GeneCodon", GeneCodon, as.environment("package:GeneGA"))
 
 allSequences <- readFasta("input/DNA-lib_RetrogradeTransport.fasta")
 AAlist <- data.frame(Class=character(),

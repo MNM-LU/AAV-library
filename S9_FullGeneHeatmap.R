@@ -11,10 +11,11 @@
 
 #' This is the final script presenting top 10 candidates as heatmap plots.  
 suppressPackageStartupMessages(library(knitr))
-#+ setup, include=FALSE
-opts_chunk$set(fig.width = 8, fig.height = 10.2)
-opts_chunk$set(comment = NA)
 
+opts_chunk$set(fig.width = 8, fig.height = 10.2)
+opts_chunk$set(tidy=TRUE)
+opts_chunk$set(comment = NA)
+#+ setup, include=FALSE
 suppressPackageStartupMessages(library(ggplot2))
 suppressPackageStartupMessages(library(ggbio))
 suppressPackageStartupMessages(library(data.table))

@@ -11,11 +11,11 @@
 
 #' This is the final script presenting top candidates and overview plots.  
 suppressPackageStartupMessages(library(knitr))
-#+ setup, include=FALSE
 
 opts_chunk$set(fig.width = 5, fig.height = 5) #Full height 11
+opts_chunk$set(tidy=TRUE)
 opts_chunk$set(comment = NA)
-
+#+ setup, include=FALSE
 suppressPackageStartupMessages(library(GenomicAlignments))
 suppressPackageStartupMessages(library(ggplot2))
 suppressPackageStartupMessages(library(VennDiagram))
@@ -28,19 +28,16 @@ suppressPackageStartupMessages(library(scales))
 complete.ranges <- readRDS("output/completeLibraryRanges.rds")
 purity.table <- data.table(mcols(complete.ranges)$mCount/mcols(complete.ranges)$tCount)
 purity.table$BCwidth <- width(mcols(complete.ranges)$BC)
-qplot(mcols(complete.ranges)$tCount, stat = "ecdf", geom = "step")
+
 beanplot(data = purity.table$V1, ll = 0.04, what=c(1,1,1,0), bw = "nrd0", log="", 
          main = "Best end recombination analysis", ylab = "Recombination fraction [1 = no recombination]", 
          border = NA, col = list("black", c("grey", "white")))
 legend("bottomleft", fill = c("black"), legend = c("Best end"))
 
-qplot(mcols(complete.ranges)$tCount, stat = "ecdf", geom = "step") + 
-  scale_x_continuous(limit=c(1,25), breaks=c(seq(1,50,10)), expand =c(0,0))
-
 fill.values <- c("A" = rgb(193,210,234, maxColorValue = 255), "B" = rgb(157,190,217, maxColorValue = 255), "c" = rgb(38,64,135, maxColorValue = 255), "D" = rgb(157,190,217, maxColorValue = 255),"E" = rgb(193,210,234, maxColorValue = 255))
 names(fill.values) <- c("18","19","20","21","22")
 
-ggplot(purity.table,aes(x = BCwidth, fill = as.character(BCwidth)))+geom_histogram(binwidth=1, origin = -0.5)+theme_bw() +
+ggplot(purity.table,aes(x = BCwidth, fill = as.character(BCwidth)))+geom_histogram(binwidth=1, boundary = 0.5)+theme_bw() +
   scale_fill_manual(name = "Width", values = fill.values) +
   scale_x_continuous(limit=c(17,23), breaks=c(seq(18,22,1)), expand =c(0,0))
 
