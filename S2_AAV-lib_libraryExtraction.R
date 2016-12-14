@@ -48,7 +48,7 @@ strt<-Sys.time()
 # This section searches the sequencing file and only select the files with valid amplicons
 out.name.P5 <- tempfile(pattern = "P5_", tmpdir = tempdir(), fileext = ".fastq.gz")
 out.name.P7 <- tempfile(pattern = "P7_", tmpdir = tempdir(), fileext = ".fastq.gz")
-command.args <- paste("-Xmx12g overwrite=true k=15 rcomp=f skipr2=t qhdist=0 maskmiddle=f",
+command.args <- paste("overwrite=true k=15 rcomp=f skipr2=t qhdist=0 maskmiddle=f",
                       " hammingdistance=2 findbestmatch=f ordered=t threads=",detectCores(),
                       " in=", in.name.P5,
                       " in2=", in.name.P7,
@@ -130,7 +130,7 @@ barcodeTable <- data.table(ID=as.character(ShortRead::id(reads.BC)), BC=as.chara
 
 
 out.name.P7 <- tempfile(pattern = "P7_", tmpdir = tempdir(), fileext = ".fastq.gz")
-command.args <- paste("-Xmx12g overwrite=true k=18 mink=18 rcomp=f qhdist=1 maskmiddle=t",
+command.args <- paste("overwrite=true k=18 mink=18 rcomp=f qhdist=1 maskmiddle=t",
                       " hammingdistance=2 findbestmatch=t minlength=38 maxlength=78 ordered=t ",
                       "threads=", detectCores(), " in=", in.name.P7, " out=", out.name.P7,
                       " lliteral=", "AGCAACCTCCAGAGAGGCAACG",
@@ -152,10 +152,11 @@ out.name.P7 <- tempfile(pattern = "P7_", tmpdir = tempdir(), fileext = ".fastq.g
 out.name.P5_singlet <- tempfile(pattern = "P5_singlet_", tmpdir = tempdir(), fileext = ".fastq.gz")
 out.name.P7_singlet <- tempfile(pattern = "P7_singlet_", tmpdir = tempdir(), fileext = ".fastq.gz")
 
-sys.out <- system(paste("pairfq makepairs -c 'gzip' -f ", in.name.P5," -r ", in.name.P7,
-                        " -fp ", out.name.P5, " -rp ", out.name.P7, " -fs ",
-                        out.name.P5_singlet, " -rs ", out.name.P7_singlet,
-                        " --stats 2>&1", sep = ""), intern = TRUE, ignore.stdout = FALSE) 
+command.args <- paste("makepairs -c 'gzip' -f ", in.name.P5," -r ", in.name.P7,
+                      " -fp ", out.name.P5, " -rp ", out.name.P7, " -fs ",
+                      out.name.P5_singlet, " -rs ", out.name.P7_singlet,
+                      " --stats 2>&1", sep = "")
+sys.out <- system2("/usr/local/bin/pairfq", args=command.args, stdout=TRUE, stderr=TRUE)
 sys.out <- as.data.frame(sys.out)
 
 colnames(sys.out) <- c("pairfq pair matching")
@@ -173,3 +174,4 @@ unlink(paste(tempdir(), "/*", sep = ""), recursive = FALSE, force = FALSE) #Clea
 print("Total execution time:")
 print(Sys.time()-strt)
 devtools::session_info()
+

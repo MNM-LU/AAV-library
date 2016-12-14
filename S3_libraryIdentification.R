@@ -115,8 +115,6 @@ bowtie.idx <- tempfile(pattern = "IDX_bowtie_", tmpdir = tempdir(), fileext = ""
 sys.out <-  system(paste("bowtie2-build",bowtie.fasta,bowtie.idx, "2>&1",  sep = " "), 
                    intern = TRUE, ignore.stdout = FALSE) 
 
-
-
 #' Align fragments to reference
 #' ============================
 #+ Align to reference...
@@ -138,10 +136,13 @@ invisible(sys.out[" "] <- " ")
 lengthOut <- (nrow(sys.out))
 knitr::kable(sys.out[1:lengthOut,], format = "markdown")
 
-system(paste("samtools view -@ ",detectCores()," -Sb ", name.bowtie, ".sam > ",
-             name.bowtie, ".bam",  sep = "")) 
-system(paste("samtools sort -@ ",detectCores()," ", name.bowtie, ".bam ",
-             name.bowtie, "_sort",  sep = ""))
+command.args <- paste("view -@ ",detectCores()," -Sb ", name.bowtie, ".sam > ",
+                      name.bowtie, ".bam",  sep = "")
+system2("/usr/local/bin/samtools", args=command.args, stdout=TRUE, stderr=TRUE)
+
+command.args <- paste("sort -@ ",detectCores()," ", name.bowtie, ".bam -o ",
+                      name.bowtie, "_sort.bam",  sep = "")
+system2("/usr/local/bin/samtools", args=command.args, stdout=TRUE, stderr=TRUE)
 
 frag14aa.ranges <- readGAlignments(paste(name.bowtie, "_sort.bam", sep = ""), use.names=TRUE)
 length(names(frag14aa.ranges))
@@ -165,10 +166,13 @@ invisible(sys.out[" "] <- " ")
 lengthOut <- (nrow(sys.out))
 knitr::kable(sys.out[1:lengthOut,], format = "markdown")
 
-system(paste("samtools view -@ ",detectCores()," -Sb ", name.bowtie, ".sam > ",
-             name.bowtie, ".bam",  sep = "")) 
-system(paste("samtools sort -@ ",detectCores()," ", name.bowtie, ".bam ",
-             name.bowtie, "_sort",  sep = ""))
+command.args <- paste("view -@ ",detectCores()," -Sb ", name.bowtie, ".sam > ",
+                      name.bowtie, ".bam",  sep = "")
+system2("/usr/local/bin/samtools", args=command.args, stdout=TRUE, stderr=TRUE)
+
+command.args <- paste("sort -@ ",detectCores()," ", name.bowtie, ".bam -o ",
+                      name.bowtie, "_sort.bam",  sep = "")
+system2("/usr/local/bin/samtools", args=command.args, stdout=TRUE, stderr=TRUE)
 
 frag14aaG4S.ranges <- readGAlignments(paste(name.bowtie, "_sort.bam", sep = ""), use.names=TRUE)
 length(names(frag14aaG4S.ranges))
@@ -192,10 +196,13 @@ invisible(sys.out[" "] <- " ")
 lengthOut <- (nrow(sys.out))
 knitr::kable(sys.out[1:lengthOut,], format = "markdown")
 
-system(paste("samtools view -@ ",detectCores()," -Sb ", name.bowtie, ".sam > ",
-             name.bowtie, ".bam",  sep = "")) 
-system(paste("samtools sort -@ ",detectCores()," ", name.bowtie, ".bam ",
-             name.bowtie, "_sort",  sep = ""))
+command.args <- paste("view -@ ",detectCores()," -Sb ", name.bowtie, ".sam > ",
+                      name.bowtie, ".bam",  sep = "")
+system2("/usr/local/bin/samtools", args=command.args, stdout=TRUE, stderr=TRUE)
+
+command.args <- paste("sort -@ ",detectCores()," ", name.bowtie, ".bam -o ",
+                      name.bowtie, "_sort.bam",  sep = "")
+system2("/usr/local/bin/samtools", args=command.args, stdout=TRUE, stderr=TRUE)
 
 frag14aaA5.ranges <- readGAlignments(paste(name.bowtie, "_sort.bam", sep = ""), use.names=TRUE)
 length(names(frag14aaA5.ranges))
@@ -219,10 +226,13 @@ invisible(sys.out[" "] <- " ")
 lengthOut <- (nrow(sys.out))
 knitr::kable(sys.out[1:lengthOut,], format = "markdown")
 
-system(paste("samtools view -@ ",detectCores()," -Sb ", name.bowtie, ".sam > ",
-             name.bowtie, ".bam",  sep = "")) 
-system(paste("samtools sort -@ ",detectCores()," ", name.bowtie, ".bam ",
-             name.bowtie, "_sort",  sep = ""))
+command.args <- paste("view -@ ",detectCores()," -Sb ", name.bowtie, ".sam > ",
+                      name.bowtie, ".bam",  sep = "")
+system2("/usr/local/bin/samtools", args=command.args, stdout=TRUE, stderr=TRUE)
+
+command.args <- paste("sort -@ ",detectCores()," ", name.bowtie, ".bam -o ",
+                      name.bowtie, "_sort.bam",  sep = "")
+system2("/usr/local/bin/samtools", args=command.args, stdout=TRUE, stderr=TRUE)
 
 frag22aa.ranges <- readGAlignments(paste(name.bowtie, "_sort.bam", sep = ""), use.names=TRUE)
 length(names(frag22aa.ranges))
@@ -248,3 +258,4 @@ mcols(allFragments.ranges)$Sequence <- LUT.dna[mcols(allFragments.ranges)$LUTnr]
 save(allFragments.ranges, file="data/alignedLibraries.rda")
 
 devtools::session_info()
+

@@ -88,7 +88,7 @@ knitr::kable(sys.out[1:(nrow(sys.out)),], format = "markdown")
 sys.out <-  system(paste("export SHELL=/bin/sh; cat ",fragments.unique.fa," | parallel --block ",
                          floor(length(unique.reads)/detectCores()),
                          " --recstart '>' --pipe 'blastn -max_target_seqs 25 -word_size 7",
-                         " -num_threads 1 -outfmt ",shQuote("10",type=c("cmd"))," -db ", blast.db,
+                         " -num_threads 1 -outfmt 10 -db ", blast.db,
                          " -query - '> ", blast.out, " 2>&1",  sep = ""),
                    intern = TRUE, ignore.stdout = FALSE) #
 
@@ -120,6 +120,7 @@ setkey(LUT.dna,Sequence)
 table.blastn<- table.blastn[LUT.dna, nomatch=0]
 table.blastn[,c("V1","identity","alignmentLength","gapOpens", "q_start", 
                 "q_end", "s_start", "s_end", "evalue","Sequence","Names"):=NULL]
+gc() #garbage collection to reduce memory foot print. Can be removed for speed
 
 table.blastn[,bitScore:= as.numeric(bitScore)]
 table.blastn[,mismatches:= as.numeric(mismatches)]
@@ -127,6 +128,8 @@ table.blastn[,mismatches:= as.numeric(mismatches)]
 setkeyv(table.blastn,c("Reads","LUTnr"))
 setorder(table.blastn,Reads,LUTnr,-bitScore) #This makes sure that a fragment is only aligned once to the reference in the top ten matches
 table.blastn <- unique(table.blastn, by=c("Reads","LUTnr"))
+
+gc() #garbage collection to reduce memory foot print. Can be removed for speed
 
 table.blastn.topHit <- table.blastn[table.blastn[, .I[which.max(bitScore)], by="Reads"]$V1] # Select only rows with the highest bitScore
 
@@ -145,9 +148,14 @@ print(paste("Alignment percentage:", percent(nrow(full.table)/all.reads)))
 
 out.name.BC.star <- tempfile(pattern = "BCsc_", tmpdir = tempdir(), fileext = ".txt")
 
-system(paste("gunzip -c ",barcodes.file," | starcode -t ",detectCores()-1," --print-clusters -d",
-             1," -r5 -q -o ", out.name.BC.star, " 2>&1", sep = ""), 
-       intern = TRUE, ignore.stdout = FALSE)
+command.args <- paste("-c ",barcodes.file," | starcode -t ",detectCores()-1," --print-clusters -d",
+                      1," -r5 -q -o ", out.name.BC.star, sep = "")
+
+system2("gunzip", args=command.args, stdout=TRUE, stderr=TRUE)
+
+# system(paste("gunzip -c ",barcodes.file," | starcode -t ",detectCores()-1," --print-clusters -d",
+#              1," -r5 -q -o ", out.name.BC.star, " 2>&1", sep = ""), 
+#        intern = TRUE, ignore.stdout = FALSE)
 
 table.BC.sc <- data.table(read.table(out.name.BC.star, header = FALSE, row.names = 1, skip = 0, sep="\t",
                                      stringsAsFactors = FALSE, fill=FALSE),keep.rownames=TRUE, key="rn") #, nrows = 1000
@@ -258,6 +266,7 @@ setkeyv(temp.table.multi,c("BC","LUTnr"))
 temp.table.multi[,c("bitScore","mismatches" ,"mCount"):= list(max(bitScore),
                                                               median(mismatches), 
                                                               sum(mCount)), by=key(temp.table.multi)]
+gc() #garbage collection to reduce memory foot print. Can be removed for speed
 temp.table.multi <- unique(temp.table.multi, by=c("BC","LUTnr"))
 
 setkeyv(temp.table.multi,"BC")

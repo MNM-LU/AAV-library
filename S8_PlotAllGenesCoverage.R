@@ -40,15 +40,15 @@ plotPair <- function(topSample,bottomSample,size.bin=1,winWidth=1,NormalizePlot=
 # Select samples
 #===================
 
-#   topSample <- "CNS1000x_Ctx"
-#   bottomSample <- "CNS100x_Ctx"
-#   filterBC <- FALSE
-#   filterAnimal <- FALSE
-#   AnimaladjustPlot <- FALSE
-#   NormalizePlot <- TRUE
-#   size.bin <- 1
-#   winWidth=1
-#   PlotBC=TRUE
+  # topSample <- "CNS1000x_Ctx"
+  # bottomSample <- "CNS100x_Ctx"
+  # filterBC <- FALSE
+  # filterAnimal <- FALSE
+  # AnimaladjustPlot <- FALSE
+  # NormalizePlot <- TRUE
+  # size.bin <- 1
+  # winWidth=1
+  # PlotBC=TRUE
   
 fill.values <- eval(parse(text=paste("c(", topSample,"= rgb(38,64,135, maxColorValue = 255), ",
                                      bottomSample,"= rgb(157,190,217, maxColorValue = 255))",sep="")))
@@ -153,7 +153,7 @@ plot.out <- plot.out +
   facet_wrap(~ GeneName, ncol=5)+   
   theme(plot.margin=unit(x=c(0,0,20,0),units="mm"),
         legend.position="bottom",
-        legend.margin=unit(0,"cm"),
+        legend.spacing=unit(0,"cm"),
         legend.key.height=unit(0, "cm"),
         plot.background=element_rect(fill="white"),
         axis.text = element_text(size = rel(0.45)),
@@ -161,10 +161,9 @@ plot.out <- plot.out +
         axis.ticks.length = unit(.05, "cm"),
         strip.text.x = element_text(size = rel(0.5), colour = "black", 
                                     angle = 0, lineheight=0.1, vjust=0.1),
-        strip.background = element_blank(),
-        strip.background = element_rect(size = 0),
-        panel.margin.y = unit(-0.15, "cm"),
-        panel.margin.x = unit(0, "cm"))
+        strip.background = element_blank(), # strip.background = element_rect(size = 0),
+        panel.spacing.y = unit(-0.15, "cm"),
+        panel.spacing.x = unit(0, "cm"))
 
 
 #===================
@@ -398,3 +397,4 @@ plotPair("H293T_1000x","H293T_100x",size.bin=2,winWidth=0,PlotBC=FALSE)$plot
 
 
 devtools::session_info()
+

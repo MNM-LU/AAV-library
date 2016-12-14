@@ -140,7 +140,7 @@ plot.out <- plot.out +
   scale_x_continuous(breaks=c(seq(0,3000,100)),expand =c(0,0)) +   
   theme(plot.margin=unit(x=c(0,0,0,0),units="mm"),
         legend.position="bottom",
-        legend.margin=unit(0,"cm"),
+        legend.spacing=unit(0,"cm"),
         legend.key.height=unit(0, "cm"),
         plot.background=element_rect(fill="white"),
         axis.text = element_text(size = rel(0.45)),
@@ -149,10 +149,10 @@ plot.out <- plot.out +
         strip.text.x = element_text(size = rel(0.5), colour = "black", 
                                     angle = 0, lineheight=0.1, vjust=0.1),
         strip.background = element_blank(),
-        strip.background = element_rect(size = 0),
-        panel.margin.y = unit(-0.15, "cm"),
-        panel.margin.x = unit(0, "cm"))
+        panel.spacing.y = unit(-0.15, "cm"),
+        panel.spacing.x = unit(0, "cm"))
 
 facet_multiple(plot = plot.out, facets = 'GeneName', ncol = 1, nrow = 25)
 
 devtools::session_info()
+
