@@ -1,0 +1,1 @@
+Plate	Group	Species1	Tau	K182	Tau	K193	Tau	T344	Tau	T375	Tau	T396	Tau	T407	Tau	T438	Tau	T449	a-syn	Monomeric10	Ctrl	BSA

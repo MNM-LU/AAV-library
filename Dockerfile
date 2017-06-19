@@ -1,7 +1,7 @@
 FROM rocker/rstudio:3.3.2
 #install latex for PDF output
 RUN apt-get update
-RUN apt-get install -y texlive-latex-base texlive-fonts-recommended texlive-latex-extra libcurl4-openssl-dev libxml2-dev
+RUN apt-get install -y texlive-latex-base texlive-fonts-recommended texlive-latex-extra libcurl4-openssl-dev libxml2-dev lbzip2 libncurses5-dev libncursesw5-dev wget libbz2-dev liblzma-dev curl ncbi-blast+ parallel bowtie2 xvfb openjdk-7-jre-headless openjdk-7-jdk
 RUN Rscript -e "install.packages('devtools')"
 RUN Rscript -e "library(devtools)" -e "install_version('acepack',version = '1.4.1',repos = 'http://cran.us.r-project.org')" \
 -e "install_version('ade4', version = '1.7-4', repos = 'http://cran.us.r-project.org')" \
@@ -62,35 +62,37 @@ RUN Rscript -e "library(devtools)" -e "install_version('matrixStats', version = 
 RUN Rscript -e "library(devtools)" -e "devtools::install_github('guiastrennec/ggplus')"
 WORKDIR /root
 #install samtools
-RUN apt-get install -y lbzip2 libncurses5-dev libncursesw5-dev curl
-RUN curl http://heanet.dl.sourceforge.net/project/samtools/samtools/1.3.1/samtools-1.3.1.tar.bz2 -o /root/samtools-1.3.1.tar.bz2
-RUN tar -xf samtools-1.3.1.tar.bz2
-WORKDIR /root/samtools-1.3.1
+RUN wget https://github.com/samtools/samtools/releases/download/1.4/samtools-1.4.tar.bz2 -O /root/samtools-1.4.tar.bz2
+RUN tar -xf samtools-1.4.tar.bz2
+WORKDIR /root/samtools-1.4
 RUN make
 RUN make install
-RUN rm /root/samtools-1.3.1.tar.bz2
+RUN rm /root/samtools-1.4.tar.bz2
 WORKDIR /root
 #install Pairfq
 RUN curl -sL cpanmin.us | perl - git://github.com/sestaton/Pairfq.git
-#install blast+
-RUN apt-get install -y ncbi-blast+ parallel
 #install BBmap
 WORKDIR /home/rstudio
-RUN apt-get install -y openjdk-7-jre-headless
-RUN curl http://heanet.dl.sourceforge.net/project/bbmap/BBMap_36.64.tar.gz | tar xvz
+RUN wget https://downloads.sourceforge.net/project/bbmap/BBMap_37.02.tar.gz -O BBMmap.tar.gz
+RUN tar -xvf BBMmap.tar.gz && rm BBMmap.tar.gz
 #install starcode
 RUN git clone git://github.com/gui11aume/starcode.git
 WORKDIR /home/rstudio/starcode
 RUN make
 RUN ln -s /home/rstudio/starcode/starcode /usr/bin/starcode
 WORKDIR /home/rstudio
-#install bowtie2
-RUN apt-get install -y bowtie2
+# Define working directory.
+WORKDIR /fiji
+# Install Fiji.
+RUN curl -O http://update.imagej.net/bootstrap2.js && jrunscript bootstrap2.js update-force-pristine
+# Add fiji to the PATH
+ENV PATH $PATH:/fiji
+WORKDIR /home/rstudio
 #Adding the scripts and environment files
-ADD ./AAV-library.Rproj ./commandLineFullRun.sh ./S1_CustomArraySequences.R ./S2_AAV-lib_libraryExtraction.R ./S3_libraryIdentification.R ./S4_Fragment_translation.R ./S5_AAV-lib_tissueExtraction.R ./S6_generateCompleteLibraryRanges.R ./S7_NormalizedGeneIdentification.R ./S8_PlotAllGenesCoverage.R ./S9_FullGeneHeatmap.R ./S10_generateLibAnalysisPlots.R ./S11_slidingMeanTopHits.R ./S12_PlotThreeSampleCoverage.R ./
-RUN mkdir functions
+ADD ./AAV-library.Rproj ./commandLineFullRun.sh ./S1_CustomArraySequences.R ./S2_AAV-lib_libraryExtraction.R ./S3_libraryIdentification.R ./S4_Fragment_translation.R ./S5_AAV-lib_tissueExtraction.R ./S6_generateCompleteLibraryRanges.R ./S7_NormalizedGeneIdentification.R ./S8_PlotAllGenesCoverage.R ./S9_FullGeneHeatmap.R ./S10_generateLibAnalysisPlots.R ./S11_slidingMeanTopHits.R ./S12_PlotThreeSampleCoverage.R ./S13_TauPlateAnalysis.R ./
+RUN mkdir functions input macros
 ADD ./functions/AAtoDNA.R ./functions/GeneCodon.R ./functions/positiveFilter_mRNA.R ./functions/retrieveFASTAQID.R ./functions/
-RUN mkdir input
-ADD ./input/config.txt ./input/DNA-lib_RetrogradeTransport.fasta ./input/loadlist_excluded.txt ./input/loadlist.txt ./input/Nextera_PCR_for_all_25_tissues_and_5_in_vitro_samples.xlsx ./input/wSet.rda ./input/
+ADD ./input/config.txt ./input/DNA-lib_RetrogradeTransport.fasta ./input/loadlist_excluded.txt ./input/loadlist.txt ./input/Nextera_PCR_for_all_25_tissues_and_5_in_vitro_samples.xlsx ./input/wSet.rda ./input/Dilutions.txt ./input/Grouping.txt ./input/
+ADD ./PlaterunnerHeadless.ijm ./macros
 RUN mkdir logs data output
 RUN chown -R rstudio:rstudio /home/rstudio/*
