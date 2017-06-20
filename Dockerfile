@@ -1,9 +1,28 @@
 FROM rocker/rstudio:3.3.2
 #install latex for PDF output
-RUN apt-get update
-RUN apt-get install -y texlive-latex-base texlive-fonts-recommended texlive-latex-extra libcurl4-openssl-dev libxml2-dev lbzip2 libncurses5-dev libncursesw5-dev wget libbz2-dev liblzma-dev curl ncbi-blast+ parallel bowtie2 xvfb openjdk-7-jre-headless openjdk-7-jdk
+RUN apt-get update && apt-get install -y \
+bowtie2 \
+curl \
+lbzip2 \
+libbz2-dev \
+libcurl4-openssl-dev \
+liblzma-dev \
+libncurses5-dev \
+libncursesw5-dev \
+libxml2-dev \
+ncbi-blast+ \
+openjdk-7-jre-headless \
+openjdk-7-jdk \
+parallel \
+texlive-fonts-recommended \
+texlive-latex-base \
+texlive-latex-extra \
+wget \
+xvfb \
+&& rm -rf /var/lib/apt/lists/*
 RUN Rscript -e "install.packages('devtools')"
-RUN Rscript -e "library(devtools)" -e "install_version('acepack',version = '1.4.1',repos = 'http://cran.us.r-project.org')" \
+RUN Rscript -e "library(devtools)" \
+-e "install_version('acepack',version = '1.4.1',repos = 'http://cran.us.r-project.org')" \
 -e "install_version('ade4', version = '1.7-4', repos = 'http://cran.us.r-project.org')" \
 -e "install_version('backports', version = '1.0.4', repos = 'http://cran.us.r-project.org')" \
 -e "install_version('BBmisc', version = '1.10', repos = 'http://cran.us.r-project.org')" \
@@ -58,8 +77,9 @@ RUN Rscript -e "source('https://bioconductor.org/biocLite.R')" -e "biocLite('bio
 -e "biocLite('ggbio')" -e "biocLite('Gviz')" -e "biocLite('IRanges')" \
 -e "biocLite('Rsamtools')" -e "biocLite('S4Vectors')" -e "biocLite('ShortRead')" \
 -e "biocLite('SummarizedExperiment')" -e "biocLite('XVector')" -e "biocLite('zlibbioc')"
-RUN Rscript -e "library(devtools)" -e "install_version('matrixStats', version = '0.51.0', repos = 'http://cran.us.r-project.org')"
-RUN Rscript -e "library(devtools)" -e "devtools::install_github('guiastrennec/ggplus')"
+RUN Rscript -e "library(devtools)" \
+-e "install_version('matrixStats', version = '0.51.0', repos = 'http://cran.us.r-project.org')" \
+-e "devtools::install_github('guiastrennec/ggplus')"
 WORKDIR /root
 #install samtools
 RUN wget https://github.com/samtools/samtools/releases/download/1.4/samtools-1.4.tar.bz2 -O /root/samtools-1.4.tar.bz2
@@ -89,10 +109,5 @@ RUN curl -O http://update.imagej.net/bootstrap2.js && jrunscript bootstrap2.js u
 ENV PATH $PATH:/fiji
 WORKDIR /home/rstudio
 #Adding the scripts and environment files
-ADD ./AAV-library.Rproj ./commandLineFullRun.sh ./S1_CustomArraySequences.R ./S2_AAV-lib_libraryExtraction.R ./S3_libraryIdentification.R ./S4_Fragment_translation.R ./S5_AAV-lib_tissueExtraction.R ./S6_generateCompleteLibraryRanges.R ./S7_NormalizedGeneIdentification.R ./S8_PlotAllGenesCoverage.R ./S9_FullGeneHeatmap.R ./S10_generateLibAnalysisPlots.R ./S11_slidingMeanTopHits.R ./S12_PlotThreeSampleCoverage.R ./S13_TauPlateAnalysis.R ./
-RUN mkdir functions input macros
-ADD ./functions/AAtoDNA.R ./functions/GeneCodon.R ./functions/positiveFilter_mRNA.R ./functions/retrieveFASTAQID.R ./functions/
-ADD ./input/config.txt ./input/DNA-lib_RetrogradeTransport.fasta ./input/loadlist_excluded.txt ./input/loadlist.txt ./input/Nextera_PCR_for_all_25_tissues_and_5_in_vitro_samples.xlsx ./input/wSet.rda ./input/Dilutions.txt ./input/Grouping.txt ./input/
-ADD ./PlaterunnerHeadless.ijm ./macros
-RUN mkdir logs data output
+COPY ./ ./
 RUN chown -R rstudio:rstudio /home/rstudio/*

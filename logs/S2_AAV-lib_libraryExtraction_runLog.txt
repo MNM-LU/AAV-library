@@ -1,47 +1,0 @@
-
-
-processing file: S2_AAV-lib_libraryExtraction.spin.Rmd
-  |                                                                         |                                                                 |   0%  |                                                                         |....                                                             |   7%
-  ordinary text without R code
-
-  |                                                                         |.........                                                        |  13%
-label: unnamed-chunk-1
-  |                                                                         |.............                                                    |  20%
-  ordinary text without R code
-
-  |                                                                         |.................                                                |  27%
-label: unnamed-chunk-2
-  |                                                                         |......................                                           |  33%
-  ordinary text without R code
-
-  |                                                                         |..........................                                       |  40%
-label: unnamed-chunk-3
-  |                                                                         |..............................                                   |  47%
-  ordinary text without R code
-
-  |                                                                         |...................................                              |  53%
-label: Selecting real amplicons.......
-  |                                                                         |.......................................                          |  60%
-  ordinary text without R code
-
-  |                                                                         |...........................................                      |  67%
-label: Extracting subset.......
-  |                                                                         |................................................                 |  73%
-  ordinary text without R code
-
-  |                                                                         |....................................................             |  80%
-label: Extracting barcodes.......
-  |                                                                         |........................................................         |  87%
-  ordinary text without R code
-
-  |                                                                         |.............................................................    |  93%
-label: Extracting fragments.......
-  |                                                                         |.................................................................| 100%
-  ordinary text without R code
-
-
-output file: S2_AAV-lib_libraryExtraction.knit.md
-
-/usr/bin/pandoc +RTS -K512m -RTS S2_AAV-lib_libraryExtraction.utf8.md --to latex --from markdown+autolink_bare_uris+ascii_identifiers+tex_math_single_backslash --output S2_AAV-lib_libraryExtraction.pdf --template '/home/lcadmin/Dropbox (Bjorklund Lab)/R-projects/AAV-library/packrat/lib/x86_64-pc-linux-gnu/3.3.1/rmarkdown/rmd/latex/default-1.15.2.tex' --highlight-style tango --latex-engine pdflatex --variable graphics=yes 
-
-Output created: S2_AAV-lib_libraryExtraction.pdf

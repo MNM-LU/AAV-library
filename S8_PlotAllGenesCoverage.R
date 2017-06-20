@@ -217,6 +217,10 @@ return(out.list)
 #'===================
 
 plotPair("infectiveLib","totalLib")$plot
+plotPair("AAV_Lib_2nd","totalLib")$plot
+plotPair("AAV_DNAse_1000x","AAV_DNAse_100x")$plot
+plotPair("AAV_DNAse_100x","AAV_Lib_2nd")$plot
+
 #' 100x analysis
 out.plot.list <- plotPair("CNS100x_Trsp","CNS100x_Str")
 out.plot.list$plot

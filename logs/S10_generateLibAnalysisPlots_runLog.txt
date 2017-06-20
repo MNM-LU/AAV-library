@@ -1,57 +1,0 @@
-
-
-processing file: S10_generateLibAnalysisPlots.spin.Rmd
-  |                                                                         |                                                                 |   0%  |                                                                         |.....                                                            |   8%
-  ordinary text without R code
-
-  |                                                                         |...........                                                      |  17%
-label: unnamed-chunk-1
-  |                                                                         |................                                                 |  25%
-label: setup (with options) 
-List of 1
- $ include: logi FALSE
-
-  |                                                                         |......................                                           |  33%
-  ordinary text without R code
-
-  |                                                                         |...........................                                      |  42%
-label: unnamed-chunk-2
-cropping S10_generateLibAnalysisPlots_files/figure-latex/unnamed-chunk-2-1.pdf
-PDFCROP 1.38, 2012/11/02 - Copyright (c) 2002-2012 by Heiko Oberdiek.
-==> 1 page written on `S10_generateLibAnalysisPlots_files/figure-latex/unnamed-chunk-2-1.pdf'.
-cropping S10_generateLibAnalysisPlots_files/figure-latex/unnamed-chunk-2-2.pdf
-PDFCROP 1.38, 2012/11/02 - Copyright (c) 2002-2012 by Heiko Oberdiek.
-==> 1 page written on `S10_generateLibAnalysisPlots_files/figure-latex/unnamed-chunk-2-2.pdf'.
-  |                                                                         |................................                                 |  50%
-  ordinary text without R code
-
-  |                                                                         |......................................                           |  58%
-label: unnamed-chunk-3
-cropping S10_generateLibAnalysisPlots_files/figure-latex/unnamed-chunk-3-1.pdf
-PDFCROP 1.38, 2012/11/02 - Copyright (c) 2002-2012 by Heiko Oberdiek.
-==> 1 page written on `S10_generateLibAnalysisPlots_files/figure-latex/unnamed-chunk-3-1.pdf'.
-  |                                                                         |...........................................                      |  67%
-  ordinary text without R code
-
-  |                                                                         |.................................................                |  75%
-label: unnamed-chunk-4
-cropping S10_generateLibAnalysisPlots_files/figure-latex/unnamed-chunk-4-1.pdf
-PDFCROP 1.38, 2012/11/02 - Copyright (c) 2002-2012 by Heiko Oberdiek.
-==> 1 page written on `S10_generateLibAnalysisPlots_files/figure-latex/unnamed-chunk-4-1.pdf'.
-  |                                                                         |......................................................           |  83%
-  ordinary text without R code
-
-  |                                                                         |............................................................     |  92%
-label: unnamed-chunk-5
-cropping S10_generateLibAnalysisPlots_files/figure-latex/unnamed-chunk-5-1.pdf
-PDFCROP 1.38, 2012/11/02 - Copyright (c) 2002-2012 by Heiko Oberdiek.
-==> 1 page written on `S10_generateLibAnalysisPlots_files/figure-latex/unnamed-chunk-5-1.pdf'.
-  |                                                                         |.................................................................| 100%
-  ordinary text without R code
-
-
-output file: S10_generateLibAnalysisPlots.knit.md
-
-/usr/bin/pandoc +RTS -K512m -RTS S10_generateLibAnalysisPlots.utf8.md --to latex --from markdown+autolink_bare_uris+ascii_identifiers+tex_math_single_backslash --output S10_generateLibAnalysisPlots.pdf --template '/home/lcadmin/Dropbox (Bjorklund Lab)/R-projects/AAV-library/packrat/lib/x86_64-pc-linux-gnu/3.3.1/rmarkdown/rmd/latex/default-1.15.2.tex' --highlight-style tango --latex-engine pdflatex --variable graphics=yes 
-
-Output created: S10_generateLibAnalysisPlots.pdf

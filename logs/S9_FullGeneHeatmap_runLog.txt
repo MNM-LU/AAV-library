@@ -1,105 +1,0 @@
-
-
-processing file: S9_FullGeneHeatmap.spin.Rmd
-  |                                                                         |                                                                 |   0%  |                                                                         |.....                                                            |   8%
-  ordinary text without R code
-
-  |                                                                         |...........                                                      |  17%
-label: unnamed-chunk-1
-  |                                                                         |................                                                 |  25%
-label: setup (with options) 
-List of 1
- $ include: logi FALSE
-
-  |                                                                         |......................                                           |  33%
-  ordinary text without R code
-
-  |                                                                         |...........................                                      |  42%
-label: unnamed-chunk-2
-  |                                                                         |................................                                 |  50%
-  ordinary text without R code
-
-  |                                                                         |......................................                           |  58%
-label: unnamed-chunk-3
-cropping S9_FullGeneHeatmap_files/figure-latex/unnamed-chunk-3-1.pdf
-PDFCROP 1.38, 2012/11/02 - Copyright (c) 2002-2012 by Heiko Oberdiek.
-==> 1 page written on `S9_FullGeneHeatmap_files/figure-latex/unnamed-chunk-3-1.pdf'.
-cropping S9_FullGeneHeatmap_files/figure-latex/unnamed-chunk-3-2.pdf
-PDFCROP 1.38, 2012/11/02 - Copyright (c) 2002-2012 by Heiko Oberdiek.
-==> 1 page written on `S9_FullGeneHeatmap_files/figure-latex/unnamed-chunk-3-2.pdf'.
-cropping S9_FullGeneHeatmap_files/figure-latex/unnamed-chunk-3-3.pdf
-PDFCROP 1.38, 2012/11/02 - Copyright (c) 2002-2012 by Heiko Oberdiek.
-==> 1 page written on `S9_FullGeneHeatmap_files/figure-latex/unnamed-chunk-3-3.pdf'.
-cropping S9_FullGeneHeatmap_files/figure-latex/unnamed-chunk-3-4.pdf
-PDFCROP 1.38, 2012/11/02 - Copyright (c) 2002-2012 by Heiko Oberdiek.
-==> 1 page written on `S9_FullGeneHeatmap_files/figure-latex/unnamed-chunk-3-4.pdf'.
-cropping S9_FullGeneHeatmap_files/figure-latex/unnamed-chunk-3-5.pdf
-PDFCROP 1.38, 2012/11/02 - Copyright (c) 2002-2012 by Heiko Oberdiek.
-==> 1 page written on `S9_FullGeneHeatmap_files/figure-latex/unnamed-chunk-3-5.pdf'.
-  |                                                                         |...........................................                      |  67%
-  ordinary text without R code
-
-  |                                                                         |.................................................                |  75%
-label: unnamed-chunk-4
-cropping S9_FullGeneHeatmap_files/figure-latex/unnamed-chunk-4-1.pdf
-PDFCROP 1.38, 2012/11/02 - Copyright (c) 2002-2012 by Heiko Oberdiek.
-==> 1 page written on `S9_FullGeneHeatmap_files/figure-latex/unnamed-chunk-4-1.pdf'.
-cropping S9_FullGeneHeatmap_files/figure-latex/unnamed-chunk-4-2.pdf
-PDFCROP 1.38, 2012/11/02 - Copyright (c) 2002-2012 by Heiko Oberdiek.
-==> 1 page written on `S9_FullGeneHeatmap_files/figure-latex/unnamed-chunk-4-2.pdf'.
-cropping S9_FullGeneHeatmap_files/figure-latex/unnamed-chunk-4-3.pdf
-PDFCROP 1.38, 2012/11/02 - Copyright (c) 2002-2012 by Heiko Oberdiek.
-==> 1 page written on `S9_FullGeneHeatmap_files/figure-latex/unnamed-chunk-4-3.pdf'.
-cropping S9_FullGeneHeatmap_files/figure-latex/unnamed-chunk-4-4.pdf
-PDFCROP 1.38, 2012/11/02 - Copyright (c) 2002-2012 by Heiko Oberdiek.
-==> 1 page written on `S9_FullGeneHeatmap_files/figure-latex/unnamed-chunk-4-4.pdf'.
-cropping S9_FullGeneHeatmap_files/figure-latex/unnamed-chunk-4-5.pdf
-PDFCROP 1.38, 2012/11/02 - Copyright (c) 2002-2012 by Heiko Oberdiek.
-==> 1 page written on `S9_FullGeneHeatmap_files/figure-latex/unnamed-chunk-4-5.pdf'.
-cropping S9_FullGeneHeatmap_files/figure-latex/unnamed-chunk-4-6.pdf
-PDFCROP 1.38, 2012/11/02 - Copyright (c) 2002-2012 by Heiko Oberdiek.
-==> 1 page written on `S9_FullGeneHeatmap_files/figure-latex/unnamed-chunk-4-6.pdf'.
-cropping S9_FullGeneHeatmap_files/figure-latex/unnamed-chunk-4-7.pdf
-PDFCROP 1.38, 2012/11/02 - Copyright (c) 2002-2012 by Heiko Oberdiek.
-==> 1 page written on `S9_FullGeneHeatmap_files/figure-latex/unnamed-chunk-4-7.pdf'.
-  |                                                                         |......................................................           |  83%
-  ordinary text without R code
-
-  |                                                                         |............................................................     |  92%
-label: unnamed-chunk-5
-cropping S9_FullGeneHeatmap_files/figure-latex/unnamed-chunk-5-1.pdf
-PDFCROP 1.38, 2012/11/02 - Copyright (c) 2002-2012 by Heiko Oberdiek.
-==> 1 page written on `S9_FullGeneHeatmap_files/figure-latex/unnamed-chunk-5-1.pdf'.
-cropping S9_FullGeneHeatmap_files/figure-latex/unnamed-chunk-5-2.pdf
-PDFCROP 1.38, 2012/11/02 - Copyright (c) 2002-2012 by Heiko Oberdiek.
-==> 1 page written on `S9_FullGeneHeatmap_files/figure-latex/unnamed-chunk-5-2.pdf'.
-cropping S9_FullGeneHeatmap_files/figure-latex/unnamed-chunk-5-3.pdf
-PDFCROP 1.38, 2012/11/02 - Copyright (c) 2002-2012 by Heiko Oberdiek.
-==> 1 page written on `S9_FullGeneHeatmap_files/figure-latex/unnamed-chunk-5-3.pdf'.
-cropping S9_FullGeneHeatmap_files/figure-latex/unnamed-chunk-5-4.pdf
-PDFCROP 1.38, 2012/11/02 - Copyright (c) 2002-2012 by Heiko Oberdiek.
-==> 1 page written on `S9_FullGeneHeatmap_files/figure-latex/unnamed-chunk-5-4.pdf'.
-cropping S9_FullGeneHeatmap_files/figure-latex/unnamed-chunk-5-5.pdf
-PDFCROP 1.38, 2012/11/02 - Copyright (c) 2002-2012 by Heiko Oberdiek.
-==> 1 page written on `S9_FullGeneHeatmap_files/figure-latex/unnamed-chunk-5-5.pdf'.
-cropping S9_FullGeneHeatmap_files/figure-latex/unnamed-chunk-5-6.pdf
-PDFCROP 1.38, 2012/11/02 - Copyright (c) 2002-2012 by Heiko Oberdiek.
-==> 1 page written on `S9_FullGeneHeatmap_files/figure-latex/unnamed-chunk-5-6.pdf'.
-cropping S9_FullGeneHeatmap_files/figure-latex/unnamed-chunk-5-7.pdf
-PDFCROP 1.38, 2012/11/02 - Copyright (c) 2002-2012 by Heiko Oberdiek.
-==> 1 page written on `S9_FullGeneHeatmap_files/figure-latex/unnamed-chunk-5-7.pdf'.
-cropping S9_FullGeneHeatmap_files/figure-latex/unnamed-chunk-5-8.pdf
-PDFCROP 1.38, 2012/11/02 - Copyright (c) 2002-2012 by Heiko Oberdiek.
-==> 1 page written on `S9_FullGeneHeatmap_files/figure-latex/unnamed-chunk-5-8.pdf'.
-cropping S9_FullGeneHeatmap_files/figure-latex/unnamed-chunk-5-9.pdf
-PDFCROP 1.38, 2012/11/02 - Copyright (c) 2002-2012 by Heiko Oberdiek.
-==> 1 page written on `S9_FullGeneHeatmap_files/figure-latex/unnamed-chunk-5-9.pdf'.
-  |                                                                         |.................................................................| 100%
-  ordinary text without R code
-
-
-output file: S9_FullGeneHeatmap.knit.md
-
-/usr/bin/pandoc +RTS -K512m -RTS S9_FullGeneHeatmap.utf8.md --to latex --from markdown+autolink_bare_uris+ascii_identifiers+tex_math_single_backslash --output S9_FullGeneHeatmap.pdf --template '/home/lcadmin/Dropbox (Bjorklund Lab)/R-projects/AAV-library/packrat/lib/x86_64-pc-linux-gnu/3.3.1/rmarkdown/rmd/latex/default-1.15.2.tex' --highlight-style tango --latex-engine pdflatex --variable graphics=yes 
-
-Output created: S9_FullGeneHeatmap.pdf

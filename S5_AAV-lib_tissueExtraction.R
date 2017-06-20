@@ -57,7 +57,7 @@ log.table <- data.table(Name="Name",
                         scBCs=NA)
 
 analyzeTissue <- function(indexNr) {
-#indexNr <- 15
+#indexNr <- 1
   
   name <- unlist(strsplit(load.list$BaseName[indexNr],"/"))
   name <- name[!is.na(name)]
@@ -87,7 +87,7 @@ name.out <- log.table$Name
 
 out.name.P5 <- tempfile(pattern = "P5_", tmpdir = tempdir(), fileext = ".fastq.gz")
 out.name.P7 <- tempfile(pattern = "P7_", tmpdir = tempdir(), fileext = ".fastq.gz")
-command.args <- paste("-Xmx12g overwrite=true k=10 rcomp=f skipr1=t qhdist=0 maskmiddle=t ",
+command.args <- paste("overwrite=true k=10 rcomp=f skipr1=t qhdist=0 maskmiddle=t ",
                       "hammingdistance=1 findbestmatch=t ordered=t threads=",detectCores(),
                       " in=", in.name.P5,
                       " in2=", in.name.P7,

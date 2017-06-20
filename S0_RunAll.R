@@ -1,32 +1,59 @@
-# Generation of a lookup table using the Pacific Biosciences RSII CCS reads of full length PCR free plasmid fragmens
-sys.args <- paste("-e",shQuote("rmarkdown::render('DNA_LibMapping.R')"), "$PWD config_Syn9-10_Lib_PacBio.txt", sep=" ")
-system2("/usr/local/bin/Rscript", args = sys.args, stdout = "logs/log_Syn9-10_Lib_PacBio.txt")
-system2("mv", args="DNA_LibMapping.pdf output/DNA_Syn9-10_Lib_PacBio.pdf")
+# Generation of the sliding window amino acid fragments for CustomArray synthesis
+sys.args <- paste("-e",shQuote("setwd('/home/rstudio')"),"-e",shQuote("rmarkdown::render('S1_CustomArraySequences.R')"), sep=" ")
+system2("/usr/local/bin/Rscript", args = sys.args, stdout = "logs/S1_CustomArraySequences_runLog.txt")
+system2("mv", args="S1_CustomArraySequences.pdf output/")
 
-#Mapping of stable clones from sincle cell sorting to the PacBio RSII LUT and map with RNA-editing efficacy
-sys.args <- paste("-e",shQuote("rmarkdown::render('mRNA-spliceCount_SingleCell.R')"), "$PWD config_singleCell_Syn9-10_stable.txt", sep=" ")
-system2("/usr/local/bin/Rscript", args = sys.args, stdout = "logs/log_singleCell_Syn9-10_stable.txt")
-system2("mv", args="mRNA-spliceCount_SingleCell.pdf output/mRNA-spliceCount_singleCell_Syn9-10_stable.pdf")
+# Extraction of barcodes and fragments from the Cre-recombined plasmin library
+sys.args <- paste("-e",shQuote("setwd('/home/rstudio')"),"-e",shQuote("rmarkdown::render('S2_AAV-lib_libraryExtraction.R')"), sep=" ")
+system2("/usr/local/bin/Rscript", args = sys.args, stdout = "logs/S2_AAV-lib_libraryExtraction_runLog.txt")
+system2("mv", args="S2_AAV-lib_libraryExtraction.pdf output/")
 
-# Generation of LUT from from both PacBio and emulsion PCR from SalI digested and ligated plasmid library. With the use of a larger sequencing dataset, more barcodes can be recovered.
-sys.args <- paste("-e",shQuote("rmarkdown::render('DNA_LibMapping_V2.R')"), "$PWD config_pSyn9-10_totalLib.txt", sep=" ")
-system2("/usr/local/bin/Rscript", args = sys.args, stdout = "logs/log_pSyn9-10_totalLib.txt")
-system2("mv", args="DNA_LibMapping_V2.pdf output/pSyn9-10_totalLib.pdf")
+# Identification and alignments of CustomArray generated fragments to the reference sequences 
+sys.args <- paste("-e",shQuote("setwd('/home/rstudio')"),"-e",shQuote("rmarkdown::render('S3_libraryIdentification.R')"), sep=" ")
+system2("/usr/local/bin/Rscript", args = sys.args, stdout = "logs/S3_libraryIdentification_runLog.txt")
+system2("mv", args="S3_libraryIdentification.pdf output/")
 
-# Evaluation of RNA-editing efficiency in reporter cell line after tansient transfection
-sys.args <- paste("-e",shQuote("rmarkdown::render('mRNA-spliceCount.R')"), "$PWD config_mRNA_Syn9-10_transient.txt", sep=" ")
-system2("/usr/local/bin/Rscript", args = sys.args, stdout = "logs/log_mRNA_Syn9-10_transient.txt")
-system2("mv", args="mRNA-spliceCount.pdf output/mRNA-spliceCount_mRNA_Syn9-10_transient.pdf")
+# S4_Fragment_translation
+sys.args <- paste("-e",shQuote("setwd('/home/rstudio')"),"-e",shQuote("rmarkdown::render('S4_Fragment_translation.R')"), sep=" ")
+system2("/usr/local/bin/Rscript", args = sys.args, stdout = "logs/S4_Fragment_translation_runLog.txt")
+system2("mv", args="S4_Fragment_translation.pdf output/")
 
-# Evaluation of RNA-editing efficiency in reporter cell line after stable transduction
-sys.args <- paste("-e",shQuote("rmarkdown::render('mRNA-spliceCount.R')"), "$PWD config_mRNA_Syn9-10_stable.txt", sep=" ")
-system2("/usr/local/bin/Rscript", args = sys.args, stdout = "logs/log_mRNA_Syn9-10_stable.txt")
-system2("mv", args="mRNA-spliceCount.pdf output/mRNA-spliceCount_mRNA_Syn9-10_stable.pdf")
+# S5_AAV-lib_tissueExtraction
+sys.args <- paste("-e",shQuote("setwd('/home/rstudio')"),"-e",shQuote("rmarkdown::render('S5_AAV-lib_tissueExtraction.R')"), sep=" ")
+system2("/usr/local/bin/Rscript", args = sys.args, stdout = "logs/S5_AAV-lib_tissueExtraction_runLog.txt")
+system2("mv", args="S5_AAV-lib_tissueExtraction.pdf output/")
 
-# Evaluation of RNA-editing efficiency in vivo after lentiviral transduction
-sys.args <- paste("-e",shQuote("rmarkdown::render('mRNA-spliceCount.R')"), "$PWD config_mRNA_Syn9-10_inVivo.txt", sep=" ")
-system2("/usr/local/bin/Rscript", args = sys.args, stdout = "logs/log_mRNA_Syn9-10_inVivo.txt")
-system2("mv", args="mRNA-spliceCount.pdf output/mRNA-spliceCount_mRNA_Syn9-10_inVivo.pdf")
+# S6_generateCompleteLibraryRanges
+sys.args <- paste("-e",shQuote("setwd('/home/rstudio')"),"-e",shQuote("rmarkdown::render('S6_generateCompleteLibraryRanges.R')"), sep=" ")
+system2("/usr/local/bin/Rscript", args = sys.args, stdout = "logs/S6_generateCompleteLibraryRanges_runLog.txt")
+system2("mv", args="S6_generateCompleteLibraryRanges.pdf output/")
 
-#Analysis of Tau Platerunner data
-system2("xvfb-run", args = "-a ImageJ-linux64 -macro /home/rstudio/macros/PlaterunnerHeadless.ijm", stdout = "logs/log_TauPlaterunner.txt")
+# S7_NormalizedGeneIdentification
+sys.args <- paste("-e",shQuote("setwd('/home/rstudio')"),"-e",shQuote("rmarkdown::render('S7_NormalizedGeneIdentification.R')"), sep=" ")
+system2("/usr/local/bin/Rscript", args = sys.args, stdout = "logs/S7_NormalizedGeneIdentification_runLog.txt")
+system2("mv", args="S7_NormalizedGeneIdentification.pdf output/")
+
+# S8_PlotAllGenesCoverage
+sys.args <- paste("-e",shQuote("setwd('/home/rstudio')"),"-e",shQuote("rmarkdown::render('S8_PlotAllGenesCoverage.R')"), sep=" ")
+system2("/usr/local/bin/Rscript", args = sys.args, stdout = "logs/S8_PlotAllGenesCoverage_runLog.txt")
+system2("mv", args="S8_PlotAllGenesCoverage.pdf output/")
+
+# S9_FullGeneHeatmap
+sys.args <- paste("-e",shQuote("setwd('/home/rstudio')"),"-e",shQuote("rmarkdown::render('S9_FullGeneHeatmap.R')"), sep=" ")
+system2("/usr/local/bin/Rscript", args = sys.args, stdout = "logs/S9_FullGeneHeatmap_runLog.txt")
+system2("mv", args="S9_FullGeneHeatmap.pdf output/")
+
+# S10_generateLibAnalysisPlots
+sys.args <- paste("-e",shQuote("setwd('/home/rstudio')"),"-e",shQuote("rmarkdown::render('S10_generateLibAnalysisPlots.R')"), sep=" ")
+system2("/usr/local/bin/Rscript", args = sys.args, stdout = "logs/S10_generateLibAnalysisPlots_runLog.txt")
+system2("mv", args="S10_generateLibAnalysisPlots.pdf output/")
+
+# S11_slidingMeanTopHits
+sys.args <- paste("-e",shQuote("setwd('/home/rstudio')"),"-e",shQuote("rmarkdown::render('S11_slidingMeanTopHits.R')"), sep=" ")
+system2("/usr/local/bin/Rscript", args = sys.args, stdout = "logs/S11_slidingMeanTopHits_runLog.txt")
+system2("mv", args="S11_slidingMeanTopHits.pdf output/")
+
+# S12_PlotThreeSampleCoverage
+sys.args <- paste("-e",shQuote("setwd('/home/rstudio')"),"-e",shQuote("rmarkdown::render('S12_PlotThreeSampleCoverage.R')"), sep=" ")
+system2("/usr/local/bin/Rscript", args = sys.args, stdout = "logs/S12_PlotThreeSampleCoverage_runLog.txt")
+system2("mv", args="S12_PlotThreeSampleCoverage.pdf output/")

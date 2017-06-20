@@ -93,7 +93,7 @@ setkey(all.samples,Mode)
 all.samples <- all.samples["Def"]
 
 setkey(all.samples,Group)
-total.AAV.samples <- all.samples[!"totalLib"]
+total.AAV.samples <- all.samples[Group!="totalLib" & Group!="AAV_Lib_2nd" & Group!="AAV_DNAse_1000x" & Group!="AAV_DNAse_100x"]
 #total.AAV.samples <- total.AAV.samples[!grepl("4wks",total.AAV.samples$Group)]
 transported.AAV.samples.100x <- total.AAV.samples[grepl("100x_SN|100x_Th|100x_Ctx",total.AAV.samples$Group)]
 transported.AAV.samples.1000x <- total.AAV.samples[grepl("1000x_SN|100x_Th|1000x_Ctx",total.AAV.samples$Group)]
