@@ -33,9 +33,9 @@ suppressPackageStartupMessages(library(devtools))
 #'Selection of relevant samples
 #'===================
 select.samples <- readRDS("data/allSamplesDataTable.RDS")
-select.samples$Group[select.samples$Group== "293T_1000x"] <- "H293T_1000x"
-select.samples$Group[select.samples$Group== "293T_100x"] <- "H293T_100x"
-select.samples <- select.samples[-grep("4wks|PrimN_1000x_RNA",select.samples$Group),]
+select.samples$Group[select.samples$Group== "mRNA_3cpc_HEK293T"] <- "mRNA_3cpc_HEK293T"
+select.samples$Group[select.samples$Group== "mRNA_30cpc_HEK293T"] <- "mRNA_30cpc_HEK293T"
+select.samples <- select.samples[-grep("4wks|mRNA_3cpc_pNeuron_RNA",select.samples$Group),]
 
 select.samples.binCat <- data.table::copy(select.samples)
 setkeyv(select.samples.binCat,c("Group","Category"))
@@ -43,7 +43,7 @@ select.samples.binCat <- select.samples.binCat[,list(BCcount=length(table(strspl
                                                                  NormCount=mean(log2(RNAcount+1))
                                                         ), by=key(select.samples.binCat)]
 setkey(select.samples.binCat,Group)
-ref.table <- select.samples.binCat["totalLib"]
+ref.table <- select.samples.binCat["DNA_pscAAVlib"]
 ref.table[,c("Group","NormCount"):=NULL]
 setnames(ref.table,"BCcount","libBC")
 setkey(ref.table,"Category")
@@ -68,7 +68,7 @@ select.samples.binGene <- select.samples.binGene[,list(BCcount=length(table(strs
                                                        NormCount=mean(log2(RNAcount+1))), by=key(select.samples.binGene)]
 select.samples.binGene[,GeneName:=gsub("/|_|’","-",GeneName)]
 setkey(select.samples.binGene,Group)
-ref.table <- select.samples.binGene["totalLib"]
+ref.table <- select.samples.binGene["DNA_pscAAVlib"]
 ref.table[,c("Group","Category","NormCount","seqlength"):=NULL]
 setnames(ref.table,"BCcount","libBC")
 setkey(ref.table,"GeneName")
@@ -93,7 +93,7 @@ select.samples.binPos <- select.samples.binPos[,list(BCcount=length(table(strspl
                              mainStruct=paste(unique(structure), collapse=","),
                              mismatches=median(mismatches)), by=key(select.samples.binPos)]
 setkey(select.samples.binPos,Group)
-ref.table <- select.samples.binPos["totalLib"]
+ref.table <- select.samples.binPos["DNA_pscAAVlib"]
 ref.table[,c("Group","NormCount","AnimalCount","LUTnrs","mainStruct","mismatches","seqlength"):=NULL]
 setnames(ref.table,"BCcount","libBC")
 setkeyv(ref.table,c("GeneName","AA"))
@@ -131,12 +131,12 @@ select.samples.matrix <- select.samples.matrix[,sample.select]
 return(pheatmap(select.samples.matrix, cluster_rows=TRUE, show_rownames=TRUE, cluster_cols=FALSE))
 }
 
-plotCategory(select.samples.binCat,"BCcountNseq",c("totalLib","CNS100x_Str","CNS100x_Th","CNS100x_Ctx","CNS100x_SN"))
-plotCategory(select.samples.binCat,"BCcountNseq",c("CNS1000x_Str","CNS1000x_Th","CNS1000x_Ctx","CNS1000x_SN"))
-plotCategory(select.samples.binCat,"BCcountNseq",c("PrimN_100x","PrimN_1000x","H293T_100x","H293T_1000x"))
+plotCategory(select.samples.binCat,"BCcountNseq",c("DNA_pscAAVlib","mRNA_30cpc_Str","mRNA_30cpc_Th","mRNA_30cpc_Ctx","mRNA_30cpc_SN"))
+plotCategory(select.samples.binCat,"BCcountNseq",c("mRNA_3cpc_Str","mRNA_3cpc_Th","mRNA_3cpc_Ctx","mRNA_3cpc_SN"))
+plotCategory(select.samples.binCat,"BCcountNseq",c("mRNA_30cpc_pNeuron","mRNA_3cpc_pNeuron","mRNA_30cpc_HEK293T","mRNA_3cpc_HEK293T"))
 
-plotCategory(select.samples.binCat,"refNormBC",c("CNS100x_Str","CNS1000x_Str","CNS100x_Th","CNS1000x_Th","CNS100x_Ctx","CNS1000x_Ctx","CNS100x_SN","CNS1000x_SN"))
-plotCategory(select.samples.binCat,"refNormBC",c("PrimN_100x","PrimN_1000x","H293T_100x","H293T_1000x"))
+plotCategory(select.samples.binCat,"refNormBC",c("mRNA_30cpc_Str","mRNA_3cpc_Str","mRNA_30cpc_Th","mRNA_3cpc_Th","mRNA_30cpc_Ctx","mRNA_3cpc_Ctx","mRNA_30cpc_SN","mRNA_3cpc_SN"))
+plotCategory(select.samples.binCat,"refNormBC",c("mRNA_30cpc_pNeuron","mRNA_3cpc_pNeuron","mRNA_30cpc_HEK293T","mRNA_3cpc_HEK293T"))
 
 
 #'Plot Heatmaps split by GeneName
@@ -154,15 +154,15 @@ select.samples.matrix <- select.samples.matrix[,sample.select]
 return(pheatmap(select.samples.matrix, fontsize_row=5.8, cluster_rows=TRUE, show_rownames=TRUE, cluster_cols=FALSE))
 }
 
-plotGene(select.samples.binGene,"BCcountNseq",c("totalLib","CNS100x_Str","CNS100x_Th","CNS100x_Ctx","CNS100x_SN"))
-plotGene(select.samples.binGene,"BCcountNseq",c("CNS1000x_Str","CNS1000x_Th","CNS1000x_Ctx","CNS1000x_SN"))
-plotGene(select.samples.binGene,"BCcountNseq",c("PrimN_100x","PrimN_1000x","H293T_100x","H293T_1000x"))
+plotGene(select.samples.binGene,"BCcountNseq",c("DNA_pscAAVlib","mRNA_30cpc_Str","mRNA_30cpc_Th","mRNA_30cpc_Ctx","mRNA_30cpc_SN"))
+plotGene(select.samples.binGene,"BCcountNseq",c("mRNA_3cpc_Str","mRNA_3cpc_Th","mRNA_3cpc_Ctx","mRNA_3cpc_SN"))
+plotGene(select.samples.binGene,"BCcountNseq",c("mRNA_30cpc_pNeuron","mRNA_3cpc_pNeuron","mRNA_30cpc_HEK293T","mRNA_3cpc_HEK293T"))
 
 
-plotGene(select.samples.binGene,"refNormBC",c("CNS100x_Str","CNS100x_Th","CNS100x_Ctx","CNS100x_SN"))
-plotGene(select.samples.binGene,"refNormBC",c("CNS1000x_Str","CNS1000x_Th","CNS1000x_Ctx","CNS1000x_SN"))
-plotGene(select.samples.binGene,"refNormBC",c("CNS100x_Str","CNS1000x_Str","CNS100x_Th","CNS1000x_Th","CNS100x_Ctx","CNS1000x_Ctx","CNS100x_SN","CNS1000x_SN"))
-plotGene(select.samples.binGene,"refNormBC",c("PrimN_100x","PrimN_1000x","H293T_100x","H293T_1000x"))
+plotGene(select.samples.binGene,"refNormBC",c("mRNA_30cpc_Str","mRNA_30cpc_Th","mRNA_30cpc_Ctx","mRNA_30cpc_SN"))
+plotGene(select.samples.binGene,"refNormBC",c("mRNA_3cpc_Str","mRNA_3cpc_Th","mRNA_3cpc_Ctx","mRNA_3cpc_SN"))
+plotGene(select.samples.binGene,"refNormBC",c("mRNA_30cpc_Str","mRNA_3cpc_Str","mRNA_30cpc_Th","mRNA_3cpc_Th","mRNA_30cpc_Ctx","mRNA_3cpc_Ctx","mRNA_30cpc_SN","mRNA_3cpc_SN"))
+plotGene(select.samples.binGene,"refNormBC",c("mRNA_30cpc_pNeuron","mRNA_3cpc_pNeuron","mRNA_30cpc_HEK293T","mRNA_3cpc_HEK293T"))
 
 #'Selection of top ten fragments per sample
 #'===================
@@ -195,17 +195,17 @@ select.samples.out <- select.samples.out[,sample.select]
 return(pheatmap(select.samples.out, cluster_rows=TRUE, show_rownames=TRUE, cluster_cols=FALSE))
 }
 
-plotPos(select.samples.binPos,"NormCount",c("PrimN_100x","PrimN_1000x","H293T_100x","H293T_1000x"))
-plotPos(select.samples.binPos,"NormCount",c("CNS100x_Str","CNS100x_Th","CNS100x_Ctx","CNS100x_SN"))
-plotPos(select.samples.binPos,"NormCount",c("CNS1000x_Str","CNS1000x_Th","CNS1000x_Ctx","CNS1000x_SN"))
+plotPos(select.samples.binPos,"NormCount",c("mRNA_30cpc_pNeuron","mRNA_3cpc_pNeuron","mRNA_30cpc_HEK293T","mRNA_3cpc_HEK293T"))
+plotPos(select.samples.binPos,"NormCount",c("mRNA_30cpc_Str","mRNA_30cpc_Th","mRNA_30cpc_Ctx","mRNA_30cpc_SN"))
+plotPos(select.samples.binPos,"NormCount",c("mRNA_3cpc_Str","mRNA_3cpc_Th","mRNA_3cpc_Ctx","mRNA_3cpc_SN"))
 
-plotPos(select.samples.binPos,"BCcountNseq",c("PrimN_100x","PrimN_1000x","H293T_100x","H293T_1000x"))
-plotPos(select.samples.binPos,"BCcountNseq",c("CNS100x_Str","CNS100x_Th","CNS100x_Ctx","CNS100x_SN"))
-plotPos(select.samples.binPos,"BCcountNseq",c("CNS1000x_Str","CNS1000x_Th","CNS1000x_Ctx","CNS1000x_SN"))
+plotPos(select.samples.binPos,"BCcountNseq",c("mRNA_30cpc_pNeuron","mRNA_3cpc_pNeuron","mRNA_30cpc_HEK293T","mRNA_3cpc_HEK293T"))
+plotPos(select.samples.binPos,"BCcountNseq",c("mRNA_30cpc_Str","mRNA_30cpc_Th","mRNA_30cpc_Ctx","mRNA_30cpc_SN"))
+plotPos(select.samples.binPos,"BCcountNseq",c("mRNA_3cpc_Str","mRNA_3cpc_Th","mRNA_3cpc_Ctx","mRNA_3cpc_SN"))
 
-plotPos(select.samples.binPos,"NormCountBC",c("PrimN_100x","PrimN_1000x","H293T_100x","H293T_1000x"))
-plotPos(select.samples.binPos,"NormCountBC",c("CNS100x_Str","CNS100x_Th","CNS100x_Ctx","CNS100x_SN"))
-plotPos(select.samples.binPos,"NormCountBC",c("CNS1000x_Str","CNS1000x_Th","CNS1000x_Ctx","CNS1000x_SN"))
+plotPos(select.samples.binPos,"NormCountBC",c("mRNA_30cpc_pNeuron","mRNA_3cpc_pNeuron","mRNA_30cpc_HEK293T","mRNA_3cpc_HEK293T"))
+plotPos(select.samples.binPos,"NormCountBC",c("mRNA_30cpc_Str","mRNA_30cpc_Th","mRNA_30cpc_Ctx","mRNA_30cpc_SN"))
+plotPos(select.samples.binPos,"NormCountBC",c("mRNA_3cpc_Str","mRNA_3cpc_Th","mRNA_3cpc_Ctx","mRNA_3cpc_SN"))
 
 
 devtools::session_info()

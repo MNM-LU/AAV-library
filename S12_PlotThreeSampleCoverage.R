@@ -31,8 +31,8 @@ suppressPackageStartupMessages(library(devtools))
 #'===================
 all.samples <- readRDS("data/allSamplesDataTable.RDS")
 
-all.samples$Group[all.samples$Group== "293T_1000x"] <- "H293T_1000x"
-all.samples$Group[all.samples$Group== "293T_100x"] <- "H293T_100x"
+all.samples$Group[all.samples$Group== "mRNA_3cpc_HEK293T"] <- "mRNA_3cpc_HEK293T"
+all.samples$Group[all.samples$Group== "mRNA_30cpc_HEK293T"] <- "mRNA_30cpc_HEK293T"
 
 #'Plotting function
 #'===================
@@ -40,12 +40,12 @@ all.samples$Group[all.samples$Group== "293T_100x"] <- "H293T_100x"
 # Select samples
 #===================
 
-  topSampleOne <- "CNS1000x_Th"
-  topSampleTwo <- "CNS1000x_Ctx"
-  topSampleThree <- "CNS1000x_SN"
-  bottomSampleOne <- "CNS100x_Th"
-  bottomSampleTwo <- "CNS100x_Ctx"
-  bottomSampleThree <- "CNS100x_SN"
+  topSampleOne <- "mRNA_3cpc_Th"
+  topSampleTwo <- "mRNA_3cpc_Ctx"
+  topSampleThree <- "mRNA_3cpc_SN"
+  bottomSampleOne <- "mRNA_30cpc_Th"
+  bottomSampleTwo <- "mRNA_30cpc_Ctx"
+  bottomSampleThree <- "mRNA_30cpc_SN"
   filterBC <- FALSE
   filterAnimal <- FALSE
   AnimaladjustPlot <- FALSE

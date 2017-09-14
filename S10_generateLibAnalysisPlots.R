@@ -49,8 +49,8 @@ complete.library <- readRDS("data/allSamplesDataTable.RDS")
 setkey(complete.library,Group)
 complete.library <- complete.library[-grep("4wk",Group)]
 seq.arry <- LUT.dna$LUTnr
-seq.lib <- unique(complete.library[J("totalLib")]$LUTnr)
-seq.AAV <- unique(complete.library[J("infectiveLib")]$LUTnr)
+seq.lib <- unique(complete.library[J("DNA_pscAAVlib")]$LUTnr)
+seq.AAV <- unique(complete.library[J("mRNA_All")]$LUTnr)
 seq.DNAse <- unique(complete.library[grep("AAV_DNAse",Group)]$LUTnr)
 seq.str <- unique(complete.library[grep("Str",Group)]$LUTnr)
 seq.Trsp <- unique(complete.library[grep("SN|Ctx|Th",Group)]$LUTnr)
@@ -124,8 +124,8 @@ opts_chunk$set(fig.width = 5, fig.height = 5)
 
 #'Barcode Venn diagrams for 100x and 1000x DNAse resistant libraries
 #'===================
-total.100x <- unique(complete.library[grep("AAV_DNAse_100x",Group)]$BC)
-total.1000x <- unique(complete.library[grep("AAV_DNAse_1000x",Group)]$BC)
+total.100x <- unique(complete.library[grep("DNA_AAVlib_DNAse_30cpc",Group)]$BC)
+total.1000x <- unique(complete.library[grep("DNA_AAVlib_DNAse_3cpc",Group)]$BC)
 
 
 venn.area1 <- length(total.100x)
@@ -154,8 +154,8 @@ grid.draw(venn.plot)
 #'Fragment Venn diagrams for 100x and 1000x DNAse resistant libraries
 #'===================
 
-total.100x <- unique(complete.library[grep("AAV_DNAse_100x",Group)]$Sequence)
-total.1000x <- unique(complete.library[grep("AAV_DNAse_1000x",Group)]$Sequence)
+total.100x <- unique(complete.library[grep("DNA_AAVlib_DNAse_30cpc",Group)]$Sequence)
+total.1000x <- unique(complete.library[grep("DNA_AAVlib_DNAse_3cpc",Group)]$Sequence)
 
 
 venn.area1 <- length(total.100x)

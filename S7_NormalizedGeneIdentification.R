@@ -33,7 +33,7 @@ in.names.all <- list.files("output", pattern="*.rds", full.names=TRUE)
 load.list <- read.table("input/loadlist.txt", header = FALSE, skip = 0, sep="\t",
                         stringsAsFactors = FALSE, fill=TRUE)
 colnames(load.list) <- c("Name", "BaseName","GroupName")
-load.list <- rbind(load.list,c("completeLibraryRanges","","totalLib"))
+load.list <- rbind(load.list,c("completeLibraryRanges","","DNA_pscAAVlib"))
 load.list <- load.list[!grepl("Untreat",load.list$Name),]
 
 select.Cases <- c(unlist(sapply(load.list$Name, function(x) grep(x,in.names.all), simplify = TRUE)))
@@ -93,13 +93,13 @@ setkey(all.samples,Mode)
 all.samples <- all.samples["Def"]
 
 setkey(all.samples,Group)
-total.AAV.samples <- all.samples[Group!="totalLib" & Group!="AAV_Lib_2nd" & Group!="AAV_DNAse_1000x" & Group!="AAV_DNAse_100x"]
+total.AAV.samples <- all.samples[Group!="DNA_pscAAVlib" & Group!="DNA_pscAAVlib_Prep2" & Group!="DNA_AAVlib_DNAse_3cpc" & Group!="DNA_AAVlib_DNAse_30cpc"]
 #total.AAV.samples <- total.AAV.samples[!grepl("4wks",total.AAV.samples$Group)]
 transported.AAV.samples.100x <- total.AAV.samples[grepl("100x_SN|100x_Th|100x_Ctx",total.AAV.samples$Group)]
 transported.AAV.samples.1000x <- total.AAV.samples[grepl("1000x_SN|100x_Th|1000x_Ctx",total.AAV.samples$Group)]
-total.AAV.samples[,Group := "infectiveLib"]
-transported.AAV.samples.100x[,Group := "CNS100x_Trsp"]
-transported.AAV.samples.1000x[,Group := "CNS1000x_Trsp"]
+total.AAV.samples[,Group := "mRNA_All"]
+transported.AAV.samples.100x[,Group := "mRNA_30cpc_Trsp"]
+transported.AAV.samples.1000x[,Group := "mRNA_3cpc_Trsp"]
 
 all.samples <- rbind(all.samples,total.AAV.samples,transported.AAV.samples.100x,transported.AAV.samples.1000x)
 

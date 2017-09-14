@@ -35,9 +35,9 @@ suppressPackageStartupMessages(library(pastecs))
 #'Selection of relevant samples
 #'===================
 select.samples <- readRDS("data/allSamplesDataTable.RDS")
-select.samples$Group[select.samples$Group== "293T_1000x"] <- "H293T_1000x"
-select.samples$Group[select.samples$Group== "293T_100x"] <- "H293T_100x"
-select.samples <- select.samples[-grep("4wks|PrimN_1000x_RNA",select.samples$Group),]
+select.samples$Group[select.samples$Group== "mRNA_3cpc_HEK293T"] <- "mRNA_3cpc_HEK293T"
+select.samples$Group[select.samples$Group== "mRNA_30cpc_HEK293T"] <- "mRNA_30cpc_HEK293T"
+select.samples <- select.samples[-grep("4wks|mRNA_3cpc_pNeuron_RNA",select.samples$Group),]
 
 select.samples.merge <- data.table::copy(select.samples)
 select.samples.merge$Lib <- "100x"

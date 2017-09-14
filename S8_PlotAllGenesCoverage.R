@@ -30,8 +30,8 @@ suppressPackageStartupMessages(library(devtools))
 #'===================
 all.samples <- readRDS("data/allSamplesDataTable.RDS")
 
-all.samples$Group[all.samples$Group== "293T_1000x"] <- "H293T_1000x"
-all.samples$Group[all.samples$Group== "293T_100x"] <- "H293T_100x"
+all.samples$Group[all.samples$Group== "mRNA_3cpc_HEK293T"] <- "mRNA_3cpc_HEK293T"
+all.samples$Group[all.samples$Group== "mRNA_30cpc_HEK293T"] <- "mRNA_30cpc_HEK293T"
 
 #'Plotting function
 #'===================
@@ -40,8 +40,8 @@ plotPair <- function(topSample,bottomSample,size.bin=1,winWidth=1,NormalizePlot=
 # Select samples
 #===================
 
-  # topSample <- "CNS1000x_Ctx"
-  # bottomSample <- "CNS100x_Ctx"
+  # topSample <- "mRNA_3cpc_Ctx"
+  # bottomSample <- "mRNA_30cpc_Ctx"
   # filterBC <- FALSE
   # filterAnimal <- FALSE
   # AnimaladjustPlot <- FALSE
@@ -216,83 +216,82 @@ return(out.list)
 #'Analyze samples
 #'===================
 
-plotPair("infectiveLib","totalLib")$plot
-plotPair("AAV_Lib_2nd","totalLib")$plot
-plotPair("AAV_DNAse_1000x","AAV_DNAse_100x")$plot
-plotPair("AAV_DNAse_100x","AAV_Lib_2nd")$plot
+plotPair("mRNA_All","DNA_pscAAVlib")$plot
+plotPair("DNA_pscAAVlib_Prep2","DNA_pscAAVlib")$plot
+plotPair("DNA_AAVlib_DNAse_3cpc","DNA_AAVlib_DNAse_30cpc")$plot
+plotPair("DNA_AAVlib_DNAse_30cpc","DNA_pscAAVlib_Prep2")$plot
 
 #' 100x analysis
-out.plot.list <- plotPair("CNS100x_Trsp","CNS100x_Str")
+out.plot.list <- plotPair("mRNA_30cpc_Trsp","mRNA_30cpc_Str")
 out.plot.list$plot
 knitr::kable(out.plot.list$top, format = "markdown")
 knitr::kable(out.plot.list$bottom, format = "markdown")
 
-out.plot.list <- plotPair("CNS100x_Th","CNS100x_Str")
+out.plot.list <- plotPair("mRNA_30cpc_Th","mRNA_30cpc_Str")
 out.plot.list$plot
 knitr::kable(out.plot.list$top, format = "markdown")
 
-out.plot.list <- plotPair("CNS100x_Ctx","CNS100x_Str")
+out.plot.list <- plotPair("mRNA_30cpc_Ctx","mRNA_30cpc_Str")
 out.plot.list$plot
 knitr::kable(out.plot.list$top, format = "markdown")
 
-out.plot.list <- plotPair("CNS100x_SN","CNS100x_Str")
+out.plot.list <- plotPair("mRNA_30cpc_SN","mRNA_30cpc_Str")
 out.plot.list$plot
 knitr::kable(out.plot.list$top, format = "markdown")
 
-plotPair("CNS100x_SN","CNS100x_Th")$plot
-plotPair("CNS100x_Ctx","CNS100x_Th")$plot
-plotPair("CNS100x_SN","CNS100x_Ctx")$plot
+plotPair("mRNA_30cpc_SN","mRNA_30cpc_Th")$plot
+plotPair("mRNA_30cpc_Ctx","mRNA_30cpc_Th")$plot
+plotPair("mRNA_30cpc_SN","mRNA_30cpc_Ctx")$plot
 
 #' 1000x analysis
-out.plot.list <- plotPair("CNS1000x_Trsp","CNS1000x_Str")
+out.plot.list <- plotPair("mRNA_3cpc_Trsp","mRNA_3cpc_Str")
 out.plot.list$plot
 knitr::kable(out.plot.list$top, format = "markdown")
 knitr::kable(out.plot.list$bottom, format = "markdown")
 
-out.plot.list <- plotPair("CNS1000x_Th","CNS1000x_Str")
+out.plot.list <- plotPair("mRNA_3cpc_Th","mRNA_3cpc_Str")
 out.plot.list$plot
 knitr::kable(out.plot.list$top, format = "markdown")
 
-out.plot.list <- plotPair("CNS1000x_Ctx","CNS1000x_Str")
+out.plot.list <- plotPair("mRNA_3cpc_Ctx","mRNA_3cpc_Str")
 out.plot.list$plot
 knitr::kable(out.plot.list$top, format = "markdown")
 
-out.plot.list <- plotPair("CNS1000x_SN","CNS1000x_Str")
+out.plot.list <- plotPair("mRNA_3cpc_SN","mRNA_3cpc_Str")
 out.plot.list$plot
 knitr::kable(out.plot.list$top, format = "markdown")
 
-plotPair("CNS1000x_SN","CNS1000x_Th")$plot
-plotPair("CNS1000x_Ctx","CNS1000x_Th")$plot
-plotPair("CNS1000x_SN","CNS1000x_Ctx")$plot
+plotPair("mRNA_3cpc_SN","mRNA_3cpc_Th")$plot
+plotPair("mRNA_3cpc_Ctx","mRNA_3cpc_Th")$plot
+plotPair("mRNA_3cpc_SN","mRNA_3cpc_Ctx")$plot
 
 #' 1000x vs 100x analysis
-plotPair("CNS1000x_Trsp","CNS100x_Trsp")$plot
-plotPair("CNS1000x_Str","CNS100x_Str")$plot
-plotPair("CNS1000x_Th","CNS100x_Th")$plot
-plotPair("CNS1000x_Ctx","CNS100x_Ctx")$plot
-plotPair("CNS1000x_SN","CNS100x_SN")$plot
+plotPair("mRNA_3cpc_Trsp","mRNA_30cpc_Trsp")$plot
+plotPair("mRNA_3cpc_Str","mRNA_30cpc_Str")$plot
+plotPair("mRNA_3cpc_Th","mRNA_30cpc_Th")$plot
+plotPair("mRNA_3cpc_Ctx","mRNA_30cpc_Ctx")$plot
+plotPair("mRNA_3cpc_SN","mRNA_30cpc_SN")$plot
 
 #' 8wks vs 4wks analysis
 
-plotPair("CNS100x_Str_4wks","CNS100x_Str")$plot
-plotPair("CNS100x_Th_4wks","CNS100x_Th")$plot
-plotPair("CNS100x_Ctx_4wks","CNS100x_Ctx")$plot
-plotPair("CNS100x_SN_4wks","CNS100x_SN")$plot
-plotPair("PerN100x_SC_4wks","PerN100x_Mu_4wks")$plot
+plotPair("mRNA_30cpc_Str_4wks","mRNA_30cpc_Str")$plot
+plotPair("mRNA_30cpc_Th_4wks","mRNA_30cpc_Th")$plot
+plotPair("mRNA_30cpc_Ctx_4wks","mRNA_30cpc_Ctx")$plot
+plotPair("mRNA_30cpc_SN_4wks","mRNA_30cpc_SN")$plot
 
-plotPair("CNS1000x_Str_4wks","CNS1000x_Str")$plot
-plotPair("CNS1000x_Th_4wks","CNS1000x_Th")$plot
-plotPair("CNS1000x_Ctx_4wks","CNS1000x_Ctx")$plot
-plotPair("CNS1000x_SN_4wks","CNS1000x_SN")$plot
+plotPair("mRNA_3cpc_Str_4wks","mRNA_3cpc_Str")$plot
+plotPair("mRNA_3cpc_Th_4wks","mRNA_3cpc_Th")$plot
+plotPair("mRNA_3cpc_Ctx_4wks","mRNA_3cpc_Ctx")$plot
+plotPair("mRNA_3cpc_SN_4wks","mRNA_3cpc_SN")$plot
 
 #' In vitro analysis
 
-out.plot.list <- plotPair("PrimN_1000x","PrimN_100x")
+out.plot.list <- plotPair("mRNA_3cpc_pNeuron","mRNA_30cpc_pNeuron")
 out.plot.list$plot
 knitr::kable(out.plot.list$top, format = "markdown")
 knitr::kable(out.plot.list$bottom, format = "markdown")
 
-out.plot.list <- plotPair("H293T_1000x","H293T_100x")
+out.plot.list <- plotPair("mRNA_3cpc_HEK293T","mRNA_30cpc_HEK293T")
 out.plot.list$plot
 knitr::kable(out.plot.list$top, format = "markdown")
 knitr::kable(out.plot.list$bottom, format = "markdown")
@@ -301,103 +300,102 @@ knitr::kable(out.plot.list$bottom, format = "markdown")
 
 #' Old binning analysis
 
-plotPair("infectiveLib","totalLib",PlotBC=FALSE)$plot
+plotPair("mRNA_All","DNA_pscAAVlib",PlotBC=FALSE)$plot
 #' 100x analysis
-out.plot.list <- plotPair("CNS100x_Trsp","CNS100x_Str",PlotBC=FALSE)
+out.plot.list <- plotPair("mRNA_30cpc_Trsp","mRNA_30cpc_Str",PlotBC=FALSE)
 out.plot.list$plot
 knitr::kable(out.plot.list$top, format = "markdown")
 knitr::kable(out.plot.list$bottom, format = "markdown")
 
-out.plot.list <- plotPair("CNS100x_Th","CNS100x_Str",PlotBC=FALSE)
+out.plot.list <- plotPair("mRNA_30cpc_Th","mRNA_30cpc_Str",PlotBC=FALSE)
 out.plot.list$plot
 knitr::kable(out.plot.list$top, format = "markdown")
 
-out.plot.list <- plotPair("CNS100x_Ctx","CNS100x_Str",PlotBC=FALSE)
+out.plot.list <- plotPair("mRNA_30cpc_Ctx","mRNA_30cpc_Str",PlotBC=FALSE)
 out.plot.list$plot
 knitr::kable(out.plot.list$top, format = "markdown")
 
-out.plot.list <- plotPair("CNS100x_SN","CNS100x_Str",PlotBC=FALSE)
+out.plot.list <- plotPair("mRNA_30cpc_SN","mRNA_30cpc_Str",PlotBC=FALSE)
 out.plot.list$plot
 knitr::kable(out.plot.list$top, format = "markdown")
 
-plotPair("CNS100x_SN","CNS100x_Th",PlotBC=FALSE)$plot
-plotPair("CNS100x_Ctx","CNS100x_Th",PlotBC=FALSE)$plot
-plotPair("CNS100x_SN","CNS100x_Ctx",PlotBC=FALSE)$plot
+plotPair("mRNA_30cpc_SN","mRNA_30cpc_Th",PlotBC=FALSE)$plot
+plotPair("mRNA_30cpc_Ctx","mRNA_30cpc_Th",PlotBC=FALSE)$plot
+plotPair("mRNA_30cpc_SN","mRNA_30cpc_Ctx",PlotBC=FALSE)$plot
 
 #' 1000x analysis
-out.plot.list <- plotPair("CNS1000x_Trsp","CNS1000x_Str",PlotBC=FALSE)
+out.plot.list <- plotPair("mRNA_3cpc_Trsp","mRNA_3cpc_Str",PlotBC=FALSE)
 out.plot.list$plot
 knitr::kable(out.plot.list$top, format = "markdown")
 knitr::kable(out.plot.list$bottom, format = "markdown")
 
-out.plot.list <- plotPair("CNS1000x_Th","CNS1000x_Str",PlotBC=FALSE)
+out.plot.list <- plotPair("mRNA_3cpc_Th","mRNA_3cpc_Str",PlotBC=FALSE)
 out.plot.list$plot
 knitr::kable(out.plot.list$top, format = "markdown")
 
-out.plot.list <- plotPair("CNS1000x_Ctx","CNS1000x_Str",PlotBC=FALSE)
+out.plot.list <- plotPair("mRNA_3cpc_Ctx","mRNA_3cpc_Str",PlotBC=FALSE)
 out.plot.list$plot
 knitr::kable(out.plot.list$top, format = "markdown")
 
-out.plot.list <- plotPair("CNS1000x_SN","CNS1000x_Str",PlotBC=FALSE)
+out.plot.list <- plotPair("mRNA_3cpc_SN","mRNA_3cpc_Str",PlotBC=FALSE)
 out.plot.list$plot
 knitr::kable(out.plot.list$top, format = "markdown")
 
-plotPair("CNS1000x_SN","CNS1000x_Th",PlotBC=FALSE)$plot
-plotPair("CNS1000x_Ctx","CNS1000x_Th",PlotBC=FALSE)$plot
-plotPair("CNS1000x_SN","CNS1000x_Ctx",PlotBC=FALSE)$plot
+plotPair("mRNA_3cpc_SN","mRNA_3cpc_Th",PlotBC=FALSE)$plot
+plotPair("mRNA_3cpc_Ctx","mRNA_3cpc_Th",PlotBC=FALSE)$plot
+plotPair("mRNA_3cpc_SN","mRNA_3cpc_Ctx",PlotBC=FALSE)$plot
 
 #' 1000x vs 100x analysis
-plotPair("CNS1000x_Trsp","CNS100x_Trsp",PlotBC=FALSE)$plot
-plotPair("CNS1000x_Str","CNS100x_Str",PlotBC=FALSE)$plot
-plotPair("CNS1000x_Th","CNS100x_Th",PlotBC=FALSE)$plot
-plotPair("CNS1000x_Ctx","CNS100x_Ctx",PlotBC=FALSE)$plot
-plotPair("CNS1000x_SN","CNS100x_SN",PlotBC=FALSE)$plot
+plotPair("mRNA_3cpc_Trsp","mRNA_30cpc_Trsp",PlotBC=FALSE)$plot
+plotPair("mRNA_3cpc_Str","mRNA_30cpc_Str",PlotBC=FALSE)$plot
+plotPair("mRNA_3cpc_Th","mRNA_30cpc_Th",PlotBC=FALSE)$plot
+plotPair("mRNA_3cpc_Ctx","mRNA_30cpc_Ctx",PlotBC=FALSE)$plot
+plotPair("mRNA_3cpc_SN","mRNA_30cpc_SN",PlotBC=FALSE)$plot
 
 #' 8wks vs 4wks analysis
 
-plotPair("CNS100x_Str_4wks","CNS100x_Str",PlotBC=FALSE)$plot
-plotPair("CNS100x_Th_4wks","CNS100x_Th",PlotBC=FALSE)$plot
-plotPair("CNS100x_Ctx_4wks","CNS100x_Ctx",PlotBC=FALSE)$plot
-plotPair("CNS100x_SN_4wks","CNS100x_SN",PlotBC=FALSE)$plot
-plotPair("PerN100x_SC_4wks","PerN100x_Mu_4wks",PlotBC=FALSE)$plot
+plotPair("mRNA_30cpc_Str_4wks","mRNA_30cpc_Str",PlotBC=FALSE)$plot
+plotPair("mRNA_30cpc_Th_4wks","mRNA_30cpc_Th",PlotBC=FALSE)$plot
+plotPair("mRNA_30cpc_Ctx_4wks","mRNA_30cpc_Ctx",PlotBC=FALSE)$plot
+plotPair("mRNA_30cpc_SN_4wks","mRNA_30cpc_SN",PlotBC=FALSE)$plot
 
-plotPair("CNS1000x_Str_4wks","CNS1000x_Str",PlotBC=FALSE)$plot
-plotPair("CNS1000x_Th_4wks","CNS1000x_Th",PlotBC=FALSE)$plot
-plotPair("CNS1000x_Ctx_4wks","CNS1000x_Ctx",PlotBC=FALSE)$plot
-plotPair("CNS1000x_SN_4wks","CNS1000x_SN",PlotBC=FALSE)$plot
+plotPair("mRNA_3cpc_Str_4wks","mRNA_3cpc_Str",PlotBC=FALSE)$plot
+plotPair("mRNA_3cpc_Th_4wks","mRNA_3cpc_Th",PlotBC=FALSE)$plot
+plotPair("mRNA_3cpc_Ctx_4wks","mRNA_3cpc_Ctx",PlotBC=FALSE)$plot
+plotPair("mRNA_3cpc_SN_4wks","mRNA_3cpc_SN",PlotBC=FALSE)$plot
 
 #' In vitro analysis
 
-out.plot.list <- plotPair("PrimN_1000x","PrimN_100x",PlotBC=FALSE)
+out.plot.list <- plotPair("mRNA_3cpc_pNeuron","mRNA_30cpc_pNeuron",PlotBC=FALSE)
 out.plot.list$plot
 knitr::kable(out.plot.list$top, format = "markdown")
 knitr::kable(out.plot.list$bottom, format = "markdown")
 
-out.plot.list <- plotPair("H293T_1000x","H293T_100x",PlotBC=FALSE)
+out.plot.list <- plotPair("mRNA_3cpc_HEK293T","mRNA_30cpc_HEK293T",PlotBC=FALSE)
 out.plot.list$plot
 knitr::kable(out.plot.list$top, format = "markdown")
 knitr::kable(out.plot.list$bottom, format = "markdown")
 
-plotPair("infectiveLib","totalLib",size.bin=2,winWidth=0,PlotBC=FALSE)$plot
-plotPair("CNS1000x_Str","CNS100x_Str",size.bin=2,winWidth=0,PlotBC=FALSE)$plot
-plotPair("CNS1000x_Th","CNS100x_Th",size.bin=2,winWidth=0,PlotBC=FALSE)$plot
-plotPair("CNS1000x_Ctx","CNS100x_Ctx",size.bin=2,winWidth=0,PlotBC=FALSE)$plot
-plotPair("CNS1000x_SN","CNS100x_SN",size.bin=2,winWidth=0,PlotBC=FALSE)$plot
+plotPair("mRNA_All","DNA_pscAAVlib",size.bin=2,winWidth=0,PlotBC=FALSE)$plot
+plotPair("mRNA_3cpc_Str","mRNA_30cpc_Str",size.bin=2,winWidth=0,PlotBC=FALSE)$plot
+plotPair("mRNA_3cpc_Th","mRNA_30cpc_Th",size.bin=2,winWidth=0,PlotBC=FALSE)$plot
+plotPair("mRNA_3cpc_Ctx","mRNA_30cpc_Ctx",size.bin=2,winWidth=0,PlotBC=FALSE)$plot
+plotPair("mRNA_3cpc_SN","mRNA_30cpc_SN",size.bin=2,winWidth=0,PlotBC=FALSE)$plot
 
-plotPair("CNS100x_SN","CNS100x_Ctx",size.bin=2,winWidth=0,PlotBC=FALSE)$plot
-plotPair("CNS100x_Ctx","CNS100x_Th",size.bin=2,winWidth=0,PlotBC=FALSE)$plot
-plotPair("CNS100x_Th","CNS100x_Str",size.bin=2,winWidth=0,PlotBC=FALSE)$plot
+plotPair("mRNA_30cpc_SN","mRNA_30cpc_Ctx",size.bin=2,winWidth=0,PlotBC=FALSE)$plot
+plotPair("mRNA_30cpc_Ctx","mRNA_30cpc_Th",size.bin=2,winWidth=0,PlotBC=FALSE)$plot
+plotPair("mRNA_30cpc_Th","mRNA_30cpc_Str",size.bin=2,winWidth=0,PlotBC=FALSE)$plot
 
-plotPair("CNS1000x_SN","CNS1000x_Ctx",size.bin=2,winWidth=0,PlotBC=FALSE)$plot
-plotPair("CNS1000x_Ctx","CNS1000x_Th",size.bin=2,winWidth=0,PlotBC=FALSE)$plot
-plotPair("CNS1000x_Th","CNS1000x_Str",size.bin=2,winWidth=0,PlotBC=FALSE)$plot
+plotPair("mRNA_3cpc_SN","mRNA_3cpc_Ctx",size.bin=2,winWidth=0,PlotBC=FALSE)$plot
+plotPair("mRNA_3cpc_Ctx","mRNA_3cpc_Th",size.bin=2,winWidth=0,PlotBC=FALSE)$plot
+plotPair("mRNA_3cpc_Th","mRNA_3cpc_Str",size.bin=2,winWidth=0,PlotBC=FALSE)$plot
 
-plotPair("CNS100x_Trsp","CNS100x_Str",size.bin=2,winWidth=0,PlotBC=FALSE)$plot
-plotPair("CNS1000x_Trsp","CNS1000x_Str",size.bin=2,winWidth=0,PlotBC=FALSE)$plot
-plotPair("CNS1000x_Trsp","CNS100x_Trsp",size.bin=2,winWidth=0,PlotBC=FALSE)$plot
+plotPair("mRNA_30cpc_Trsp","mRNA_30cpc_Str",size.bin=2,winWidth=0,PlotBC=FALSE)$plot
+plotPair("mRNA_3cpc_Trsp","mRNA_3cpc_Str",size.bin=2,winWidth=0,PlotBC=FALSE)$plot
+plotPair("mRNA_3cpc_Trsp","mRNA_30cpc_Trsp",size.bin=2,winWidth=0,PlotBC=FALSE)$plot
 
-plotPair("PrimN_1000x","PrimN_100x",size.bin=2,winWidth=0,PlotBC=FALSE)$plot
-plotPair("H293T_1000x","H293T_100x",size.bin=2,winWidth=0,PlotBC=FALSE)$plot
+plotPair("mRNA_3cpc_pNeuron","mRNA_30cpc_pNeuron",size.bin=2,winWidth=0,PlotBC=FALSE)$plot
+plotPair("mRNA_3cpc_HEK293T","mRNA_30cpc_HEK293T",size.bin=2,winWidth=0,PlotBC=FALSE)$plot
 
 
 devtools::session_info()
