@@ -1,6 +1,6 @@
-dataDir	seqFiles/DNA
-in.name.P5	psc-lib-1-2UndetOldSort_S1_L001_R1_001.fastq.gz
-in.name.P7	psc-lib-1-2UndetOldSort_S1_L001_R2_001.fastq.gz
+dataDir	seqFiles
+in.name.P5	DNA_pscAAVlib_R1.fastq.gz
+in.name.P7	DNA_pscAAVlib_R2.fastq.gz
 name.out	AAVlibrary_complete
 paired.alignment	TRUE
 run.subset	FALSE

@@ -36,7 +36,11 @@ AAlist <- data.frame(Class=character(),
                      AAfragment=character(),
                      stringsAsFactors = FALSE)
 
-#allSequences <- allSequences[124:129]
+#allSequences <- allSequences[124:129] #Debug row
+
+
+#'Generation of AA table for the selected proteins
+#'===================
 
 strt<-Sys.time()
 for (i in 1:length(allSequences)){
