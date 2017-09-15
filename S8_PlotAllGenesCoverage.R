@@ -221,7 +221,7 @@ plotPair("DNA_pscAAVlib_Prep2","DNA_pscAAVlib")$plot
 plotPair("DNA_AAVlib_DNAse_3cpc","DNA_AAVlib_DNAse_30cpc")$plot
 plotPair("DNA_AAVlib_DNAse_30cpc","DNA_pscAAVlib_Prep2")$plot
 
-#' 100x analysis
+#' 30cpc analysis
 out.plot.list <- plotPair("mRNA_30cpc_Trsp","mRNA_30cpc_Str")
 out.plot.list$plot
 knitr::kable(out.plot.list$top, format = "markdown")
@@ -243,7 +243,7 @@ plotPair("mRNA_30cpc_SN","mRNA_30cpc_Th")$plot
 plotPair("mRNA_30cpc_Ctx","mRNA_30cpc_Th")$plot
 plotPair("mRNA_30cpc_SN","mRNA_30cpc_Ctx")$plot
 
-#' 1000x analysis
+#' 3cpc analysis
 out.plot.list <- plotPair("mRNA_3cpc_Trsp","mRNA_3cpc_Str")
 out.plot.list$plot
 knitr::kable(out.plot.list$top, format = "markdown")
@@ -265,7 +265,7 @@ plotPair("mRNA_3cpc_SN","mRNA_3cpc_Th")$plot
 plotPair("mRNA_3cpc_Ctx","mRNA_3cpc_Th")$plot
 plotPair("mRNA_3cpc_SN","mRNA_3cpc_Ctx")$plot
 
-#' 1000x vs 100x analysis
+#' 3cpc vs 30cpc analysis
 plotPair("mRNA_3cpc_Trsp","mRNA_30cpc_Trsp")$plot
 plotPair("mRNA_3cpc_Str","mRNA_30cpc_Str")$plot
 plotPair("mRNA_3cpc_Th","mRNA_30cpc_Th")$plot
@@ -301,7 +301,7 @@ knitr::kable(out.plot.list$bottom, format = "markdown")
 #' Old binning analysis
 
 plotPair("mRNA_All","DNA_pscAAVlib",PlotBC=FALSE)$plot
-#' 100x analysis
+#' 30cpc analysis
 out.plot.list <- plotPair("mRNA_30cpc_Trsp","mRNA_30cpc_Str",PlotBC=FALSE)
 out.plot.list$plot
 knitr::kable(out.plot.list$top, format = "markdown")
@@ -323,7 +323,7 @@ plotPair("mRNA_30cpc_SN","mRNA_30cpc_Th",PlotBC=FALSE)$plot
 plotPair("mRNA_30cpc_Ctx","mRNA_30cpc_Th",PlotBC=FALSE)$plot
 plotPair("mRNA_30cpc_SN","mRNA_30cpc_Ctx",PlotBC=FALSE)$plot
 
-#' 1000x analysis
+#' 3cpc analysis
 out.plot.list <- plotPair("mRNA_3cpc_Trsp","mRNA_3cpc_Str",PlotBC=FALSE)
 out.plot.list$plot
 knitr::kable(out.plot.list$top, format = "markdown")
@@ -345,7 +345,7 @@ plotPair("mRNA_3cpc_SN","mRNA_3cpc_Th",PlotBC=FALSE)$plot
 plotPair("mRNA_3cpc_Ctx","mRNA_3cpc_Th",PlotBC=FALSE)$plot
 plotPair("mRNA_3cpc_SN","mRNA_3cpc_Ctx",PlotBC=FALSE)$plot
 
-#' 1000x vs 100x analysis
+#' 3cpc vs 30cpc analysis
 plotPair("mRNA_3cpc_Trsp","mRNA_30cpc_Trsp",PlotBC=FALSE)$plot
 plotPair("mRNA_3cpc_Str","mRNA_30cpc_Str",PlotBC=FALSE)$plot
 plotPair("mRNA_3cpc_Th","mRNA_30cpc_Th",PlotBC=FALSE)$plot

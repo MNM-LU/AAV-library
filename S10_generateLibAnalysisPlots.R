@@ -122,16 +122,16 @@ ggplot(output.table) +
 
 opts_chunk$set(fig.width = 5, fig.height = 5)
 
-#'Barcode Venn diagrams for 100x and 1000x DNAse resistant libraries
+#'Barcode Venn diagrams for 30cpc and 3cpc DNAse resistant libraries
 #'===================
-total.100x <- unique(complete.library[grep("DNA_AAVlib_DNAse_30cpc",Group)]$BC)
-total.1000x <- unique(complete.library[grep("DNA_AAVlib_DNAse_3cpc",Group)]$BC)
+total.30cpc <- unique(complete.library[grep("DNA_AAVlib_DNAse_30cpc",Group)]$BC)
+total.3cpc <- unique(complete.library[grep("DNA_AAVlib_DNAse_3cpc",Group)]$BC)
 
 
-venn.area1 <- length(total.100x)
-venn.area2 <- length(total.1000x)
+venn.area1 <- length(total.30cpc)
+venn.area2 <- length(total.3cpc)
 
-venn.n12 <- length(intersect(total.100x,total.1000x))
+venn.n12 <- length(intersect(total.30cpc,total.3cpc))
 
 venn.colors <- c("cornflower blue", "red") 
 grid.newpage()
@@ -145,23 +145,23 @@ venn.plot <- draw.pairwise.venn(area1    = venn.area1,
                                 cex      = 2,
                                 cat.cex  = 2,
                                 cat.col  = venn.colors,
-                                category = c("100x", "1000x"))
+                                category = c("30cpc", "3cpc"))
 grid.draw(venn.plot)
 
 
 
 
-#'Fragment Venn diagrams for 100x and 1000x DNAse resistant libraries
+#'Fragment Venn diagrams for 30cpc and 3cpc DNAse resistant libraries
 #'===================
 
-total.100x <- unique(complete.library[grep("DNA_AAVlib_DNAse_30cpc",Group)]$Sequence)
-total.1000x <- unique(complete.library[grep("DNA_AAVlib_DNAse_3cpc",Group)]$Sequence)
+total.30cpc <- unique(complete.library[grep("DNA_AAVlib_DNAse_30cpc",Group)]$Sequence)
+total.3cpc <- unique(complete.library[grep("DNA_AAVlib_DNAse_3cpc",Group)]$Sequence)
 
 
-venn.area1 <- length(total.100x)
-venn.area2 <- length(total.1000x)
+venn.area1 <- length(total.30cpc)
+venn.area2 <- length(total.3cpc)
 
-venn.n12 <- length(intersect(total.100x,total.1000x))
+venn.n12 <- length(intersect(total.30cpc,total.3cpc))
 
 
 grid.newpage()
@@ -175,23 +175,23 @@ venn.plot <- draw.pairwise.venn(area1    = venn.area1,
                                 cex      = 2,
                                 cat.cex  = 2,
                                 cat.col  = venn.colors,
-                                category = c("100x", "1000x"))
+                                category = c("30cpc", "3cpc"))
 grid.draw(venn.plot)
 
 
 
 
-#'Barcode Venn diagrams for 100x and 1000x infective libraries
+#'Barcode Venn diagrams for 30cpc and 3cpc infective libraries
 #'===================
 RNA.library <- complete.library[-grep("DNAse",Group)]
-total.100x <- unique(RNA.library[grep("100x",Group)]$BC)
-total.1000x <- unique(RNA.library[grep("1000x",Group)]$BC)
+total.30cpc <- unique(RNA.library[grep("30cpc",Group)]$BC)
+total.3cpc <- unique(RNA.library[grep("3cpc",Group)]$BC)
 
 
-venn.area1 <- length(total.100x)
-venn.area2 <- length(total.1000x)
+venn.area1 <- length(total.30cpc)
+venn.area2 <- length(total.3cpc)
 
-venn.n12 <- length(intersect(total.100x,total.1000x))
+venn.n12 <- length(intersect(total.30cpc,total.3cpc))
 
 venn.colors <- c("cornflower blue", "red") 
 grid.newpage()
@@ -205,20 +205,20 @@ venn.plot <- draw.pairwise.venn(area1    = venn.area1,
                               cex      = 2,
                               cat.cex  = 2,
                               cat.col  = venn.colors,
-                              category = c("100x", "1000x"))
+                              category = c("30cpc", "3cpc"))
 grid.draw(venn.plot)
 
-#'Fragment Venn diagrams for 100x and 1000x infective libraries
+#'Fragment Venn diagrams for 30cpc and 3cpc infective libraries
 #'===================
 
-total.100x <- unique(RNA.library[grep("100x",Group)]$Sequence)
-total.1000x <- unique(RNA.library[grep("1000x",Group)]$Sequence)
+total.30cpc <- unique(RNA.library[grep("30cpc",Group)]$Sequence)
+total.3cpc <- unique(RNA.library[grep("3cpc",Group)]$Sequence)
 
 
-venn.area1 <- length(total.100x)
-venn.area2 <- length(total.1000x)
+venn.area1 <- length(total.30cpc)
+venn.area2 <- length(total.3cpc)
 
-venn.n12 <- length(intersect(total.100x,total.1000x))
+venn.n12 <- length(intersect(total.30cpc,total.3cpc))
 
 
 grid.newpage()
@@ -232,5 +232,5 @@ venn.plot <- draw.pairwise.venn(area1    = venn.area1,
                                 cex      = 2,
                                 cat.cex  = 2,
                                 cat.col  = venn.colors,
-                                category = c("100x", "1000x"))
+                                category = c("30cpc", "3cpc"))
 grid.draw(venn.plot)

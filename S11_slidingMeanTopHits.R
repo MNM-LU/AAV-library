@@ -40,9 +40,9 @@ select.samples$Group[select.samples$Group== "mRNA_30cpc_HEK293T"] <- "mRNA_30cpc
 select.samples <- select.samples[-grep("4wks|mRNA_3cpc_pNeuron_RNA",select.samples$Group),]
 
 select.samples.merge <- data.table::copy(select.samples)
-select.samples.merge$Lib <- "100x"
-select.samples.merge$Lib[grep("1000x",select.samples.merge$Group)] <- "1000x"
-select.samples.merge[,Group:=gsub("100x|1000x","",Group)]
+select.samples.merge$Lib <- "30cpc"
+select.samples.merge$Lib[grep("3cpc",select.samples.merge$Group)] <- "3cpc"
+select.samples.merge[,Group:=gsub("30cpc|3cpc","",Group)]
 
 setkey(select.samples.merge,Group)
 select.samples.merge.binPos <- select.samples.merge[c("CNS_Str","CNS_Th","CNS_Ctx","CNS_SN")]

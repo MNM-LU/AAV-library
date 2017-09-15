@@ -95,15 +95,15 @@ all.samples <- all.samples["Def"]
 setkey(all.samples,Group)
 total.AAV.samples <- all.samples[Group!="DNA_pscAAVlib" & Group!="DNA_pscAAVlib_Prep2" & Group!="DNA_AAVlib_DNAse_3cpc" & Group!="DNA_AAVlib_DNAse_30cpc"]
 #total.AAV.samples <- total.AAV.samples[!grepl("4wks",total.AAV.samples$Group)]
-transported.AAV.samples.100x <- total.AAV.samples[grepl("100x_SN|100x_Th|100x_Ctx",total.AAV.samples$Group)]
-transported.AAV.samples.1000x <- total.AAV.samples[grepl("1000x_SN|100x_Th|1000x_Ctx",total.AAV.samples$Group)]
+transported.AAV.samples.30cpc <- total.AAV.samples[grepl("mRNA_30cpc_SN|mRNA_30cpc_Th|mRNA_30cpc_Ctx",total.AAV.samples$Group)]
+transported.AAV.samples.3cpc <- total.AAV.samples[grepl("mRNA_3cpc_SN|30cpc_Th|mRNA_3cpc_Ctx",total.AAV.samples$Group)]
 total.AAV.samples[,Group := "mRNA_All"]
-transported.AAV.samples.100x[,Group := "mRNA_30cpc_Trsp"]
-transported.AAV.samples.1000x[,Group := "mRNA_3cpc_Trsp"]
+transported.AAV.samples.30cpc[,Group := "mRNA_30cpc_Trsp"]
+transported.AAV.samples.3cpc[,Group := "mRNA_3cpc_Trsp"]
 
-all.samples <- rbind(all.samples,total.AAV.samples,transported.AAV.samples.100x,transported.AAV.samples.1000x)
+all.samples <- rbind(all.samples,total.AAV.samples,transported.AAV.samples.30cpc,transported.AAV.samples.3cpc)
 
-rm(total.AAV.samples,transported.AAV.samples.100x,transported.AAV.samples.1000x)
+rm(total.AAV.samples,transported.AAV.samples.30cpc,transported.AAV.samples.3cpc)
 
 setkeyv(all.samples,c("Group","Category","GeneName","structure","start","width","Sequence","seqlength"))
 

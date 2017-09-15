@@ -1,3 +1,0 @@
-primNeuronsNr6_1000x_RNA-30	30_S30_L00	mRNA_3cpc_pNeuron_RNA
-RatNr25_4wks_Untreat_Mu-13	FirstRound/13_S13_L00	PerNUntreat_Mu_4wks
-RatNr25_4wks_Untreat_Sc-14	FirstRound/14_S14_L00	PerNUntreat_Sc_4wks
