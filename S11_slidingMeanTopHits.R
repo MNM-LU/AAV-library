@@ -35,17 +35,15 @@ suppressPackageStartupMessages(library(pastecs))
 #'Selection of relevant samples
 #'===================
 select.samples <- readRDS("data/allSamplesDataTable.RDS")
-select.samples$Group[select.samples$Group== "mRNA_3cpc_HEK293T"] <- "mRNA_3cpc_HEK293T"
-select.samples$Group[select.samples$Group== "mRNA_30cpc_HEK293T"] <- "mRNA_30cpc_HEK293T"
 select.samples <- select.samples[-grep("4wks|mRNA_3cpc_pNeuron_RNA",select.samples$Group),]
 
 select.samples.merge <- data.table::copy(select.samples)
 select.samples.merge$Lib <- "30cpc"
 select.samples.merge$Lib[grep("3cpc",select.samples.merge$Group)] <- "3cpc"
-select.samples.merge[,Group:=gsub("30cpc|3cpc","",Group)]
+select.samples.merge[,Group:=gsub("_30cpc|_3cpc","",Group)]
 
 setkey(select.samples.merge,Group)
-select.samples.merge.binPos <- select.samples.merge[c("CNS_Str","CNS_Th","CNS_Ctx","CNS_SN")]
+select.samples.merge.binPos <- select.samples.merge[c("mRNA_Str","mRNA_Th","mRNA_Ctx","mRNA_SN")]
 
 #'Summarize data over each aa
 #'===================
@@ -185,10 +183,10 @@ setorder(select.samples.windowBin.allTop,Group,Rank)
 
 setkey(select.samples.windowBin.allTop,Group)
 
-v1 <- select.samples.windowBin.allTop["CNS_Str"]$GeneAA
-v2 <- select.samples.windowBin.allTop["CNS_Th"]$GeneAA
-v3 <- select.samples.windowBin.allTop["CNS_Ctx"]$GeneAA
-v4 <- select.samples.windowBin.allTop["CNS_SN"]$GeneAA
+v1 <- select.samples.windowBin.allTop["mRNA_Str"]$GeneAA
+v2 <- select.samples.windowBin.allTop["mRNA_Th"]$GeneAA
+v3 <- select.samples.windowBin.allTop["mRNA_Ctx"]$GeneAA
+v4 <- select.samples.windowBin.allTop["mRNA_SN"]$GeneAA
 
 
 o <- 0.05

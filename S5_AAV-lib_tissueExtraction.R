@@ -45,7 +45,7 @@ load("data/LUTdna.rda")
 load.list <- read.table("input/loadlist.txt", header = FALSE, skip = 0, sep="\t",
                         stringsAsFactors = FALSE, fill=TRUE)
 
-dataDir <- "seqFiles/RNA"
+dataDir <- "seqFiles"
 colnames(load.list) <- c("Name", "BaseName","GroupName")
 
 log.table <- data.table(Name="Name",

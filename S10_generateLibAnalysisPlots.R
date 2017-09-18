@@ -47,27 +47,29 @@ opts_chunk$set(fig.width = 8, fig.height = 8)
 load("data/LUTdna.rda")
 complete.library <- readRDS("data/allSamplesDataTable.RDS")
 setkey(complete.library,Group)
-complete.library <- complete.library[-grep("4wk",Group)]
+complete.library <- complete.library[-grep("4wks",Group)]
 seq.arry <- LUT.dna$LUTnr
 seq.lib <- unique(complete.library[J("DNA_pscAAVlib")]$LUTnr)
 seq.AAV <- unique(complete.library[J("mRNA_All")]$LUTnr)
-seq.DNAse <- unique(complete.library[grep("AAV_DNAse",Group)]$LUTnr)
+seq.DNAse <- unique(complete.library[grep("DNA_AAVlib_DNAse",Group)]$LUTnr)
 seq.str <- unique(complete.library[grep("Str",Group)]$LUTnr)
 seq.Trsp <- unique(complete.library[grep("SN|Ctx|Th",Group)]$LUTnr)
 
 venn.area1 <- length(seq.arry)
 venn.area2 <- length(seq.lib)
-venn.area3 <- length(seq.AAV)
-venn.area4 <- length(seq.str)
-venn.area5 <- length(seq.Trsp)
+venn.area3 <- length(seq.DNAse)
+venn.area4 <- length(seq.AAV)
+venn.area5 <- length(seq.str)
+venn.area6 <- length(seq.Trsp)
 
 
 isect.Str_Trsp <- length(intersect(seq.str, seq.Trsp))
 
 venn.n12 <- length(intersect(seq.arry,seq.lib))
-venn.n23 <- length(intersect(seq.lib,seq.AAV))
-venn.n13 <- length(intersect(seq.arry,seq.AAV))
-venn.n123 <- length(intersect(intersect(seq.arry,seq.lib),seq.AAV))
+venn.n23 <- length(intersect(seq.lib,seq.DNAse))
+
+venn.n13 <- length(intersect(seq.arry,seq.DNAse))
+venn.n123 <- length(intersect(intersect(seq.arry,seq.lib),seq.DNAse))
 
 
 output.table <- data.frame(NameArray=character(),
