@@ -1,6 +1,6 @@
 
 #' ---
-#' title: "Library identification"
+#' title: "Reverse mapping of CustumArray oligos to original proteins"
 #' author: "Tomas Bjorklund"
 #' output: 
 #'  pdf_document:
@@ -8,7 +8,7 @@
 #' geometry: margin=0.7in
 #' ---
 
-#' This workflow aligns the library fragments to the full reference sequences using Bowtie2. 
+#' This workflow aligns the short oligos from the CustomArray order to the full reference sequences using Bowtie2. This enables the mapping to all genes sharing the same sequence.
 suppressPackageStartupMessages(library(knitr)) 
 suppressPackageStartupMessages(library(data.table))
 suppressPackageStartupMessages(library(ShortRead))

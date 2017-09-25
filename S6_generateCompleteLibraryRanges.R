@@ -8,7 +8,7 @@
 #' geometry: margin=0.7in
 #' ---
 
-#' This workflow clusters every read from each unique barcode from the library and matches them to the relevant ranges.  
+#' This short script generates a lookup scoring table of the AAV plasmid library so that it follows the same structure as the mRNA samples so that they can be compared for coverages.  
 
 
 suppressPackageStartupMessages(library(knitr))

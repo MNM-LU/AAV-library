@@ -8,7 +8,7 @@
 #' geometry: margin=0.7in
 #' ---
 
-#' This workflow normalizes read counts between samples.  
+#' This workflow normalizes read counts between samples to compensate for variable read depth.  
 
 
 suppressPackageStartupMessages(library(knitr))

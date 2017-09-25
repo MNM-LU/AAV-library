@@ -1,6 +1,6 @@
 
 #' ---
-#' title: "Pairwise sample analysis output"
+#' title: "Analysis plots for AAV plasmid library and coverage"
 #' author: "Tomas Bjorklund"
 #' output: 
 #'  pdf_document:
@@ -9,7 +9,8 @@
 #' fontsize: 10pt
 #' ---
 
-#' This is the final script presenting top candidates and overview plots.  
+#' This script provides a number of measurements on the AAV plasmid library and the readouts in vitro & in vivo.  
+
 suppressPackageStartupMessages(library(knitr))
 
 opts_chunk$set(fig.width = 5, fig.height = 5) #Full height 11

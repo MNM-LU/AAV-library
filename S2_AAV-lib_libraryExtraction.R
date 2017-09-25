@@ -1,6 +1,6 @@
 
 #' ---
-#' title: "Library analysis output"
+#' title: "Extraction of Barcodes and gene fragments"
 #' author: "Tomas Bjorklund"
 #' output: 
 #'  pdf_document:
@@ -8,7 +8,7 @@
 #' geometry: margin=0.7in
 #' ---
 
-#' This workflow brings together FastQ files containing barcodes and the gene fragments synthesized with the CustomArray. Requires bbmap2. The fragments are then suitable for alignment to reference sequences using blastn.  
+#' This workflow extracts barcodes and the gene fragments synthesized with the CustomArray using bbmap2. The fragments are then suitable for alignment to reference sequences using blastn.  
 suppressPackageStartupMessages(library(knitr))
 suppressPackageStartupMessages(library(ShortRead))
 suppressPackageStartupMessages(library(parallel))

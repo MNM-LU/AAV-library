@@ -1,6 +1,6 @@
 
 #' ---
-#' title: "Barcoded extraction and reduction from RNA samples"
+#' title: "Library fragment alignment"
 #' author: "Tomas Bjorklund"
 #' output: 
 #'  pdf_document:
@@ -8,7 +8,7 @@
 #' geometry: margin=0.7in
 #' ---
 
-#' This workflow identifies correct amplicons from in vivo, in vitro samples and extracts the barcode. Barcodes are then reduced using the starcode algorithm.  
+#' This workflow identifies correct fragments from the Cre-recombined AAV plasmid library and aligns them to the CustumArray ordered nucleotide fragments using Blastn. Consistant mutations in each fragment/barcode combination are also registered as is the putity of each barcode.
 
 
 suppressPackageStartupMessages(library(knitr))

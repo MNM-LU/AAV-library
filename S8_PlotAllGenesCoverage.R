@@ -9,7 +9,7 @@
 #' fontsize: 9.5pt
 #' ---
 
-#' This is the final script presenting top candidates and overview plots.  
+#' This script presents overview ploits and top candidates.  
 suppressPackageStartupMessages(library(knitr))
 
 opts_chunk$set(fig.width = 7.3, fig.height = 10.1) #Full height 11
@@ -197,7 +197,7 @@ if (PlotBC){
 setorder(select.samples.binPos,Group,-NormCount,-BCcount,-AnimalCount)
 }
 setkey(select.samples.binPos,Group)
-select.samples.top <- select.samples.binPos[, head(.SD, 20), by=Group]
+select.samples.top <- select.samples.binPos[, head(.SD, 25), by=Group]
 top.sample <- select.samples.top[J(names(fill.values)[1])]
 bottom.sample <- select.samples.top[J(names(fill.values)[2])]
 top.sample[,c("Group"):=NULL]
@@ -216,89 +216,11 @@ return(out.list)
 #'Analyze samples
 #'===================
 
-plotPair("mRNA_All","DNA_pscAAVlib")$plot
-plotPair("DNA_pscAAVlib_Prep2","DNA_pscAAVlib")$plot
-plotPair("DNA_AAVlib_DNAse_3cpc","DNA_AAVlib_DNAse_30cpc")$plot
-plotPair("DNA_AAVlib_DNAse_30cpc","DNA_pscAAVlib_Prep2")$plot
+#===================
+# Sample plotting
+#===================
 
-#' 30cpc analysis
-out.plot.list <- plotPair("mRNA_30cpc_Trsp","mRNA_30cpc_Str")
-out.plot.list$plot
-knitr::kable(out.plot.list$top, format = "markdown")
-knitr::kable(out.plot.list$bottom, format = "markdown")
-
-out.plot.list <- plotPair("mRNA_30cpc_Th","mRNA_30cpc_Str")
-out.plot.list$plot
-knitr::kable(out.plot.list$top, format = "markdown")
-
-out.plot.list <- plotPair("mRNA_30cpc_Ctx","mRNA_30cpc_Str")
-out.plot.list$plot
-knitr::kable(out.plot.list$top, format = "markdown")
-
-out.plot.list <- plotPair("mRNA_30cpc_SN","mRNA_30cpc_Str")
-out.plot.list$plot
-knitr::kable(out.plot.list$top, format = "markdown")
-
-plotPair("mRNA_30cpc_SN","mRNA_30cpc_Th")$plot
-plotPair("mRNA_30cpc_Ctx","mRNA_30cpc_Th")$plot
-plotPair("mRNA_30cpc_SN","mRNA_30cpc_Ctx")$plot
-
-#' 3cpc analysis
-out.plot.list <- plotPair("mRNA_3cpc_Trsp","mRNA_3cpc_Str")
-out.plot.list$plot
-knitr::kable(out.plot.list$top, format = "markdown")
-knitr::kable(out.plot.list$bottom, format = "markdown")
-
-out.plot.list <- plotPair("mRNA_3cpc_Th","mRNA_3cpc_Str")
-out.plot.list$plot
-knitr::kable(out.plot.list$top, format = "markdown")
-
-out.plot.list <- plotPair("mRNA_3cpc_Ctx","mRNA_3cpc_Str")
-out.plot.list$plot
-knitr::kable(out.plot.list$top, format = "markdown")
-
-out.plot.list <- plotPair("mRNA_3cpc_SN","mRNA_3cpc_Str")
-out.plot.list$plot
-knitr::kable(out.plot.list$top, format = "markdown")
-
-plotPair("mRNA_3cpc_SN","mRNA_3cpc_Th")$plot
-plotPair("mRNA_3cpc_Ctx","mRNA_3cpc_Th")$plot
-plotPair("mRNA_3cpc_SN","mRNA_3cpc_Ctx")$plot
-
-#' 3cpc vs 30cpc analysis
-plotPair("mRNA_3cpc_Trsp","mRNA_30cpc_Trsp")$plot
-plotPair("mRNA_3cpc_Str","mRNA_30cpc_Str")$plot
-plotPair("mRNA_3cpc_Th","mRNA_30cpc_Th")$plot
-plotPair("mRNA_3cpc_Ctx","mRNA_30cpc_Ctx")$plot
-plotPair("mRNA_3cpc_SN","mRNA_30cpc_SN")$plot
-
-#' 8wks vs 4wks analysis
-
-plotPair("mRNA_30cpc_Str_4wks","mRNA_30cpc_Str")$plot
-plotPair("mRNA_30cpc_Th_4wks","mRNA_30cpc_Th")$plot
-plotPair("mRNA_30cpc_Ctx_4wks","mRNA_30cpc_Ctx")$plot
-plotPair("mRNA_30cpc_SN_4wks","mRNA_30cpc_SN")$plot
-
-plotPair("mRNA_3cpc_Str_4wks","mRNA_3cpc_Str")$plot
-plotPair("mRNA_3cpc_Th_4wks","mRNA_3cpc_Th")$plot
-plotPair("mRNA_3cpc_Ctx_4wks","mRNA_3cpc_Ctx")$plot
-plotPair("mRNA_3cpc_SN_4wks","mRNA_3cpc_SN")$plot
-
-#' In vitro analysis
-
-out.plot.list <- plotPair("mRNA_3cpc_pNeuron","mRNA_30cpc_pNeuron")
-out.plot.list$plot
-knitr::kable(out.plot.list$top, format = "markdown")
-knitr::kable(out.plot.list$bottom, format = "markdown")
-
-out.plot.list <- plotPair("mRNA_3cpc_HEK293T","mRNA_30cpc_HEK293T")
-out.plot.list$plot
-knitr::kable(out.plot.list$top, format = "markdown")
-knitr::kable(out.plot.list$bottom, format = "markdown")
-
-
-
-#' Old binning analysis
+#' Binning analysis version 1
 
 plotPair("mRNA_All","DNA_pscAAVlib",PlotBC=FALSE)$plot
 #' 30cpc analysis
@@ -397,6 +319,87 @@ plotPair("mRNA_3cpc_Trsp","mRNA_30cpc_Trsp",size.bin=2,winWidth=0,PlotBC=FALSE)$
 plotPair("mRNA_3cpc_pNeuron","mRNA_30cpc_pNeuron",size.bin=2,winWidth=0,PlotBC=FALSE)$plot
 plotPair("mRNA_3cpc_HEK293T","mRNA_30cpc_HEK293T",size.bin=2,winWidth=0,PlotBC=FALSE)$plot
 
+#' Binning analysis version 2
+
+plotPair("mRNA_All","DNA_pscAAVlib")$plot
+plotPair("DNA_pscAAVlib_Prep2","DNA_pscAAVlib")$plot
+plotPair("DNA_AAVlib_DNAse_3cpc","DNA_AAVlib_DNAse_30cpc")$plot
+plotPair("DNA_AAVlib_DNAse_30cpc","DNA_pscAAVlib_Prep2")$plot
+
+#' 30cpc analysis
+out.plot.list <- plotPair("mRNA_30cpc_Trsp","mRNA_30cpc_Str")
+out.plot.list$plot
+knitr::kable(out.plot.list$top, format = "markdown")
+knitr::kable(out.plot.list$bottom, format = "markdown")
+
+out.plot.list <- plotPair("mRNA_30cpc_Th","mRNA_30cpc_Str")
+out.plot.list$plot
+knitr::kable(out.plot.list$top, format = "markdown")
+
+out.plot.list <- plotPair("mRNA_30cpc_Ctx","mRNA_30cpc_Str")
+out.plot.list$plot
+knitr::kable(out.plot.list$top, format = "markdown")
+
+out.plot.list <- plotPair("mRNA_30cpc_SN","mRNA_30cpc_Str")
+out.plot.list$plot
+knitr::kable(out.plot.list$top, format = "markdown")
+
+plotPair("mRNA_30cpc_SN","mRNA_30cpc_Th")$plot
+plotPair("mRNA_30cpc_Ctx","mRNA_30cpc_Th")$plot
+plotPair("mRNA_30cpc_SN","mRNA_30cpc_Ctx")$plot
+
+#' 3cpc analysis
+out.plot.list <- plotPair("mRNA_3cpc_Trsp","mRNA_3cpc_Str")
+out.plot.list$plot
+knitr::kable(out.plot.list$top, format = "markdown")
+knitr::kable(out.plot.list$bottom, format = "markdown")
+
+out.plot.list <- plotPair("mRNA_3cpc_Th","mRNA_3cpc_Str")
+out.plot.list$plot
+knitr::kable(out.plot.list$top, format = "markdown")
+
+out.plot.list <- plotPair("mRNA_3cpc_Ctx","mRNA_3cpc_Str")
+out.plot.list$plot
+knitr::kable(out.plot.list$top, format = "markdown")
+
+out.plot.list <- plotPair("mRNA_3cpc_SN","mRNA_3cpc_Str")
+out.plot.list$plot
+knitr::kable(out.plot.list$top, format = "markdown")
+
+plotPair("mRNA_3cpc_SN","mRNA_3cpc_Th")$plot
+plotPair("mRNA_3cpc_Ctx","mRNA_3cpc_Th")$plot
+plotPair("mRNA_3cpc_SN","mRNA_3cpc_Ctx")$plot
+
+#' 3cpc vs 30cpc analysis
+plotPair("mRNA_3cpc_Trsp","mRNA_30cpc_Trsp")$plot
+plotPair("mRNA_3cpc_Str","mRNA_30cpc_Str")$plot
+plotPair("mRNA_3cpc_Th","mRNA_30cpc_Th")$plot
+plotPair("mRNA_3cpc_Ctx","mRNA_30cpc_Ctx")$plot
+plotPair("mRNA_3cpc_SN","mRNA_30cpc_SN")$plot
+
+#' 8wks vs 4wks analysis
+
+plotPair("mRNA_30cpc_Str_4wks","mRNA_30cpc_Str")$plot
+plotPair("mRNA_30cpc_Th_4wks","mRNA_30cpc_Th")$plot
+plotPair("mRNA_30cpc_Ctx_4wks","mRNA_30cpc_Ctx")$plot
+plotPair("mRNA_30cpc_SN_4wks","mRNA_30cpc_SN")$plot
+
+plotPair("mRNA_3cpc_Str_4wks","mRNA_3cpc_Str")$plot
+plotPair("mRNA_3cpc_Th_4wks","mRNA_3cpc_Th")$plot
+plotPair("mRNA_3cpc_Ctx_4wks","mRNA_3cpc_Ctx")$plot
+plotPair("mRNA_3cpc_SN_4wks","mRNA_3cpc_SN")$plot
+
+#' In vitro analysis
+
+out.plot.list <- plotPair("mRNA_3cpc_pNeuron","mRNA_30cpc_pNeuron")
+out.plot.list$plot
+knitr::kable(out.plot.list$top, format = "markdown")
+knitr::kable(out.plot.list$bottom, format = "markdown")
+
+out.plot.list <- plotPair("mRNA_3cpc_HEK293T","mRNA_30cpc_HEK293T")
+out.plot.list$plot
+knitr::kable(out.plot.list$top, format = "markdown")
+knitr::kable(out.plot.list$bottom, format = "markdown")
 
 devtools::session_info()
 

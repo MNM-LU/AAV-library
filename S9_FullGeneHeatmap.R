@@ -1,6 +1,6 @@
 
 #' ---
-#' title: "Top 10 heatmap analysis output"
+#' title: "Heatmap analysis output"
 #' author: "Tomas Bjorklund"
 #' output: 
 #'  pdf_document:
@@ -9,13 +9,14 @@
 #' fontsize: 10pt
 #' ---
 
-#' This is the final script presenting top 10 candidates as heatmap plots.  
+#' A secondary approach to visualizing the top candidates and their relative abundance.  
 suppressPackageStartupMessages(library(knitr))
+#+ setup, include=FALSE
 
 opts_chunk$set(fig.width = 8, fig.height = 10.2)
 opts_chunk$set(tidy=TRUE)
 opts_chunk$set(comment = NA)
-#+ setup, include=FALSE
+
 suppressPackageStartupMessages(library(ggplot2))
 suppressPackageStartupMessages(library(ggbio))
 suppressPackageStartupMessages(library(data.table))
@@ -32,6 +33,7 @@ suppressPackageStartupMessages(library(devtools))
 
 #'Selection of relevant samples
 #'===================
+options(datatable.verbose=FALSE)
 select.samples <- readRDS("data/allSamplesDataTable.RDS")
 select.samples$Group[select.samples$Group== "mRNA_3cpc_HEK293T"] <- "mRNA_3cpc_HEK293T"
 select.samples$Group[select.samples$Group== "mRNA_30cpc_HEK293T"] <- "mRNA_30cpc_HEK293T"
@@ -107,13 +109,9 @@ select.samples.binPos[,BCcountNanim:=BCcountN+AnimalCount]
 select.samples.binPos[,BCcountanim:=BCcount+AnimalCount]
 select.samples.binPos[,BCcountNseq:=BCcountN/seqlength]
 select.samples.binPos[,NormCountBC:=BCcountNseq*NormCount]
-# select.samples.binPos[,libNormBCNanim:=libNormBC*AnimalCount]
-# select.samples.binPos[,libNormBCNseq:=libNormBC/seqlength]
-# select.samples.binPos[,libNormBCNormCount:=libNormBC*NormCount]
 
 
 select.samples.binPos[,GeneAA:=paste(GeneName," [",AA,"] - ", mainStruct, sep="")]
-
 
 
 #'Plot Heatmaps split by Category
@@ -207,8 +205,4 @@ plotPos(select.samples.binPos,"NormCountBC",c("mRNA_30cpc_pNeuron","mRNA_3cpc_pN
 plotPos(select.samples.binPos,"NormCountBC",c("mRNA_30cpc_Str","mRNA_30cpc_Th","mRNA_30cpc_Ctx","mRNA_30cpc_SN"))
 plotPos(select.samples.binPos,"NormCountBC",c("mRNA_3cpc_Str","mRNA_3cpc_Th","mRNA_3cpc_Ctx","mRNA_3cpc_SN"))
 
-
 devtools::session_info()
-
-
-

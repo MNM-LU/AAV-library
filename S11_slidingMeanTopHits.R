@@ -9,7 +9,7 @@
 #' fontsize: 10pt
 #' ---
 
-#' This is the final script presenting top 23 candidates as connectivity graph.  
+#' This script presents top 23 candidates as connectivity graph.  
 suppressPackageStartupMessages(library(knitr))
 opts_chunk$set(fig.width = 8, fig.height = 6.5)
 opts_chunk$set(tidy=TRUE)

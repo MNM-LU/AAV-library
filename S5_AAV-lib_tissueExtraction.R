@@ -1,6 +1,6 @@
 
 #' ---
-#' title: "Tissue RNA analysis"
+#' title: "Barcoded extraction and reduction from RNA samples"
 #' author: "Tomas Bjorklund"
 #' output:
 #'  pdf_document:
@@ -8,7 +8,7 @@
 #' geometry: margin=0.7in
 #' ---
 
-#' This workflow brings together FastQ files containing barcodes expresssed in vivo. It also includes starcode based false barcode reduction. 
+#' This workflow identifies correct amplicons from in vivo & in vitro samples and extracts the barcode. Barcodes are then reduced using the starcode algorithm.  
 suppressPackageStartupMessages(library(knitr))
 
 opts_chunk$set(tidy=TRUE)
