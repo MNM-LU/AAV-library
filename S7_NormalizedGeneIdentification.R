@@ -10,11 +10,7 @@
 
 #' This workflow normalizes read counts between samples to compensate for variable read depth.  
 
-
 suppressPackageStartupMessages(library(knitr))
-
-opts_chunk$set(tidy=TRUE)
-opts_chunk$set(comment = NA)
 #+ setup, include=FALSE
 suppressPackageStartupMessages(library(GenomicAlignments))
 suppressPackageStartupMessages(library(data.table))
@@ -24,6 +20,12 @@ suppressPackageStartupMessages(library(multicore))
 suppressPackageStartupMessages(library(plyr))
 suppressPackageStartupMessages(library(Hmisc))
 suppressPackageStartupMessages(library(devtools))
+suppressPackageStartupMessages(library(kableExtra))
+
+opts_chunk$set(fig.width = 7.5, fig.height = 8)
+opts_chunk$set(tidy=TRUE)
+opts_chunk$set(comment = NA)
+
 
 #' Generate load list and grouping names
 #' ============================

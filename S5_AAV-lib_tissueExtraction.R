@@ -8,11 +8,8 @@
 #' geometry: margin=0.7in
 #' ---
 
-#' This workflow identifies correct amplicons from in vivo & in vitro samples and extracts the barcode. Barcodes are then reduced using the starcode algorithm.  
+#' This workflow identifies correct amplicons from in vivo & in vitro samples and extracts the barcode. Barcodes are then reduced using the starcode algorithm.
 suppressPackageStartupMessages(library(knitr))
-
-opts_chunk$set(tidy=TRUE)
-opts_chunk$set(comment = NA)
 #+ setup, include=FALSE
 suppressPackageStartupMessages(library(ShortRead))
 suppressPackageStartupMessages(library(ggplot2))
@@ -33,6 +30,12 @@ suppressPackageStartupMessages(library(biovizBase))
 suppressPackageStartupMessages(library(Gviz))
 suppressPackageStartupMessages(library(plyr))
 suppressPackageStartupMessages(library(devtools))
+suppressPackageStartupMessages(library(kableExtra))
+
+opts_chunk$set(fig.width = 7.5, fig.height = 8)
+opts_chunk$set(tidy=TRUE)
+opts_chunk$set(comment = NA)
+
 
 #' Analyze tissue RNA
 #' ============================
@@ -199,7 +202,7 @@ return(log.table)
 
 all.logs <- lapply(1:nrow(load.list), analyzeTissue)
 all.logs <- rbindlist(all.logs, use.names=FALSE )
-knitr::kable(all.logs, format = "markdown")
+knitr::kable(all.logs, format = "latex", booktabs = T) %>%   kable_styling(latex_options = c("striped", "scale_down","repeat_header")) %>%   landscape()
 
 unlink(paste(tempdir(), "/*", sep = ""), recursive = FALSE, force = FALSE) #Cleanup of temp files
 

@@ -12,10 +12,6 @@
 #' This script provides a number of measurements on the AAV plasmid library and the readouts in vitro & in vivo.  
 
 suppressPackageStartupMessages(library(knitr))
-
-opts_chunk$set(fig.width = 5, fig.height = 5) #Full height 11
-opts_chunk$set(tidy=TRUE)
-opts_chunk$set(comment = NA)
 #+ setup, include=FALSE
 suppressPackageStartupMessages(library(GenomicAlignments))
 suppressPackageStartupMessages(library(ggplot2))
@@ -23,6 +19,11 @@ suppressPackageStartupMessages(library(VennDiagram))
 suppressPackageStartupMessages(library(data.table))
 suppressPackageStartupMessages(library(beanplot))
 suppressPackageStartupMessages(library(scales))
+suppressPackageStartupMessages(library(kableExtra))
+
+opts_chunk$set(fig.width = 5, fig.height = 5) #Full height 11
+opts_chunk$set(tidy=TRUE)
+opts_chunk$set(comment = NA)
 
 #'Generation plots for library purity
 #'===================

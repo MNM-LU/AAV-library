@@ -9,11 +9,8 @@
 #' fontsize: 10pt
 #' ---
 
-#' This script presents top 23 candidates as connectivity graph.  
+#' This script presents top 23 candidates as connectivity graph.   
 suppressPackageStartupMessages(library(knitr))
-opts_chunk$set(fig.width = 8, fig.height = 6.5)
-opts_chunk$set(tidy=TRUE)
-opts_chunk$set(comment = NA)
 #+ setup, include=FALSE
 suppressPackageStartupMessages(library(ggplot2))
 suppressPackageStartupMessages(library(ggbio))
@@ -30,6 +27,11 @@ suppressPackageStartupMessages(library(reshape2))
 suppressPackageStartupMessages(library(devtools))
 suppressPackageStartupMessages(library(grid))
 suppressPackageStartupMessages(library(pastecs))
+suppressPackageStartupMessages(library(kableExtra))
+
+opts_chunk$set(fig.width = 8, fig.height = 6.5)
+opts_chunk$set(tidy=TRUE)
+opts_chunk$set(comment = NA)
 
 
 #'Selection of relevant samples

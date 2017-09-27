@@ -10,12 +10,14 @@
 
 #' This workflow extracts barcodes and the gene fragments synthesized with the CustomArray using bbmap2. The fragments are then suitable for alignment to reference sequences using blastn.  
 suppressPackageStartupMessages(library(knitr))
+#+ setup, include=FALSE
 suppressPackageStartupMessages(library(ShortRead))
 suppressPackageStartupMessages(library(parallel))
 suppressPackageStartupMessages(library(doParallel))
 suppressPackageStartupMessages(library(data.table))
 suppressPackageStartupMessages(library(devtools))
 suppressPackageStartupMessages(library(Hmisc))
+suppressPackageStartupMessages(library(kableExtra))
 
 opts_chunk$set(fig.width = 7.5, fig.height = 8)
 opts_chunk$set(tidy=TRUE)
@@ -35,7 +37,8 @@ paired.alignment <- as.logical(config$Value[5])
 
 #'Analysis parameters
 #'===================
-knitr::kable(config, format = "markdown")
+knitr::kable(config, format = "latex", booktabs = T) %>%
+  kable_styling(latex_options = "striped")
 run.subset <- as.logical(config$Value[6])
 max.cores <- as.integer(config$Value[7])
 subset.count <- as.integer(config$Value[8])
@@ -63,7 +66,8 @@ sys.out <- as.data.frame(sys.out)
 colnames(sys.out) <- c("bbduk2 Identification of real amplicons")
 invisible(sys.out[" "] <- " ")
 lengthOut <- (nrow(sys.out))
-knitr::kable(sys.out[3:lengthOut,], format = "markdown")
+knitr::kable(sys.out[3:lengthOut,], format = "latex", booktabs = T) %>%
+  kable_styling(latex_options = "striped")
 
 in.name.P5 <- out.name.P5
 in.name.P7 <- out.name.P7
@@ -114,7 +118,8 @@ in.name.P5 <- out.name.P5
 colnames(sys.out) <- c("bbduk2 Extraction of barcodes")
 invisible(sys.out[" "] <- " ")
 lengthOut <- (nrow(sys.out))
-knitr::kable(sys.out[3:lengthOut,], format = "markdown")
+knitr::kable(sys.out[3:lengthOut,], format = "latex", booktabs = T) %>%
+  kable_styling(latex_options = "striped")
 rm(sys.out)
 
 reads.BC <- readFastq(in.name.P5)
@@ -143,7 +148,8 @@ sys.out <- as.data.frame(sys.out)
 colnames(sys.out) <- c("bbduk2 extraction of fragments")
 invisible(sys.out[" "] <- " ")
 lengthOut <- (nrow(sys.out))
-knitr::kable(sys.out[3:lengthOut,], format = "markdown")
+knitr::kable(sys.out[3:lengthOut,], format = "latex", booktabs = T) %>%
+  kable_styling(latex_options = "striped")
 
 in.name.P7 <- out.name.P7
 
@@ -162,7 +168,8 @@ sys.out <- as.data.frame(sys.out)
 colnames(sys.out) <- c("pairfq pair matching")
 invisible(sys.out[" "] <- " ")
 lengthOut <- (nrow(sys.out))
-knitr::kable(sys.out[1:lengthOut,], format = "markdown")
+knitr::kable(sys.out[1:lengthOut,], format = "latex", booktabs = T) %>%
+  kable_styling(latex_options = "striped")
 rm(sys.out)
 
 

@@ -12,15 +12,18 @@
 
 
 suppressPackageStartupMessages(library(knitr))
-
-opts_chunk$set(tidy=TRUE)
-opts_chunk$set(comment = NA)
 #+ setup, include=FALSE
 suppressPackageStartupMessages(library(ShortRead))
 suppressPackageStartupMessages(library(parallel))
 suppressPackageStartupMessages(library(doParallel))
 suppressPackageStartupMessages(library(data.table))
 suppressPackageStartupMessages(library(devtools))
+suppressPackageStartupMessages(library(kableExtra))
+
+opts_chunk$set(fig.width = 7.5, fig.height = 8)
+opts_chunk$set(tidy=TRUE)
+opts_chunk$set(comment = NA)
+
 
 #' Generate library rage object
 #' ============================

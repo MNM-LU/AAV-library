@@ -10,21 +10,23 @@
 
 #' This workflow aligns the short oligos from the CustomArray order to the full reference sequences using Bowtie2. This enables the mapping to all genes sharing the same sequence.
 suppressPackageStartupMessages(library(knitr)) 
+#+ setup, include=FALSE
 suppressPackageStartupMessages(library(data.table))
 suppressPackageStartupMessages(library(ShortRead))
 suppressPackageStartupMessages(library(Hmisc))
 suppressPackageStartupMessages(library(GeneGA))
 suppressPackageStartupMessages(library(devtools))
+suppressPackageStartupMessages(library(kableExtra))
+
+opts_chunk$set(fig.width = 7.5, fig.height = 8)
+opts_chunk$set(tidy=TRUE)
+opts_chunk$set(comment = NA)
 
 source(file.path("functions", "GeneCodon.R"))
 #Override the GeneCodon function with local version containing human codons
 unlockBinding("GeneCodon", as.environment("package:GeneGA"))
 assign("GeneCodon", GeneCodon, as.environment("package:GeneGA"))
 
-
-opts_chunk$set(fig.width = 7.5, fig.height = 8)
-opts_chunk$set(tidy=TRUE)
-opts_chunk$set(comment = NA)
 
 #'Load sequences
 #'===================
@@ -134,7 +136,8 @@ sys.out <- as.data.frame(sys.out)
 colnames(sys.out) <- c("Bowtie 2 alignment to library")
 invisible(sys.out[" "] <- " ")
 lengthOut <- (nrow(sys.out))
-knitr::kable(sys.out[1:lengthOut,], format = "markdown")
+knitr::kable(sys.out[1:lengthOut,], format =  "latex", booktabs = T) %>%
+  kable_styling(latex_options = "striped")
 
 command.args <- paste("view -@ ",detectCores()," -Sb ", name.bowtie, ".sam > ",
                       name.bowtie, ".bam",  sep = "")
@@ -164,7 +167,8 @@ sys.out <- as.data.frame(sys.out)
 colnames(sys.out) <- c("Bowtie 2 alignment to library")
 invisible(sys.out[" "] <- " ")
 lengthOut <- (nrow(sys.out))
-knitr::kable(sys.out[1:lengthOut,], format = "markdown")
+knitr::kable(sys.out[1:lengthOut,], format =  "latex", booktabs = T) %>%
+  kable_styling(latex_options = "striped")
 
 command.args <- paste("view -@ ",detectCores()," -Sb ", name.bowtie, ".sam > ",
                       name.bowtie, ".bam",  sep = "")
@@ -194,7 +198,8 @@ sys.out <- as.data.frame(sys.out)
 colnames(sys.out) <- c("Bowtie 2 alignment to library")
 invisible(sys.out[" "] <- " ")
 lengthOut <- (nrow(sys.out))
-knitr::kable(sys.out[1:lengthOut,], format = "markdown")
+knitr::kable(sys.out[1:lengthOut,], format =  "latex", booktabs = T) %>%
+  kable_styling(latex_options = "striped")
 
 command.args <- paste("view -@ ",detectCores()," -Sb ", name.bowtie, ".sam > ",
                       name.bowtie, ".bam",  sep = "")
@@ -224,7 +229,8 @@ sys.out <- as.data.frame(sys.out)
 colnames(sys.out) <- c("Bowtie 2 alignment to library")
 invisible(sys.out[" "] <- " ")
 lengthOut <- (nrow(sys.out))
-knitr::kable(sys.out[1:lengthOut,], format = "markdown")
+knitr::kable(sys.out[1:lengthOut,], format =  "latex", booktabs = T) %>%
+  kable_styling(latex_options = "striped")
 
 command.args <- paste("view -@ ",detectCores()," -Sb ", name.bowtie, ".sam > ",
                       name.bowtie, ".bam",  sep = "")

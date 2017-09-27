@@ -12,9 +12,6 @@
 
 
 suppressPackageStartupMessages(library(knitr))
-
-opts_chunk$set(tidy=TRUE)
-opts_chunk$set(comment = NA)
 #+ setup, include=FALSE
 suppressPackageStartupMessages(library(ShortRead))
 suppressPackageStartupMessages(library(parallel))
@@ -32,7 +29,12 @@ suppressPackageStartupMessages(library(Hmisc))
 suppressPackageStartupMessages(library(matrixStats))
 suppressPackageStartupMessages(library(stringdist))
 suppressPackageStartupMessages(library(scales))
+suppressPackageStartupMessages(library(kableExtra))
+
+opts_chunk$set(fig.width = 7.5, fig.height = 8)
 opts_chunk$set(tidy=TRUE)
+opts_chunk$set(comment = NA)
+
 strt1<-Sys.time()
 
 #' Load the trimmed reads
@@ -83,7 +85,8 @@ sys.out <- as.data.frame(sys.out)
 
 colnames(sys.out) <- c("blastn database generation")
 invisible(sys.out[" "] <- " ")
-knitr::kable(sys.out[1:(nrow(sys.out)),], format = "markdown")
+knitr::kable(sys.out[1:(nrow(sys.out)),], format =  "latex", booktabs = T) %>%
+  kable_styling(latex_options = "striped")
 
 sys.out <-  system(paste("export SHELL=/bin/sh; cat ",fragments.unique.fa," | parallel --block ",
                          floor(length(unique.reads)/detectCores()),
@@ -104,7 +107,7 @@ if (length(grep("Warning",table.blastn$V1)) != 0) {
   warnings.out <- unique(table.blastn[grep("Warning",table.blastn$V1),])
   table.blastn <- table.blastn[-grep("Warning",table.blastn$V1),]
   setnames(warnings.out,"V1", c("blastn Warnings"))
-  knitr::kable(warnings.out[1:(nrow(warnings.out)),], format = "markdown")
+  # knitr::kable(warnings.out[1:(nrow(warnings.out)),], format = "markdown")
 }
 
 table.blastn[,c("Reads","Sequence","identity","alignmentLength","mismatches",
@@ -153,10 +156,6 @@ command.args <- paste("-c ",barcodes.file," | starcode -t ",detectCores()-1," --
 
 system2("gunzip", args=command.args, stdout=TRUE, stderr=TRUE)
 
-# system(paste("gunzip -c ",barcodes.file," | starcode -t ",detectCores()-1," --print-clusters -d",
-#              1," -r5 -q -o ", out.name.BC.star, " 2>&1", sep = ""), 
-#        intern = TRUE, ignore.stdout = FALSE)
-
 table.BC.sc <- data.table(read.table(out.name.BC.star, header = FALSE, row.names = 1, skip = 0, sep="\t",
                                      stringsAsFactors = FALSE, fill=FALSE),keep.rownames=TRUE, key="rn") #, nrows = 1000
 table.BC.sc[,V2 := NULL]
@@ -194,12 +193,14 @@ print(paste("SC reduced unique barcodes:", scBC))
 table.frag <- data.table(as.data.frame((rev(sort(table(full.table$oldBC))))[1:10], row.names = "Var1"), keep.rownames=TRUE)
 #In R versions below 3.3 remove, row.names = "Var1" to make this compatible
 setnames(table.frag, colnames(table.frag), c("Original BC", "Count"))
-knitr::kable(table.frag, format = "markdown")
+knitr::kable(table.frag, format = "latex", booktabs = T) %>%
+  kable_styling(latex_options = "striped")
 
 table.frag <- data.table(as.data.frame((rev(sort(table(full.table$BC))))[1:10], row.names = "Var1"), keep.rownames=TRUE)
 #In R versions below 3.3 remove, row.names = "Var1" to make this compatible
 setnames(table.frag, colnames(table.frag), c("SC reduced BC", "Count"))
-knitr::kable(table.frag, format = "markdown")
+knitr::kable(table.frag, format = "latex", booktabs = T) %>%
+  kable_styling(latex_options = "striped")
 
 invisible(full.table[,oldBC:=NULL])
 

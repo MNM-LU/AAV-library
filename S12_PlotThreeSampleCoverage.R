@@ -9,7 +9,7 @@
 #' fontsize: 10pt
 #' ---
 
-#' This is the final script presenting top candidates and overview plots.  
+#' This is the final script presenting top candidates and overview plots. 
 suppressPackageStartupMessages(library(knitr))
 #+ setup, include=FALSE
 
@@ -26,6 +26,7 @@ suppressPackageStartupMessages(library(plyr))
 suppressPackageStartupMessages(library(doParallel))
 suppressPackageStartupMessages(library(grid))
 suppressPackageStartupMessages(library(devtools))
+suppressPackageStartupMessages(library(kableExtra))
 
 #'Generation of infective library
 #'===================

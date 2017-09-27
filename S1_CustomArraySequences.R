@@ -10,13 +10,17 @@
 
 #' This script generates all unique AA sequences for the CustomArray production  
 suppressPackageStartupMessages(library(knitr))
+#+ setup, include=FALSE
 suppressPackageStartupMessages(library(ShortRead))
 suppressPackageStartupMessages(library(parallel))
 suppressPackageStartupMessages(library(GeneGA))
 suppressPackageStartupMessages(library(devtools))
 suppressPackageStartupMessages(library(Hmisc))
-opts_chunk$set(tidy=TRUE)
+suppressPackageStartupMessages(library(kableExtra))
 
+opts_chunk$set(fig.width = 7.5, fig.height = 8)
+opts_chunk$set(tidy=TRUE)
+opts_chunk$set(comment = NA)
 
 #'Loading source files
 #'===================
@@ -47,8 +51,7 @@ for (i in 1:length(allSequences)){
   thisID <- as.character(ShortRead::id(allSequences[i]))
   thisSeq <- sread(allSequences[i])
   thisAA <- Biostrings::translate(thisSeq, genetic.code=GENETIC_CODE, if.fuzzy.codon="solve")
-  AAlist[i,c("Class","Family","Strain","Note",
-             "Number","Name","AAfragment")] <- c(BBmisc::explode(thisID, sep=","),as.character(thisAA))
+  AAlist[i,c("Class","Family","Strain","Note", "Number","Name","AAfragment")] <- c(BBmisc::explode(thisID, sep=","),as.character(thisAA))
 }
 
 #'The generateFragments function
