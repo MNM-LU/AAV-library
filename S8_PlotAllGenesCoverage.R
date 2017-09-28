@@ -225,6 +225,10 @@ plotPair <- function(topSample,bottomSample,size.bin=1,winWidth=1,NormalizePlot=
 #' Binning analysis version 1
 
 plotPair("mRNA_All","DNA_pscAAVlib",PlotBC=FALSE)$plot
+plotPair("DNA_pscAAVlib_Prep2","DNA_pscAAVlib",PlotBC=FALSE)$plot
+plotPair("DNA_AAVlib_DNAse_3cpc","DNA_AAVlib_DNAse_30cpc",PlotBC=FALSE)$plot
+plotPair("DNA_AAVlib_DNAse_30cpc","DNA_pscAAVlib_Prep2",PlotBC=FALSE)$plot
+
 # 30cpc analysis
 out.plot.list <- plotPair("mRNA_30cpc_Trsp","mRNA_30cpc_Str",PlotBC=FALSE)
 out.plot.list$plot
