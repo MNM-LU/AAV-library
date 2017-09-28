@@ -202,7 +202,7 @@ return(log.table)
 
 all.logs <- lapply(1:nrow(load.list), analyzeTissue)
 all.logs <- rbindlist(all.logs, use.names=FALSE )
-knitr::kable(all.logs, format = "latex", booktabs = T) %>%   kable_styling(latex_options = c("striped", "scale_down","repeat_header")) %>%   landscape()
+knitr::kable(all.logs, format = "latex", longtable = T, booktabs = T) %>%   kable_styling(latex_options = c("striped", "scale_down","repeat_header")) %>%   landscape()
 
 unlink(paste(tempdir(), "/*", sep = ""), recursive = FALSE, force = FALSE) #Cleanup of temp files
 

@@ -120,10 +120,10 @@ all.samples <- all.samples[,j=list(bitScore=sum(bitScore*tCount)/sum(tCount),
                   NormCount=log2(sum(RNAcount)+1)*.N),
             by=c("Group","Category","GeneName","structure","start","width","Sequence","seqlength")]
 
-all.samples[,start:=(start+2)/3]
-all.samples[,width:=(width)/3]
-all.samples[,seqlength:=seqlength/3]
-all.samples[,AA:=start+(width/2)]
+all.samples[,start:=floor((start+2)/3)]
+all.samples[,width:=ceiling((width)/3)]
+all.samples[,seqlength:=ceiling(seqlength/3)]
+all.samples[,AA:=floor(start+(width/2))]
 all.samples[,AAproc:=AA/seqlength*100]
 
 

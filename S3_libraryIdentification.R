@@ -125,7 +125,7 @@ sys.out <-  system(paste("bowtie2-build",bowtie.fasta,bowtie.idx, "2>&1",  sep =
 name.bowtie <- tempfile(pattern = "bowtie_", tmpdir = tempdir(), fileext = "")
 
 sys.out <-  system(paste("bowtie2 --non-deterministic --threads ",detectCores(),
-                         " --local --score-min 'C,0,-1' -f -a",
+                         " --very-sensitive -f -a",
                          " -x ", bowtie.idx, " -U ", LUT.14aa.fa, " -S ", 
                          name.bowtie, ".sam 2>&1",  sep = ""), 
                    intern = TRUE, ignore.stdout = FALSE) 
@@ -148,6 +148,7 @@ command.args <- paste("sort -@ ",detectCores()," ", name.bowtie, ".bam -o ",
 system2("/usr/local/bin/samtools", args=command.args, stdout=TRUE, stderr=TRUE)
 
 frag14aa.ranges <- readGAlignments(paste(name.bowtie, "_sort.bam", sep = ""), use.names=TRUE)
+width(frag14aa.ranges)
 length(names(frag14aa.ranges))
 length(unique(names(frag14aa.ranges)))
 length(unique(LUT.14aa$Sequence))
@@ -157,7 +158,7 @@ length(unique(LUT.14aa$Sequence))
 name.bowtie <- tempfile(pattern = "bowtie_", tmpdir = tempdir(), fileext = "")
 
 sys.out <-  system(paste("bowtie2 --non-deterministic --threads ",detectCores(),
-                         " --local --score-min 'C,0,-1' -f -a",
+                         " --very-sensitive -f -a",
                          " -x ", bowtie.idx, " -U ", LUT.14aaG4S.fa, " -S ", 
                          name.bowtie, ".sam 2>&1",  sep = ""),
                    intern = TRUE, ignore.stdout = FALSE)
@@ -188,7 +189,7 @@ length(unique(LUT.14aaG4S$Sequence))
 name.bowtie <- tempfile(pattern = "bowtie_", tmpdir = tempdir(), fileext = "")
 
 sys.out <-  system(paste("bowtie2 --non-deterministic --threads ",detectCores(),
-                         " --local --score-min 'C,0,-1' -f -a",
+                         " --very-sensitive -f -a",
                          " -x ", bowtie.idx, " -U ", LUT.14aaA5.fa, " -S ", 
                          name.bowtie, ".sam 2>&1",  sep = ""),
                    intern = TRUE, ignore.stdout = FALSE) 
@@ -219,7 +220,7 @@ length(unique(LUT.14aaA5$Sequence))
 name.bowtie <- tempfile(pattern = "bowtie_", tmpdir = tempdir(), fileext = "")
 
 sys.out <-  system(paste("bowtie2 --non-deterministic --threads ",detectCores(),
-                         " --local --score-min 'C,0,-1' -f -a",
+                         " --very-sensitive -f -a",
                          " -x ", bowtie.idx, " -U ",LUT.22aa.fa," -S ", 
                          name.bowtie, ".sam 2>&1",  sep = ""),
                    intern = TRUE, ignore.stdout = FALSE) 
