@@ -395,8 +395,8 @@ plotPair("mRNA_3cpc_SN_4wks","mRNA_3cpc_SN")$plot
 # In vitro analysis
 out.plot.list <- plotPair("mRNA_3cpc_pNeuron","mRNA_30cpc_pNeuron")
 out.plot.list$plot
-knitr::kable(out.plot.list$top, format = "latex", booktabs = T, caption = paste("Sample:", colnames(out.plot.list$top)[1]), caption = cat("Sample\\:", str_replace_all(colnames(out.plot.list$top)[1], fixed("_"), "\\_"))) %>%   kable_styling(latex_options = c("striped", "scale_down","repeat_header")) %>%   landscape()
-knitr::kable(out.plot.list$bottom, format = "latex", booktabs = T, caption = paste("Sample:", colnames(out.plot.list$bottom)[1]), caption = cat("Sample\\:", str_replace_all(colnames(out.plot.list$bottom)[1], fixed("_"), "\\_"))) %>%   kable_styling(latex_options = c("striped", "scale_down","repeat_header")) %>%   landscape()
+knitr::kable(out.plot.list$top, format = "latex", booktabs = T) %>%   kable_styling(latex_options = c("striped", "scale_down","repeat_header")) %>%   landscape()
+knitr::kable(out.plot.list$bottom, format = "latex", booktabs = T) %>%   kable_styling(latex_options = c("striped", "scale_down","repeat_header")) %>%   landscape()
 
 out.plot.list <- plotPair("mRNA_3cpc_HEK293T","mRNA_30cpc_HEK293T")
 out.plot.list$plot
