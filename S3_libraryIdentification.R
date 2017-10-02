@@ -148,7 +148,6 @@ command.args <- paste("sort -@ ",detectCores()," ", name.bowtie, ".bam -o ",
 system2("/usr/local/bin/samtools", args=command.args, stdout=TRUE, stderr=TRUE)
 
 frag14aa.ranges <- readGAlignments(paste(name.bowtie, "_sort.bam", sep = ""), use.names=TRUE)
-width(frag14aa.ranges)
 length(names(frag14aa.ranges))
 length(unique(names(frag14aa.ranges)))
 length(unique(LUT.14aa$Sequence))

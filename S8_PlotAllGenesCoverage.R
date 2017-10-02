@@ -13,7 +13,7 @@
 suppressPackageStartupMessages(library(knitr))
 #+ setup, include=FALSE
 
-opts_chunk$set(fig.width = 7.3, fig.height = 10.1) #Full height 11
+opts_chunk$set(fig.width = 8, fig.height = 10.5, fig.align = 'center') #Full height 11
 opts_chunk$set(tidy=TRUE)
 opts_chunk$set(comment = NA)
 
@@ -27,6 +27,7 @@ suppressPackageStartupMessages(library(doParallel))
 suppressPackageStartupMessages(library(grid))
 suppressPackageStartupMessages(library(devtools))
 suppressPackageStartupMessages(library(kableExtra))
+strt1<-Sys.time()
 
 #'Generation of infective library
 #'===================
@@ -153,7 +154,7 @@ plotPair <- function(topSample,bottomSample,size.bin=1,winWidth=1,NormalizePlot=
     scale_colour_manual(name = "Library", values = fill.values) +
     scale_x_continuous(limit=c(0,100), breaks=c(seq(0,100,20)), expand =c(0,0)) +
     facet_wrap(~ GeneName, ncol=5)+   
-    theme(plot.margin=unit(x=c(0,0,20,0),units="mm"),
+    theme(plot.margin=unit(x=c(0,0,0,0),units="mm"),
           legend.position="bottom",
           legend.spacing=unit(0,"cm"),
           legend.key.height=unit(0, "cm"),
@@ -223,22 +224,21 @@ plotPair <- function(topSample,bottomSample,size.bin=1,winWidth=1,NormalizePlot=
 #===================
 
 #' Binning analysis version 1
-
+#+ echo=FALSE
 plotPair("mRNA_All","DNA_pscAAVlib",PlotBC=FALSE)$plot
 plotPair("DNA_pscAAVlib_Prep2","DNA_pscAAVlib",PlotBC=FALSE)$plot
 plotPair("DNA_AAVlib_DNAse_3cpc","DNA_AAVlib_DNAse_30cpc",PlotBC=FALSE)$plot
 plotPair("DNA_AAVlib_DNAse_30cpc","DNA_pscAAVlib_Prep2",PlotBC=FALSE)$plot
 
-# 30cpc analysis
+
 out.plot.list <- plotPair("mRNA_30cpc_Trsp","mRNA_30cpc_Str",PlotBC=FALSE)
 out.plot.list$plot
-tmp <- paste("Sample", gsub("([_])"," ",colnames(out.plot.list$top)[1]))
 knitr::kable(out.plot.list$top, format = "latex", booktabs = T) %>%   kable_styling(latex_options = c("striped", "scale_down","repeat_header")) %>%   landscape()
 knitr::kable(out.plot.list$bottom, format = "latex", booktabs = T) %>%   kable_styling(latex_options = c("striped", "scale_down","repeat_header")) %>%   landscape()
-
 out.plot.list <- plotPair("mRNA_30cpc_Th","mRNA_30cpc_Str",PlotBC=FALSE)
 out.plot.list$plot
 knitr::kable(out.plot.list$top, format = "latex", booktabs = T) %>%   kable_styling(latex_options = c("striped", "scale_down","repeat_header")) %>%   landscape()
+
 
 out.plot.list <- plotPair("mRNA_30cpc_Ctx","mRNA_30cpc_Str",PlotBC=FALSE)
 out.plot.list$plot
@@ -252,15 +252,16 @@ plotPair("mRNA_30cpc_SN","mRNA_30cpc_Th",PlotBC=FALSE)$plot
 plotPair("mRNA_30cpc_Ctx","mRNA_30cpc_Th",PlotBC=FALSE)$plot
 plotPair("mRNA_30cpc_SN","mRNA_30cpc_Ctx",PlotBC=FALSE)$plot
 
-# 3cpc analysis
 out.plot.list <- plotPair("mRNA_3cpc_Trsp","mRNA_3cpc_Str",PlotBC=FALSE)
 out.plot.list$plot
 knitr::kable(out.plot.list$top, format = "latex", booktabs = T) %>%   kable_styling(latex_options = c("striped", "scale_down","repeat_header")) %>%   landscape()
 knitr::kable(out.plot.list$bottom, format = "latex", booktabs = T) %>%   kable_styling(latex_options = c("striped", "scale_down","repeat_header")) %>%   landscape()
 
+
 out.plot.list <- plotPair("mRNA_3cpc_Th","mRNA_3cpc_Str",PlotBC=FALSE)
 out.plot.list$plot
 knitr::kable(out.plot.list$top, format = "latex", booktabs = T) %>%   kable_styling(latex_options = c("striped", "scale_down","repeat_header")) %>%   landscape()
+
 
 out.plot.list <- plotPair("mRNA_3cpc_Ctx","mRNA_3cpc_Str",PlotBC=FALSE)
 out.plot.list$plot
@@ -269,6 +270,7 @@ knitr::kable(out.plot.list$top, format = "latex", booktabs = T) %>%   kable_styl
 out.plot.list <- plotPair("mRNA_3cpc_SN","mRNA_3cpc_Str",PlotBC=FALSE)
 out.plot.list$plot
 knitr::kable(out.plot.list$top, format = "latex", booktabs = T) %>%   kable_styling(latex_options = c("striped", "scale_down","repeat_header")) %>%   landscape()
+
 
 plotPair("mRNA_3cpc_SN","mRNA_3cpc_Th",PlotBC=FALSE)$plot
 plotPair("mRNA_3cpc_Ctx","mRNA_3cpc_Th",PlotBC=FALSE)$plot
@@ -374,33 +376,41 @@ plotPair("mRNA_3cpc_SN","mRNA_3cpc_Th")$plot
 plotPair("mRNA_3cpc_Ctx","mRNA_3cpc_Th")$plot
 plotPair("mRNA_3cpc_SN","mRNA_3cpc_Ctx")$plot
 
-# 3cpc vs 30cpc analysis
+
 plotPair("mRNA_3cpc_Trsp","mRNA_30cpc_Trsp")$plot
 plotPair("mRNA_3cpc_Str","mRNA_30cpc_Str")$plot
 plotPair("mRNA_3cpc_Th","mRNA_30cpc_Th")$plot
 plotPair("mRNA_3cpc_Ctx","mRNA_30cpc_Ctx")$plot
 plotPair("mRNA_3cpc_SN","mRNA_30cpc_SN")$plot
 
-# 8wks vs 4wks analysis
+
 plotPair("mRNA_30cpc_Str_4wks","mRNA_30cpc_Str")$plot
 plotPair("mRNA_30cpc_Th_4wks","mRNA_30cpc_Th")$plot
 plotPair("mRNA_30cpc_Ctx_4wks","mRNA_30cpc_Ctx")$plot
 plotPair("mRNA_30cpc_SN_4wks","mRNA_30cpc_SN")$plot
+
 
 plotPair("mRNA_3cpc_Str_4wks","mRNA_3cpc_Str")$plot
 plotPair("mRNA_3cpc_Th_4wks","mRNA_3cpc_Th")$plot
 plotPair("mRNA_3cpc_Ctx_4wks","mRNA_3cpc_Ctx")$plot
 plotPair("mRNA_3cpc_SN_4wks","mRNA_3cpc_SN")$plot
 
-# In vitro analysis
+
 out.plot.list <- plotPair("mRNA_3cpc_pNeuron","mRNA_30cpc_pNeuron")
 out.plot.list$plot
 knitr::kable(out.plot.list$top, format = "latex", booktabs = T) %>%   kable_styling(latex_options = c("striped", "scale_down","repeat_header")) %>%   landscape()
 knitr::kable(out.plot.list$bottom, format = "latex", booktabs = T) %>%   kable_styling(latex_options = c("striped", "scale_down","repeat_header")) %>%   landscape()
+
 
 out.plot.list <- plotPair("mRNA_3cpc_HEK293T","mRNA_30cpc_HEK293T")
 out.plot.list$plot
 knitr::kable(out.plot.list$top, format = "latex", booktabs = T) %>%   kable_styling(latex_options = c("striped", "scale_down","repeat_header")) %>%   landscape()
 knitr::kable(out.plot.list$bottom, format = "latex", booktabs = T) %>%   kable_styling(latex_options = c("striped", "scale_down","repeat_header")) %>%   landscape()
 
+
+#+ echo=TRUE
+print("Total analysis time:")
+print(Sys.time()-strt1)
+
 devtools::session_info()
+
