@@ -129,6 +129,20 @@ RUN git clone git://github.com/gui11aume/starcode.git
 WORKDIR /home/rstudio/starcode
 RUN make
 RUN ln -s /home/rstudio/starcode/starcode /usr/bin/starcode
+RUN apt-get update && \
+apt-get upgrade -y && \
+apt-get install -y \
+p7zip \
+hhsuite \
+python-numpy \
+&& \
+apt-get clean && \
+rm -rf /var/lib/apt/lists/*
+WORKDIR /home/rstudio
+RUN wget https://github.com/hammock-dev/hammock/releases/download/v1.1.1/Hammock_v_1.1.1.7z && 7zr x Hammock_v_1.1.1.7z && rm Hammock_v_1.1.1.7z
+RUN wget -O /usr/local/bin/clustalo http://www.clustal.org/omega/clustalo-1.2.4-Ubuntu-x86_64  && chmod u+x /usr/local/bin/clustalo
+RUN wget -qO- http://eddylab.org/software/hmmer3/3.1b2/hmmer-3.1b2-linux-intel-x86_64.tar.gz | tar -xvz && mv hmmer-3.1b2-linux-intel-x86_64 /root/HMMER
+RUN easy_install weblogo
 #Adding the scripts and environment files
 COPY ./ /home/rstudio/
 RUN chown -R rstudio:rstudio /home/rstudio/*

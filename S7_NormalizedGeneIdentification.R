@@ -17,6 +17,8 @@ suppressPackageStartupMessages(library(data.table))
 suppressPackageStartupMessages(library(scales))
 suppressPackageStartupMessages(library(ShortRead))
 suppressPackageStartupMessages(library(multicore))
+suppressPackageStartupMessages(library(parallel))
+suppressPackageStartupMessages(library(seqinr))
 suppressPackageStartupMessages(library(plyr))
 suppressPackageStartupMessages(library(Hmisc))
 suppressPackageStartupMessages(library(devtools))
@@ -30,7 +32,7 @@ opts_chunk$set(comment = NA)
 #' Generate load list and grouping names
 #' ============================
 #+ Generating load list.......
-
+strt <- Sys.time()
 in.names.all <- list.files("output", pattern="*.rds", full.names=TRUE)
 load.list <- read.table("input/loadlist.txt", header = FALSE, skip = 0, sep="\t",
                         stringsAsFactors = FALSE, fill=TRUE)
@@ -110,15 +112,15 @@ rm(total.AAV.samples,transported.AAV.samples.30cpc,transported.AAV.samples.3cpc)
 setkeyv(all.samples,c("Group","Category","GeneName","structure","start","width","Sequence","seqlength"))
 
 all.samples <- all.samples[,j=list(bitScore=sum(bitScore*tCount)/sum(tCount),
-                  mismatches=median(mismatches),
-                  mCount=sum(mCount),
-                  tCount=sum(tCount),
-                  BC=paste(unique(BC), collapse = ","),
-                  Animals=paste(unique(Sample), collapse = ","),
-                  LUTnrs=paste(unique(LUTnr), collapse = ","),
-                  RNAcount=sum(RNAcount),
-                  NormCount=log2(sum(RNAcount)+1)*.N),
-            by=c("Group","Category","GeneName","structure","start","width","Sequence","seqlength")]
+                                   mismatches=median(mismatches),
+                                   mCount=sum(mCount),
+                                   tCount=sum(tCount),
+                                   BC=paste(unique(BC), collapse = ","),
+                                   Animals=paste(unique(Sample), collapse = ","),
+                                   LUTnrs=paste(unique(LUTnr), collapse = ","),
+                                   RNAcount=sum(RNAcount),
+                                   NormCount=log2(sum(RNAcount)+1)*.N),
+                           by=c("Group","Category","GeneName","structure","start","width","Sequence","seqlength")]
 
 all.samples[,start:=floor((start+2)/3)]
 all.samples[,width:=ceiling((width)/3)]
@@ -126,7 +128,20 @@ all.samples[,seqlength:=ceiling(seqlength/3)]
 all.samples[,AA:=floor(start+(width/2))]
 all.samples[,AAproc:=AA/seqlength*100]
 
+#' Remove overhangs on the sequence based on the Structure annotation
+#' ============================
+#+ Removing overhangs.......
 
+all.samples[structure == "14aa", "Sequence" := substr(Sequence,3,44)]
+all.samples[structure == "22aa", "Sequence" := substr(Sequence,3,68)]
+all.samples[structure == "14aaG4S", "Sequence" := substr(Sequence,15,56)]
+all.samples[structure == "14aaA5", "Sequence" := substr(Sequence,15,56)]
+
+all.samples[, Peptide := mclapply(Sequence, function(x) as.character(Biostrings::translate(DNAString(x), genetic.code=GENETIC_CODE, if.fuzzy.codon="solve")), mc.cores = detectCores())]
+all.samples[,Peptide:= as.character(Peptide),]
 saveRDS(all.samples, file="data/allSamplesDataTable.RDS")
 
+print("Total execution time:")
+print(Sys.time()-strt)
 devtools::session_info()
+
