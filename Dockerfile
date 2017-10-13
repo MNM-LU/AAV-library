@@ -1,4 +1,4 @@
-FROM rocker/verse:3.4.1
+FROM rocker/verse:3.4.2
 RUN apt-get update && \
 apt-get upgrade -y && \
 apt-get install -y \
@@ -16,6 +16,7 @@ apt-get update && \
 apt-get install -y \
 bowtie2 \
 curl \
+hhsuite \
 lbzip2 \
 libbz2-dev \
 libcurl4-openssl-dev \
@@ -24,6 +25,8 @@ libncurses5-dev \
 libncursesw5-dev \
 libxml2-dev \
 ncbi-blast+ \
+p7zip \
+python-numpy \
 oracle-java8-installer \
 oracle-java8-set-default \
 parallel \
@@ -32,27 +35,25 @@ texlive-fonts-recommended \
 texlive-latex-base \
 texlive-latex-extra \
 xvfb \
+git \
 && \
 apt-get clean && \
 rm -rf /var/lib/apt/lists/*
-RUN apt-get update && \
-apt-get install -y \
-git
 RUN Rscript -e "install.packages('devtools')"
 RUN Rscript -e "library(devtools)" \
 -e "install_version('acepack',version = '1.4.1',repos = 'http://cran.us.r-project.org')" \
 -e "install_version('ade4', version = '1.7-8', repos = 'http://cran.us.r-project.org')" \
--e "install_version('backports', version = '1.1.0', repos = 'http://cran.us.r-project.org')" \
+-e "install_version('backports', version = '1.1.1', repos = 'http://cran.us.r-project.org')" \
 -e "install_version('BBmisc', version = '1.11', repos = 'http://cran.us.r-project.org')" \
 -e "install_version('beanplot', version = '1.2', repos = 'http://cran.us.r-project.org')" \
 -e "install_version('bitops', version = '1.0-6', repos = 'http://cran.us.r-project.org')" \
--e "install_version('chron', version = '2.3-50', repos = 'http://cran.us.r-project.org')" \
+-e "install_version('chron', version = '2.3-51', repos = 'http://cran.us.r-project.org')" \
 -e "install_version('cluster', version = '2.0.6', repos = 'http://cran.us.r-project.org')" \
 -e "install_version('commonmark', version = '1.4', repos = 'http://cran.us.r-project.org')" \
 -e "install_version('crayon', version = '1.3.4', repos = 'http://cran.us.r-project.org')" \
--e "install_version('data.table', version = '1.10.4', repos = 'http://cran.us.r-project.org')" \
--e "install_version('doParallel', version = '1.0.10', repos = 'http://cran.us.r-project.org')" \
--e "install_version('dplyr', version = '0.7.3', repos = 'http://cran.us.r-project.org')" \
+-e "install_version('data.table', version = '1.10.4-2', repos = 'http://cran.us.r-project.org')" \
+-e "install_version('doParallel', version = '1.0.11', repos = 'http://cran.us.r-project.org')" \
+-e "install_version('dplyr', version = '0.7.4', repos = 'http://cran.us.r-project.org')" \
 -e "install_version('evaluate', version = '0.10.1', repos = 'http://cran.us.r-project.org')" \
 -e "install_version('foreign', version = '0.8-69', repos = 'http://cran.us.r-project.org')" \
 -e "install_version('formatR', version = '1.5', repos = 'http://cran.us.r-project.org')" \
@@ -83,7 +84,7 @@ RUN Rscript -e "library(devtools)" \
 -e "install_version('plyr', version = '1.8.4', repos = 'http://cran.us.r-project.org')" \
 -e "install_version('RColorBrewer', version = '1.1-2', repos = 'http://cran.us.r-project.org')" \
 -e "install_version('psych', version = '1.7.8', repos = 'http://cran.us.r-project.org')" \
--e "install_version('Rcpp', version = '0.12.12', repos = 'http://cran.us.r-project.org')" \
+-e "install_version('Rcpp', version = '0.12.13', repos = 'http://cran.us.r-project.org')" \
 -e "install_version('rmarkdown', version = '1.6', repos = 'http://cran.us.r-project.org')" \
 -e "install_version('rpart', version = '4.1-11', repos = 'http://cran.us.r-project.org')" \
 -e "install_version('rstudioapi', version = '0.7', repos = 'http://cran.us.r-project.org')" \
@@ -129,15 +130,7 @@ RUN git clone git://github.com/gui11aume/starcode.git
 WORKDIR /home/rstudio/starcode
 RUN make
 RUN ln -s /home/rstudio/starcode/starcode /usr/bin/starcode
-RUN apt-get update && \
-apt-get upgrade -y && \
-apt-get install -y \
-p7zip \
-hhsuite \
-python-numpy \
-&& \
-apt-get clean && \
-rm -rf /var/lib/apt/lists/*
+#Install Hammock
 WORKDIR /home/rstudio
 RUN wget https://github.com/hammock-dev/hammock/releases/download/v1.1.1/Hammock_v_1.1.1.7z && 7zr x Hammock_v_1.1.1.7z && rm Hammock_v_1.1.1.7z
 RUN wget -O /usr/local/bin/clustalo http://www.clustal.org/omega/clustalo-1.2.4-Ubuntu-x86_64  && chmod u+x /usr/local/bin/clustalo

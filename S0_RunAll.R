@@ -63,3 +63,8 @@ sys.args <- paste("-e",shQuote("setwd('/home/rstudio')"),"-e",shQuote("rmarkdown
 system2("/usr/local/bin/Rscript", args = sys.args, stdout = "logs/S13_Hammock_HMM_Clustering_runLog.txt")
 system2("mv", args="S13_Hammock_HMM_Clustering.pdf output/")
 
+# S14_HMM_Selected_Clustering
+sys.args <- paste("-e",shQuote("setwd('/home/rstudio')"),"-e",shQuote("rmarkdown::render('S14_HMM_Selected_Clustering.R')"), sep=" ")
+system2("/usr/local/bin/Rscript", args = sys.args, stdout = "logs/S14_HMM_Selected_Clustering_runLog.txt")
+system2("mv", args="S14_HMM_Selected_Clustering.pdf output/")
+

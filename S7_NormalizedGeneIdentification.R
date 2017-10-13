@@ -137,7 +137,11 @@ all.samples[structure == "22aa", "Sequence" := substr(Sequence,3,68)]
 all.samples[structure == "14aaG4S", "Sequence" := substr(Sequence,15,56)]
 all.samples[structure == "14aaA5", "Sequence" := substr(Sequence,15,56)]
 
-all.samples[, Peptide := mclapply(Sequence, function(x) as.character(Biostrings::translate(DNAString(x), genetic.code=GENETIC_CODE, if.fuzzy.codon="solve")), mc.cores = detectCores())]
+#Change the default behavior to induce start codons and Methionine
+GENETIC_CODE_ALT <- GENETIC_CODE
+attr(GENETIC_CODE_ALT, "alt_init_codons") <- c("TAA","TAG")
+
+all.samples[, Peptide := mclapply(Sequence, function(x) as.character(Biostrings::translate(DNAString(x), genetic.code=GENETIC_CODE_ALT, if.fuzzy.codon="solve")), mc.cores = detectCores())]
 all.samples[,Peptide:= as.character(Peptide),]
 saveRDS(all.samples, file="data/allSamplesDataTable.RDS")
 
