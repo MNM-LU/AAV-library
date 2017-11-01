@@ -44,6 +44,9 @@ ggplot(purity.table,aes(x = BCwidth, fill = as.character(BCwidth)))+geom_histogr
   scale_x_continuous(limit=c(17,23), breaks=c(seq(18,22,1)), expand =c(0,0))
 
 opts_chunk$set(fig.width = 8, fig.height = 8)
+
+
+
 #'Plot Venn diagrams of fragments
 #'===================
 load("data/LUTdna.rda")
@@ -114,23 +117,30 @@ fill.values <- c("Array" = rgb(193,210,234, maxColorValue = 255), "Lib" = rgb(15
 
 ggplot(output.table) + 
   scale_x_continuous(limit=c(0,12), breaks=c(seq(1,11,2)), expand =c(0,0)) + 
+  scale_y_continuous(breaks=c(seq(0,90000,15000))) +
   scale_fill_manual(name = "Library", values = fill.values) +
   theme(aspect.ratio=1) + 
-  geom_rect(data=output.table, aes(fill=NameTrsp, ymax=TrspEnd, ymin=TrspStart, xmax=12, xmin=10)) +
-  geom_rect(data=output.table, aes(fill=NameStr, ymax=StrEnd, ymin=StrStart, xmax=10, xmin=0)) +
-  geom_rect(data=output.table, aes(fill=NameAAV, ymax=AAVend, ymin=AAVStart, xmax=8, xmin=6)) +
-  geom_rect(data=output.table, aes(fill=NameDNAse, ymax=DNAseEnd, ymin=DNAseStart, xmax=6, xmin=4)) +
-  geom_rect(data=output.table, aes(fill=NameLib, ymax=LibEnd, ymin=LibStart, xmax=4, xmin=2)) +
-  geom_rect(data=output.table, aes(fill=NameArray, ymax=ArrayEnd, ymin=ArrayStart, xmax=2, xmin=0)) +
+  geom_rect(data=output.table, aes(fill=NameTrsp, ymax=TrspEnd, ymin=TrspStart, xmax=11.95, xmin=10.05)) +
+  geom_rect(data=output.table, aes(fill=NameStr, ymax=StrEnd, ymin=StrStart, xmax=9.95, xmin=8.05)) +
+  geom_rect(data=output.table, aes(fill=NameAAV, ymax=AAVend, ymin=AAVStart, xmax=7.95, xmin=6.05)) +
+  geom_rect(data=output.table, aes(fill=NameDNAse, ymax=DNAseEnd, ymin=DNAseStart, xmax=5.95, xmin=4.05)) +
+  geom_rect(data=output.table, aes(fill=NameLib, ymax=LibEnd, ymin=LibStart, xmax=3.95, xmin=2.05)) +
+  geom_rect(data=output.table, aes(fill=NameArray, ymax=ArrayEnd, ymin=ArrayStart, xmax=1.95, xmin=0)) +
   coord_polar(theta="y") 
 
 opts_chunk$set(fig.width = 5, fig.height = 5)
+
+
+knitr::kable(output.table, format = "latex", booktabs = T) %>%   kable_styling(latex_options = c("striped","scale_down","repeat_header")) %>%   landscape()
+
 
 #'Barcode Venn diagrams for 30cpc and 3cpc DNAse resistant libraries
 #'===================
 total.30cpc <- unique(complete.library[grep("DNA_AAVlib_DNAse_30cpc",Group)]$BC)
 total.3cpc <- unique(complete.library[grep("DNA_AAVlib_DNAse_3cpc",Group)]$BC)
 
+total.30cpc <- names(table(strsplit(paste(total.30cpc, collapse=","), ",")))
+total.3cpc <- names(table(strsplit(paste(total.3cpc, collapse=","), ",")))
 
 venn.area1 <- length(total.30cpc)
 venn.area2 <- length(total.3cpc)
@@ -191,6 +201,8 @@ RNA.library <- complete.library[-grep("DNAse",Group)]
 total.30cpc <- unique(RNA.library[grep("30cpc",Group)]$BC)
 total.3cpc <- unique(RNA.library[grep("3cpc",Group)]$BC)
 
+total.30cpc <- names(table(strsplit(paste(total.30cpc, collapse=","), ",")))
+total.3cpc <- names(table(strsplit(paste(total.3cpc, collapse=","), ",")))
 
 venn.area1 <- length(total.30cpc)
 venn.area2 <- length(total.3cpc)
@@ -238,3 +250,19 @@ venn.plot <- draw.pairwise.venn(area1    = venn.area1,
                                 cat.col  = venn.colors,
                                 category = c("30cpc", "3cpc"))
 grid.draw(venn.plot)
+
+
+
+
+load("data/scBC_DNA_pscAAVlib.rda")
+
+reads.BC <- readFastq("data/barcodes_AAVlibrary_complete.fastq.gz")
+
+barcodeTable <- data.table(ID=as.character(ShortRead::id(reads.BC)), 
+                              BC=as.character(sread(reads.BC)), key="BC")
+
+setkey(barcodeTable,BC)
+setkey(DNA_pscAAVlib,BC)
+DNA_pscAAVlib <- barcodeTable[DNA_pscAAVlib,nomatch=0]
+
+DNA_pscAAVlib.BCs <- data.table(rev(sort(table(DNA_pscAAVlib$scBC))))

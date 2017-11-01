@@ -169,6 +169,8 @@ print(paste("Dropped BCs in Starcode:", SC.droppedBC))
 
 setnames(table.BC.sc,c("V1","rn"),c("BC","scBC"))
 
+DNA_pscAAVlib <- table.BC.sc
+save(DNA_pscAAVlib, file="data/scBC_DNA_pscAAVlib.rda")
 
 
 #' Replacing barcodes with Starcode reduced versions

@@ -68,3 +68,8 @@ sys.args <- paste("-e",shQuote("setwd('/home/rstudio')"),"-e",shQuote("rmarkdown
 system2("/usr/local/bin/Rscript", args = sys.args, stdout = "logs/S14_HMM_Selected_Clustering_runLog.txt")
 system2("mv", args="S14_HMM_Selected_Clustering.pdf output/")
 
+# S15_HammockHeatmap
+sys.args <- paste("-e",shQuote("setwd('/home/rstudio')"),"-e",shQuote("rmarkdown::render('S15_HammockHeatmap.R')"), sep=" ")
+system2("/usr/local/bin/Rscript", args = sys.args, stdout = "logs/S15_HammockHeatmap_runLog.txt")
+system2("mv", args="S15_HammockHeatmap.pdf output/")
+

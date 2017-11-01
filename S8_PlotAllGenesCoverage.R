@@ -163,7 +163,7 @@ plotPair <- function(topSample,bottomSample,size.bin=1,winWidth=1,NormalizePlot=
           axis.ticks = element_line(size = rel(0.5)),
           axis.ticks.length = unit(.05, "cm"),
           strip.text.x = element_text(size = rel(0.5), colour = "black", 
-                                      angle = 0, lineheight=0.1, vjust=0.1),
+                                      angle = 0, lineheight=0.1, vjust=-5),
           strip.background = element_blank(),
           panel.spacing.y = unit(-0.15, "cm"),
           panel.spacing.x = unit(0, "cm"))
