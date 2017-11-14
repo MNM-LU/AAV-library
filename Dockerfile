@@ -43,6 +43,7 @@ RUN Rscript -e "install.packages('devtools')"
 RUN Rscript -e "library(devtools)" \
 -e "install_version('acepack',version = '1.4.1',repos = 'http://cran.us.r-project.org')" \
 -e "install_version('ade4', version = '1.7-8', repos = 'http://cran.us.r-project.org')" \
+-e "install_version('ape', version = '4.1', repos = 'http://cran.us.r-project.org')" \
 -e "install_version('backports', version = '1.1.1', repos = 'http://cran.us.r-project.org')" \
 -e "install_version('BBmisc', version = '1.11', repos = 'http://cran.us.r-project.org')" \
 -e "install_version('beanplot', version = '1.2', repos = 'http://cran.us.r-project.org')" \
@@ -52,6 +53,7 @@ RUN Rscript -e "library(devtools)" \
 -e "install_version('commonmark', version = '1.4', repos = 'http://cran.us.r-project.org')" \
 -e "install_version('crayon', version = '1.3.4', repos = 'http://cran.us.r-project.org')" \
 -e "install_version('data.table', version = '1.10.4-2', repos = 'http://cran.us.r-project.org')" \
+-e "install_version('diversitree', version = '0.9-10', repos = 'http://cran.us.r-project.org')" \
 -e "install_version('doParallel', version = '1.0.11', repos = 'http://cran.us.r-project.org')" \
 -e "install_version('dplyr', version = '0.7.4', repos = 'http://cran.us.r-project.org')" \
 -e "install_version('evaluate', version = '0.10.1', repos = 'http://cran.us.r-project.org')" \
@@ -59,6 +61,7 @@ RUN Rscript -e "library(devtools)" \
 -e "install_version('formatR', version = '1.5', repos = 'http://cran.us.r-project.org')" \
 -e "install_version('Formula', version = '1.2-2', repos = 'http://cran.us.r-project.org')" \
 -e "install_version('gdtools', version = '0.1.6', repos = 'http://cran.us.r-project.org')" \
+-e "install_version('geiger', version = '2.0.6', repos = 'http://cran.us.r-project.org')" \
 -e "install_version('ggplot2', version = '2.2.1', repos = 'http://cran.us.r-project.org')" \
 -e "install_version('gridExtra', version = '2.3', repos = 'http://cran.us.r-project.org')" \
 -e "install_version('hash', version = '2.2.6', repos = 'http://cran.us.r-project.org')" \
@@ -85,6 +88,7 @@ RUN Rscript -e "library(devtools)" \
 -e "install_version('RColorBrewer', version = '1.1-2', repos = 'http://cran.us.r-project.org')" \
 -e "install_version('psych', version = '1.7.8', repos = 'http://cran.us.r-project.org')" \
 -e "install_version('Rcpp', version = '0.12.13', repos = 'http://cran.us.r-project.org')" \
+-e "install_version('rncl', version = '0.8.2', repos = 'http://cran.us.r-project.org')" \
 -e "install_version('rmarkdown', version = '1.6', repos = 'http://cran.us.r-project.org')" \
 -e "install_version('rpart', version = '4.1-11', repos = 'http://cran.us.r-project.org')" \
 -e "install_version('rstudioapi', version = '0.7', repos = 'http://cran.us.r-project.org')" \
@@ -104,7 +108,7 @@ RUN Rscript -e "source('https://bioconductor.org/biocLite.R')" -e "biocLite('bio
 -e "biocLite('BSgenome')" -e "biocLite('BiocParallel')" -e "biocLite('Biostrings')" \
 -e "biocLite('DESeq2')" -e "biocLite('GeneGA')" -e "biocLite('GenomeInfoDb')" \
 -e "biocLite('GenomicAlignments')" -e "biocLite('GenomicFeatures')" -e "biocLite('GenomicRanges')" \
--e "biocLite('ggbio')" -e "biocLite('Gviz')" -e "biocLite('IRanges')" \
+-e "biocLite('ggbio')" -e "biocLite('ggtree')" -e "biocLite('Gviz')" -e "biocLite('IRanges')" \
 -e "biocLite('Rsamtools')" -e "biocLite('S4Vectors')" -e "biocLite('ShortRead')" \
 -e "biocLite('SummarizedExperiment')" -e "biocLite('XVector')" -e "biocLite('zlibbioc')"
 RUN Rscript -e "library(devtools)" \
@@ -128,8 +132,9 @@ RUN wget -qO- https://downloads.sourceforge.net/project/bbmap/BBMap_37.02.tar.gz
 #install starcode
 RUN git clone git://github.com/gui11aume/starcode.git
 WORKDIR /home/rstudio/starcode
-RUN make
-RUN ln -s /home/rstudio/starcode/starcode /usr/bin/starcode
+RUN make && ln -s /home/rstudio/starcode/starcode /usr/bin/starcode
+#Install Usearch
+RUN wget https://drive5.com/cgi-bin/upload3.py?license=2017110905465430340 -O /root/usearch && chmod +x /root/usearch
 #Install Hammock
 WORKDIR /home/rstudio
 RUN wget https://github.com/hammock-dev/hammock/releases/download/v1.1.1/Hammock_v_1.1.1.7z && 7zr x Hammock_v_1.1.1.7z && rm Hammock_v_1.1.1.7z

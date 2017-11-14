@@ -168,7 +168,7 @@ generateWeblogo <- function(in.name) {
 }
 
 #+ results = 'asis'
-lapply(id.order, generateWeblogo)
+invisible(lapply(id.order, generateWeblogo))
 #+ results = 'markup'
 
 

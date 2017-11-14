@@ -48,7 +48,7 @@ setkey(select.samples.trsp,Sequence)
 selected.peptides <- data.table(read.table("input/selectedPeptides.txt", header = TRUE, skip = 0, sep="\t",
                                       stringsAsFactors = FALSE, fill=TRUE))
 #Removed the first 2 serotypes selected for in vitro properties
-selected.peptides <- selected.peptides[3:24,]
+selected.peptides <- selected.peptides[3:25,]
 select.samples.main <- select.samples.trsp[J(selected.peptides$Sequence)]
 
 select.samples.main[,Group:=as.character(lapply(Group, function(x) gsub("(_4wks)","",x)))]
@@ -83,7 +83,7 @@ write.fasta(as.list(select.samples.trsp$Peptide), fasta.names, "data/trspSamples
 
 Sys.setenv("PATH" = paste("/root/HMMER/binaries",Sys.getenv("PATH"),sep=":"), "HHLIB" = "/home/rstudio/Hammock_v_1.1.1/hhsuite-2.0.16/lib/hh/")
 unlink("/home/rstudio/data/HammockSelected", recursive = TRUE, force = FALSE)
-sys.out <-  system(paste("java -jar /home/rstudio/Hammock_v_1.1.1/dist/Hammock.jar cluster -i /home/rstudio/data/selectedPeptides.tsv -as /home/rstudio/data/trspSamplesPeptidesNonSelect.fasta -d /home/rstudio/data/HammockSelected --max_shift 9 --assign_thresholds 15,12,10 --max_aln_length 42 -c 22 -t ", detectCores(), sep = ""),
+sys.out <-  system(paste("java -jar /home/rstudio/Hammock_v_1.1.1/dist/Hammock.jar cluster -i /home/rstudio/data/selectedPeptides.tsv -as /home/rstudio/data/trspSamplesPeptidesNonSelect.fasta -d /home/rstudio/data/HammockSelected --max_shift 9 --assign_thresholds 15,12,10 --max_aln_length 42 -c 23 -t ", detectCores(), sep = ""),
                    intern = TRUE, ignore.stdout = TRUE) 
 # Alternative parameters  --use_clinkage --alignment_threshold 23 --max_shift 13 --max_aln_length 42 --count_threshold 50 --max_inner_gaps 0 --assign_thresholds 14.1,10.5,7.0 
 hammock.log <- data.table(readLines("data/HammockSelected/run.log"))
@@ -206,7 +206,7 @@ generateWeblogo <- function(in.name) {
 }
 
 #+ results = 'asis'
-lapply(id.order, generateWeblogo)
+invisible(lapply(id.order, generateWeblogo))
 #+ results = 'markup'
 
 

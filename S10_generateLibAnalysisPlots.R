@@ -16,14 +16,48 @@ suppressPackageStartupMessages(library(knitr))
 suppressPackageStartupMessages(library(GenomicAlignments))
 suppressPackageStartupMessages(library(ggplot2))
 suppressPackageStartupMessages(library(VennDiagram))
+suppressPackageStartupMessages(library(ShortRead))
+suppressPackageStartupMessages(library(ape))
+suppressPackageStartupMessages(library(ggtree))
+suppressPackageStartupMessages(library(rncl))
+suppressPackageStartupMessages(library(geiger))
+suppressPackageStartupMessages(library(diversitree))
 suppressPackageStartupMessages(library(data.table))
 suppressPackageStartupMessages(library(beanplot))
 suppressPackageStartupMessages(library(scales))
 suppressPackageStartupMessages(library(kableExtra))
 
-opts_chunk$set(fig.width = 5, fig.height = 5) #Full height 11
+opts_chunk$set(fig.width = 6, fig.height = 11) #Full height 11
 opts_chunk$set(tidy=TRUE)
 opts_chunk$set(comment = NA)
+
+#'Generation of phylotree for selected proteins
+#'===================
+in.fasta <-  readFasta("input/DNA-lib_RetrogradeTransport.fasta")
+aaSeqs <- Biostrings::translate(sread(in.fasta), genetic.code=GENETIC_CODE, if.fuzzy.codon="solve")
+name.table <- data.table(as.character(ShortRead::id(in.fasta)),gsub("([ ])", "_",tstrsplit(ShortRead::id(in.fasta), ",", fixed=TRUE)[[6]]))
+setnames(name.table, c("V1","V2"), c("FullName", "ShortName"))
+names(aaSeqs) <- name.table$ShortName
+saveRDS(name.table, file="data/geneNames.rds")
+aaLib.file <- tempfile(pattern = "aalib_", tmpdir = tempdir(), fileext = ".fasta")
+writeXStringSet(aaSeqs,aaLib.file, format= "fasta")
+
+
+tree.file <- tempfile(pattern = "results_", tmpdir = tempdir(), fileext = ".tree")
+
+sys.out <- system(paste("/usr/bin/usearch -cluster_agg ",aaLib.file," -treeout  /home/rstudio/data/tree.phy -id 0.10 -linkage max "," 2>&1", sep = ""), intern = TRUE, ignore.stdout = FALSE)
+tree <- read_newick_phylo("/home/rstudio/data/tree.phy", simplify = FALSE, missing_edge_length = NA)
+#tmp.list <- tree$edge.length
+#tmp.list <- as.integer(tmp.list)
+#tree$edge.length <- tmp.list
+
+tree.calib <- makeChronosCalib(tree, age.min = 0, age.max = max(tree$edge.length))
+dendrogram <- chronos(tree, calibration = tree.calib )
+
+plot(dendrogram)
+
+
+opts_chunk$set(fig.width = 5, fig.height = 5) #Full height 11
 
 #'Generation plots for library purity
 #'===================
@@ -34,7 +68,7 @@ purity.table$BCwidth <- width(mcols(complete.ranges)$BC)
 beanplot(data = purity.table$V1, ll = 0.04, what=c(1,1,1,0), bw = "nrd0", log="", 
          main = "Best end recombination analysis", ylab = "Recombination fraction [1 = no recombination]", 
          border = NA, col = list("black", c("grey", "white")))
-legend("bottomleft", fill = c("black"), legend = c("Best end"))
+legend("bottomleft", fill = c("black"), legend = c("AAV-lib"))
 
 fill.values <- c("A" = rgb(193,210,234, maxColorValue = 255), "B" = rgb(157,190,217, maxColorValue = 255), "c" = rgb(38,64,135, maxColorValue = 255), "D" = rgb(157,190,217, maxColorValue = 255),"E" = rgb(193,210,234, maxColorValue = 255))
 names(fill.values) <- c("18","19","20","21","22")
@@ -195,6 +229,7 @@ grid.draw(venn.plot)
 
 
 
+
 #'Barcode Venn diagrams for 30cpc and 3cpc infective libraries
 #'===================
 RNA.library <- complete.library[-grep("DNAse",Group)]
@@ -251,18 +286,3 @@ venn.plot <- draw.pairwise.venn(area1    = venn.area1,
                                 category = c("30cpc", "3cpc"))
 grid.draw(venn.plot)
 
-
-
-
-load("data/scBC_DNA_pscAAVlib.rda")
-
-reads.BC <- readFastq("data/barcodes_AAVlibrary_complete.fastq.gz")
-
-barcodeTable <- data.table(ID=as.character(ShortRead::id(reads.BC)), 
-                              BC=as.character(sread(reads.BC)), key="BC")
-
-setkey(barcodeTable,BC)
-setkey(DNA_pscAAVlib,BC)
-DNA_pscAAVlib <- barcodeTable[DNA_pscAAVlib,nomatch=0]
-
-DNA_pscAAVlib.BCs <- data.table(rev(sort(table(DNA_pscAAVlib$scBC))))

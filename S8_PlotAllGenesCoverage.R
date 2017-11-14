@@ -147,7 +147,7 @@ plotPair <- function(topSample,bottomSample,size.bin=1,winWidth=1,NormalizePlot=
   
   if (PlotBC) {outVar <- "BCanim"} else {outVar <- "NormCount"}
   
-  plot.out <- eval(parse(text=paste("ggplot(plot.data.bin,aes(x=AAproc,y=",outVar,", fill = Group))",sep="")))
+  plot.out <- eval(parse(text=paste("ggplot(plot.data.bin,aes(x=AAproc,y=",outVar,", fill = Group, vjust=-20))",sep="")))
   plot.out <- plot.out + 
     geom_bar(stat="identity", position="identity")+theme_bw() +
     scale_fill_manual(name = "Library", values = fill.values) +
@@ -163,9 +163,9 @@ plotPair <- function(topSample,bottomSample,size.bin=1,winWidth=1,NormalizePlot=
           axis.ticks = element_line(size = rel(0.5)),
           axis.ticks.length = unit(.05, "cm"),
           strip.text.x = element_text(size = rel(0.5), colour = "black", 
-                                      angle = 0, lineheight=0.1, vjust=-5),
+                                      angle = 0, lineheight=3, vjust=-20),
           strip.background = element_blank(),
-          panel.spacing.y = unit(-0.15, "cm"),
+          panel.spacing.y = unit(0, "cm"),
           panel.spacing.x = unit(0, "cm"))
   
   
@@ -225,7 +225,9 @@ plotPair <- function(topSample,bottomSample,size.bin=1,winWidth=1,NormalizePlot=
 
 #' Binning analysis version 1
 #+ echo=FALSE
+
 plotPair("mRNA_All","DNA_pscAAVlib",PlotBC=FALSE)$plot
+
 plotPair("DNA_pscAAVlib_Prep2","DNA_pscAAVlib",PlotBC=FALSE)$plot
 plotPair("DNA_AAVlib_DNAse_3cpc","DNA_AAVlib_DNAse_30cpc",PlotBC=FALSE)$plot
 plotPair("DNA_AAVlib_DNAse_30cpc","DNA_pscAAVlib_Prep2",PlotBC=FALSE)$plot
@@ -400,7 +402,6 @@ out.plot.list <- plotPair("mRNA_3cpc_pNeuron","mRNA_30cpc_pNeuron")
 out.plot.list$plot
 knitr::kable(out.plot.list$top, format = "latex", booktabs = T) %>%   kable_styling(latex_options = c("striped", "scale_down","repeat_header")) %>%   landscape()
 knitr::kable(out.plot.list$bottom, format = "latex", booktabs = T) %>%   kable_styling(latex_options = c("striped", "scale_down","repeat_header")) %>%   landscape()
-
 
 out.plot.list <- plotPair("mRNA_3cpc_HEK293T","mRNA_30cpc_HEK293T")
 out.plot.list$plot
