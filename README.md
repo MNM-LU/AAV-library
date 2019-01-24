@@ -3,7 +3,7 @@ This R-script collection enables identification of fragments and barcodes and al
 It utilizes knowledge on the surrounding sequence to extract the barcode and requires bbmap, Starcode and Bowtie2 to function
 
 # Download sequencing files
-https://www.dropbox.com/sh/mj8j9vuaea8uvsf/AAD0Klsxhmn8D3R4LTfmUzIra?dl=1
+Will be made available at the time of Manuscript publication
 
 # Run command
 
