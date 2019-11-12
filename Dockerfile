@@ -4,16 +4,6 @@ apt-get upgrade -y && \
 apt-get install -y \
 gnupg \
 wget \
-software-properties-common \
-&& \
-echo "deb http://ppa.launchpad.net/webupd8team/java/ubuntu xenial main" | \
-tee /etc/apt/sources.list.d/webupd8team-java.list && \
-echo "deb-src http://ppa.launchpad.net/webupd8team/java/ubuntu xenial main" | \
-tee -a /etc/apt/sources.list.d/webupd8team-java.list && \
-sudo apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv-keys EEA14886 && \
-echo oracle-java7-installer shared/accepted-oracle-license-v1-1 select true | /usr/bin/debconf-set-selections && \
-apt-get update && \
-apt-get install -y \
 bowtie2 \
 curl \
 hhsuite \
@@ -28,8 +18,6 @@ libgsl-dev \
 ncbi-blast+ \
 p7zip \
 python-numpy \
-oracle-java8-installer \
-oracle-java8-set-default \
 parallel \
 software-properties-common \
 texlive-fonts-recommended \
@@ -141,7 +129,7 @@ WORKDIR /home/rstudio
 RUN wget https://github.com/hammock-dev/hammock/releases/download/v1.1.1/Hammock_v_1.1.1.7z && 7zr x Hammock_v_1.1.1.7z && rm Hammock_v_1.1.1.7z
 RUN wget -O /usr/local/bin/clustalo http://www.clustal.org/omega/clustalo-1.2.4-Ubuntu-x86_64  && chmod u+x /usr/local/bin/clustalo
 RUN wget -qO- http://eddylab.org/software/hmmer3/3.1b2/hmmer-3.1b2-linux-intel-x86_64.tar.gz | tar -xvz && mv hmmer-3.1b2-linux-intel-x86_64 /root/HMMER
-RUN easy_install weblogo
+RUN easy_install weblogo==3.5.0
 #Adding the scripts and environment files
 COPY ./ /home/rstudio/
 RUN chown -R rstudio:rstudio /home/rstudio/*
