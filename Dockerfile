@@ -132,4 +132,5 @@ RUN wget -qO- http://eddylab.org/software/hmmer3/3.1b2/hmmer-3.1b2-linux-intel-x
 RUN easy_install weblogo==3.5.0
 #Adding the scripts and environment files
 COPY ./ /home/rstudio/
+RUN mkdir /home/rstudio/logs
 RUN chown -R rstudio:rstudio /home/rstudio/*
