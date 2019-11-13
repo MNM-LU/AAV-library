@@ -7,7 +7,7 @@ It utilizes knowledge on the surrounding sequence to extract the barcode and req
 The depository is structured around a Dockerfile which enables the build of a self-contained encapulation of all required dependencies, including R-studio, bowtie2 et.c., The version presented in the paper can be downloaded pre-built from Docker Hub (See below).
 
 # Sequencing datasets
-The raw sequencing files have been uploaded to the NCBI SRA with the project number SRP149133. These data will be publicly released at the point of publication. Until then, the entire sequencing dataset can be downloaded as a single (9.4GB) compressed file using the following command (in Linux/MacOS):
+The raw sequencing files have been uploaded to the NCBI SRA with the Accession number PRJNA473475 ( https://www.ncbi.nlm.nih.gov/bioproject/PRJNA473475 ). These data will be publicly released at the point of publication. Until then, the entire sequencing dataset can be downloaded as a single (9.4GB) compressed file using the following command (in Linux/MacOS):
 
 ```
 wget https://www.dropbox.com/s/6wugrf85ekffqdc/AAVlib-SRA.tar.gz 
@@ -51,5 +51,5 @@ The original analysis was performed on a “fat node” Linux server with dual I
 
 # Source code and Complete data output
 
-The datasets required to re-run this analysis pipeline are available in the NCBI Sequence Read Archive (SRA) with the Accession numbers: SRP149133. The R-based workflow is publicly available as a Git repository at https://bitbucket.org/MNM-LU/aav-library with the dockerfile to generate a docker image. A pre-built Docker image is also available on Docker Hub named: Bjorklund/aavlib:v0.2. The output from the entire bioinformatics pipeline is available at https://www.dropbox.com/s/9p14lyjs6e5gt9w/Bioinformatics-output.pdf?dl=1 contains the complete formatted output of the bioinformatics pipeline. This will be made publicly available as part of the Git repository at the time of publication.
+The datasets required to re-run this analysis pipeline are available in the NCBI Sequence Read Archive (SRA) with the accession number PRJNA473475 ( https://www.ncbi.nlm.nih.gov/bioproject/PRJNA473475 ). The R-based workflow is publicly available as a Git repository at https://bitbucket.org/MNM-LU/aav-library with the dockerfile to generate a docker image. A pre-built Docker image is also available on Docker Hub named: Bjorklund/aavlib:v0.2. The output from the entire bioinformatics pipeline is available at https://www.dropbox.com/s/9p14lyjs6e5gt9w/Bioinformatics-output.pdf?dl=1 contains the complete formatted output of the bioinformatics pipeline. This will be made publicly available as part of the Git repository at the time of publication.
 
