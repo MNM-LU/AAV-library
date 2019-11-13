@@ -123,7 +123,7 @@ RUN git clone git://github.com/gui11aume/starcode.git
 WORKDIR /home/rstudio/starcode
 RUN make && ln -s /home/rstudio/starcode/starcode /usr/bin/starcode
 #Install Usearch
-RUN wget https://drive5.com/cgi-bin/upload3.py?license=2017110905465430340 -O /usr/bin/usearch && chmod +x /usr/bin/usearch
+RUN wget https://drive5.com/cgi-bin/upload3.py?license=MY_LICENSE_HERE -O /usr/bin/usearch && chmod +x /usr/bin/usearch
 #Install Hammock
 WORKDIR /home/rstudio
 RUN wget https://github.com/hammock-dev/hammock/releases/download/v1.1.1/Hammock_v_1.1.1.7z && 7zr x Hammock_v_1.1.1.7z && rm Hammock_v_1.1.1.7z
