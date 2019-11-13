@@ -27,6 +27,12 @@ docker run -d -v /path-to_sequenceFolder:/home/rstudio/seqFiles -i -p 9797:8787 
 
 The string “/path-to_sequenceFolder” needs to be updated with the full path to the folder housing the downloaded sequencing files above.
 
+# Adding personalized usearch license
+
+The usearch package, required for the generation of the phylotree in script S10 is a personal non-transferable license. Thus, to build in into the docker container, visit https://www.drive5.com/usearch/download.html and select to download version 10.0.240 for Linux. (Later versions could also work but are not tested.)
+In an email you will receive a URL with a personal license number. e.g., https://drive5.com/cgi-bin/upload3.py?license=20191113089230462 the number is fake here). Copy the number and paste it into the Docker file in this reposityry where it is stated "MY_LICENSE_HERE". After this it shoud build with all functions.  
+
+
 # Building the Docker container from the git repository
 To ease execution, the entire workflow has been encapsulated in a Docker container with a web-based interface through Rstudio. This container is publicly available on Docker Hub as bjorklund/aavlib:v0.2 (https://hub.docker.com/r/bjorklund/aavlib )
 
