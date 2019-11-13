@@ -37,7 +37,7 @@ docker run -d -v /path-to_sequenceFolder:/home/rstudio/seqFiles -i -p 9797:8787 
 The string “/path-to_sequenceFolder” needs to be updated with the full path to the folder housing the downloaded sequencing files above. 
 
 # Running the workflow
-Once this Docker container is running, an instance of Rstudo is available on port 9797. If executed on the same computer, then point any modern web browser to http://localhost:9797
+Once this Docker container is running, an instance of Rstudo is available on port 9797 (This is an arbitrary port and can be changed to any free port in the docker command above). If executed on the same computer, then point any modern web browser to http://localhost:9797
 The username:password for Rstudio is rstudio:rstudio
 
 To execute all workflows and generate a PDF for each dataset, execute all lines in the R-script “S0_RunAll.R”. This will render PDF files in the “output” folder. To execute the code line-by-line, you will need to run the R-scripts S1 to S15 in this folder in the correct order as they generate dependencies for each other.
